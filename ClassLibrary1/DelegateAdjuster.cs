@@ -7,18 +7,18 @@ namespace ClassLibrary1
     [DebuggerStepThrough]
     public class DelegateAdjuster
     {
-        public static Action<BaseT> CastArgument<BaseT, DerivedT>(Expression<Action<DerivedT>> source) where DerivedT : BaseT
+        public static Action<TBase> CastArgument<TBase, TDerived>(Expression<Action<TDerived>> source) where TDerived : TBase
         {
-            if (typeof(DerivedT) == typeof(BaseT))
+            if (typeof(TDerived) == typeof(TBase))
             {
-                return (Action<BaseT>)((Delegate)source.Compile());
+                return (Action<TBase>)((Delegate)source.Compile());
 
             }
-            ParameterExpression sourceParameter = Expression.Parameter(typeof(BaseT), "source");
-            var result = Expression.Lambda<Action<BaseT>>(
+            ParameterExpression sourceParameter = Expression.Parameter(typeof(TBase), "source");
+            var result = Expression.Lambda<Action<TBase>>(
                 Expression.Invoke(
                     source,
-                    Expression.Convert(sourceParameter, typeof(DerivedT))),
+                    Expression.Convert(sourceParameter, typeof(TDerived))),
                 sourceParameter);
             return result.Compile();
         }

@@ -21,21 +21,21 @@ namespace ClassLibrary1
             handlers.Add(DelegateAdjuster.CastArgument<IMessage, TMessage>(x => handler(x)));
         }
 
-        public void Send<T>(T command) where T : Command
+        public void Send<TCommand>(TCommand command) where TCommand : Command
         {
             List<Action<IMessage>> handlers;
-            if (_routes.TryGetValue(typeof(T), out handlers))
+            if (_routes.TryGetValue(typeof(TCommand), out handlers))
             {
-                if (handlers.Count != 1) throw new DuplicateHandlerRegisteredException("cannot send to more than one handler");
+                if (handlers.Count != 1) throw new DuplicateHandlerRegisteredException(string.Format("There are {0} handlers registered for Command of type {1}.  Each Command must have exacty one handler registered.", handlers.Count, typeof(TCommand)));
                 handlers[0](command);
             }
             else
             {
-                throw new NoHandlerRegisteredException("no handler registered");
+                throw new NoHandlerRegisteredException(string.Format("No handler registered for Command of type {0}.  Each Command must have exacty one handler registered.", typeof(TCommand)));
             }
         }
 
-        public void Publish<T>(T @event) where T : Event
+        public void Publish<TEvent>(TEvent @event) where TEvent : Event
         {
             List<Action<IMessage>> handlers;
             if (!_routes.TryGetValue(@event.GetType(), out handlers)) return;

@@ -45,13 +45,16 @@ namespace Tests
         [Test]
         public void CanIgnoreNoHandlerRegisteredForEvent()
         {
-            _bus.Publish(new TestEvent(string.Empty));
+            Assert.DoesNotThrow(() => _bus.Publish(new TestEvent(string.Empty)));
         }
 
         [Test]
         public void RegisteredHandlerCanProcessMessageOnEventPublish()
         {
             const string input = "test";
+
+            //two identical handlers will be registered for the single event,
+            // so the result will be the input value twice
             var expected = string.Format("{0}{0}", input);
 
             var events = new EventHandlers();
@@ -69,7 +72,7 @@ namespace Tests
 
             public void Handle(TestEvent message)
             {
-                HandledMessagePayload = HandledMessagePayload + message.Payload;
+                HandledMessagePayload += message.Payload;
             }
         }
 
