@@ -1,6 +1,6 @@
 ﻿namespace ClassLibrary1.Abstractions
 {
-    public interface ISendCommand
+    public interface ISendCommands
     {
         void Send<TCommand>(TCommand command) where TCommand : Command;
 

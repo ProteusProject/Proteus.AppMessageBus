@@ -43,8 +43,8 @@
     <Compile Include="Abstractions\Event.cs" />
     <Compile Include="Abstractions\IHandle.cs" />
     <Compile Include="Abstractions\IMessage.cs" />
-    <Compile Include="Abstractions\IPublishEvent.cs" />
-    <Compile Include="Abstractions\ISendCommand.cs" />
+    <Compile Include="Abstractions\IPublishEvents.cs" />
+    <Compile Include="Abstractions\ISendCommands.cs" />
     <Compile Include="Bus.cs" />
     <Compile Include="DelegateAdjuster.cs" />
     <Compile Include="PrivateReflectionDynamicObject.cs" />

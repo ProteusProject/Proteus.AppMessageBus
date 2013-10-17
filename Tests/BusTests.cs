@@ -27,29 +27,43 @@ namespace Tests
         }
 
         [Test]
-        public void CanPreventMoreThanOneHandlerRegisteredPerCommand()
+        public void CanPreventMoreThanOneSubscriberRegisteredPerCommand()
         {
-            var commands = new CommandHandlers();
-            _bus.RegisterHandlerFor<TestCommand>(commands.Handle);
-            _bus.RegisterHandlerFor<TestCommand>(commands.Handle);
+            var commands = new CommandSubscribers();
+            _bus.RegisterSubscriberFor<TestCommand>(commands.Handle);
+            _bus.RegisterSubscriberFor<TestCommand>(commands.Handle);
 
-            Assert.Throws<DuplicateHandlerRegisteredException>(() => _bus.Send(new TestCommand(string.Empty)));
+            Assert.Throws<DuplicateSubscriberRegisteredException>(() => _bus.Send(new TestCommand(string.Empty)));
         }
 
         [Test]
-        public void CanPreventNoHandlerRegisteredForCommand()
+        public void CanPreventNoSubscriberRegisteredForCommand()
         {
-            Assert.Throws<NoHandlerRegisteredException>(() => _bus.Send(new TestCommand(string.Empty)));
+            Assert.Throws<NoSubscriberRegisteredException>(() => _bus.Send(new TestCommand(string.Empty)));
         }
 
         [Test]
-        public void CanIgnoreNoHandlerRegisteredForEvent()
+        public void CanReportNoSubscribers()
         {
+            Assert.That(_bus.IsSubscriberRegisteredFor<TestCommand>(), Is.False);
+        }
+
+        [Test]
+        public void CanReportSubscribers()
+        {
+            _bus.RegisterSubscriberFor<TestCommand>(new CommandSubscribers().Handle);
+            Assert.That(_bus.IsSubscriberRegisteredFor<TestCommand>(), Is.True);
+        }
+
+        [Test]
+        public void CanIgnoreNoSubscriberRegisteredForEvent()
+        {
+            //publish the event without registering any handlers
             Assert.DoesNotThrow(() => _bus.Publish(new TestEvent(string.Empty)));
         }
 
         [Test]
-        public void RegisteredHandlerCanProcessMessageOnEventPublish()
+        public void MultipleSubscribersCanProcessMessageOnEventPublish()
         {
             const string input = "test";
 
@@ -57,36 +71,26 @@ namespace Tests
             // so the result will be the input value twice
             var expected = string.Format("{0}{0}", input);
 
-            var events = new EventHandlers();
-            _bus.RegisterHandlerFor<TestEvent>(events.Handle);
-            _bus.RegisterHandlerFor<TestEvent>(events.Handle);
+            var events = new EventSubscribers();
+            _bus.RegisterSubscriberFor<TestEvent>(events.Handle);
+            _bus.RegisterSubscriberFor<TestEvent>(events.Handle);
 
             _bus.Publish(new TestEvent(input));
 
-            Assert.That(events.HandledMessagePayload, Is.EqualTo(expected));
-        }
-
-        public class EventHandlers : IHandle<TestEvent>
-        {
-            public string HandledMessagePayload { get; private set; }
-
-            public void Handle(TestEvent message)
-            {
-                HandledMessagePayload += message.Payload;
-            }
+            Assert.That(events.ProcessedMessagePayload, Is.EqualTo(expected));
         }
 
         [Test]
-        public void RegisteredHandlerCanProcessMessageOnCommandSend()
+        public void SubscriberCanProcessMessageOnCommandSend()
         {
             const string expectedPayload = "payload";
 
-            var commands = new CommandHandlers();
-            _bus.RegisterHandlerFor<TestCommand>(commands.Handle);
+            var commands = new CommandSubscribers();
+            _bus.RegisterSubscriberFor<TestCommand>(commands.Handle);
 
             _bus.Send(new TestCommand(expectedPayload));
 
-            Assert.That(commands.HandledMessagePayload, Is.EqualTo(expectedPayload));
+            Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(expectedPayload));
         }
 
         public class TestEvent : Event
@@ -109,13 +113,23 @@ namespace Tests
             }
         }
 
-        public class CommandHandlers : IHandle<TestCommand>
+        public class CommandSubscribers : IHandle<TestCommand>
         {
-            public string HandledMessagePayload { get; private set; }
+            public string ProcessedMessagePayload { get; private set; }
 
             public void Handle(TestCommand message)
             {
-                HandledMessagePayload = message.Payload;
+                ProcessedMessagePayload = message.Payload;
+            }
+        }
+
+        public class EventSubscribers : IHandle<TestEvent>
+        {
+            public string ProcessedMessagePayload { get; private set; }
+
+            public void Handle(TestEvent message)
+            {
+                ProcessedMessagePayload += message.Payload;
             }
         }
     }
