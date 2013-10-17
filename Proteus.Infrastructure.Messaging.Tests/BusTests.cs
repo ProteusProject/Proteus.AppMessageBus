@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
-using Proteus.Infrastructure.Messaging.Abstractions;
+using Proteus.Infrastructure.Messaging.Portable;
+using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
 namespace Proteus.Infrastructure.Messaging.Tests
 {
