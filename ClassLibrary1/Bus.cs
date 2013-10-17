@@ -12,13 +12,13 @@ namespace ClassLibrary1
 
         public void RegisterSubscriberFor<TMessage>(Action<TMessage> handler) where TMessage : IMessage
         {
-            List<Action<IMessage>> handlers;
-            if (!_routes.TryGetValue(typeof(TMessage), out handlers))
+            List<Action<IMessage>> subscribers;
+            if (!_routes.TryGetValue(typeof(TMessage), out subscribers))
             {
-                handlers = new List<Action<IMessage>>();
-                _routes.Add(typeof(TMessage), handlers);
+                subscribers = new List<Action<IMessage>>();
+                _routes.Add(typeof(TMessage), subscribers);
             }
-            handlers.Add(DelegateAdjuster.CastArgument<IMessage, TMessage>(x => handler(x)));
+            subscribers.Add(DelegateAdjuster.CastArgument<IMessage, TMessage>(x => handler(x)));
         }
 
         public bool IsSubscriberRegisteredFor<TMessage>() where TMessage : IMessage
