@@ -1,4 +1,4 @@
-﻿namespace ClassLibrary1.Abstractions
+﻿namespace Proteus.Infrastructure.Messaging.Abstractions
 {
     public class Event : IMessage
     {

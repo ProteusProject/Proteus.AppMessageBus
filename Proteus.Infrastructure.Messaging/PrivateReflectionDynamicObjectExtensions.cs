@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace ClassLibrary1
+namespace Proteus.Infrastructure.Messaging
 {
     [DebuggerStepThrough]
     public static class PrivateReflectionDynamicObjectExtensions

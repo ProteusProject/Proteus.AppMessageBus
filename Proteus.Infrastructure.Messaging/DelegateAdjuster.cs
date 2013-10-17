@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Linq.Expressions;
 
-namespace ClassLibrary1
+namespace Proteus.Infrastructure.Messaging
 {
     [DebuggerStepThrough]
     public class DelegateAdjuster

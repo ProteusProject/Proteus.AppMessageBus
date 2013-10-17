@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "ClassLibrary1\ClassLibrary1.csproj", "{CD09367E-F9E9-4E67-91B8-5E4333FAB812}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proteus.Infrastructure.Messaging", "Proteus.Infrastructure.Messaging\Proteus.Infrastructure.Messaging.csproj", "{CD09367E-F9E9-4E67-91B8-5E4333FAB812}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proteus.Infrastructure.Messaging.Tests", "Proteus.Infrastructure.Messaging.Tests\Proteus.Infrastructure.Messaging.Tests.csproj", "{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Threading;
-using ClassLibrary1.Abstractions;
+using Proteus.Infrastructure.Messaging.Abstractions;
 
-namespace ClassLibrary1
+namespace Proteus.Infrastructure.Messaging
 {
     public class Bus : ISendCommands, IPublishEvents
     {

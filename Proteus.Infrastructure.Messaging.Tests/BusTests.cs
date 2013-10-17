@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ClassLibrary1;
-using ClassLibrary1.Abstractions;
-using NUnit.Framework;
+﻿using NUnit.Framework;
+using Proteus.Infrastructure.Messaging.Abstractions;
 
-namespace Tests
+namespace Proteus.Infrastructure.Messaging.Tests
 {
     [TestFixture]
     public class BusTests
