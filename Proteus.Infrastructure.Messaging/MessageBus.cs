@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using Proteus.Infrastructure.Messaging.Abstractions;
 
 namespace Proteus.Infrastructure.Messaging
 {
-    public class Bus : ISendCommands, IPublishEvents
+    public class MessageBus : ISendCommands, IPublishEvents
     {
         private readonly Dictionary<Type, List<Action<IMessage>>> _routes = new Dictionary<Type, List<Action<IMessage>>>();
 
-        public void RegisterSubscriberFor<TMessage>(Action<TMessage> handler) where TMessage : IMessage
+        public void RegisterSubscriptionFor<TMessage>(Action<TMessage> handler) where TMessage : IMessage
         {
             List<Action<IMessage>> subscribers;
             if (!_routes.TryGetValue(typeof(TMessage), out subscribers))
@@ -20,9 +19,17 @@ namespace Proteus.Infrastructure.Messaging
             subscribers.Add(DelegateAdjuster.CastArgument<IMessage, TMessage>(x => handler(x)));
         }
 
-        public bool IsSubscriberRegisteredFor<TMessage>() where TMessage : IMessage
+        public bool HasSubscriptionFor<TMessage>() where TMessage : IMessage
         {
             return _routes.ContainsKey(typeof (TMessage));
+        }
+
+        public void UnRegisterAllSubscriptionsFor<TMessage>() where TMessage : IMessage
+        {
+            if (HasSubscriptionFor<TMessage>())
+            {
+                _routes.Remove(typeof (TMessage));
+            }
         }
 
         public void Send<TCommand>(TCommand command) where TCommand : Command
@@ -47,55 +54,10 @@ namespace Proteus.Infrastructure.Messaging
             if (!_routes.TryGetValue(@event.GetType(), out subscribers)) return;
             foreach (var subscriber in subscribers)
             {
-                //assign to local var to avoid the .net bug
+                //assign to local var to avoid the .net foreach bug
                 var subscriber1 = subscriber;
-
                 subscriber1(@event);
             }
-        }
-    }
-
-    public class NoSubscriberRegisteredException : InvalidOperationException
-    {
-        public NoSubscriberRegisteredException()
-        {
-        }
-
-        public NoSubscriberRegisteredException(string message)
-            : base(message)
-        {
-        }
-
-        public NoSubscriberRegisteredException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
-
-        protected NoSubscriberRegisteredException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-    }
-
-    public class DuplicateSubscriberRegisteredException : InvalidOperationException
-    {
-        public DuplicateSubscriberRegisteredException()
-        {
-        }
-
-        public DuplicateSubscriberRegisteredException(string message)
-            : base(message)
-        {
-        }
-
-        public DuplicateSubscriberRegisteredException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
-
-        protected DuplicateSubscriberRegisteredException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
         }
     }
 }

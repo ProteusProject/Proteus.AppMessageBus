@@ -45,8 +45,10 @@
     <Compile Include="Abstractions\IMessage.cs" />
     <Compile Include="Abstractions\IPublishEvents.cs" />
     <Compile Include="Abstractions\ISendCommands.cs" />
-    <Compile Include="Bus.cs" />
+    <Compile Include="MessageBus.cs" />
     <Compile Include="DelegateAdjuster.cs" />
+    <Compile Include="DuplicateSubscriberRegisteredException.cs" />
+    <Compile Include="NoSubscriberRegisteredException.cs" />
     <Compile Include="PrivateReflectionDynamicObject.cs" />
     <Compile Include="PrivateReflectionDynamicObjectExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

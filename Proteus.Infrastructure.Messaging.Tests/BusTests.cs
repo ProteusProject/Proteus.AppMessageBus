@@ -6,12 +6,12 @@ namespace Proteus.Infrastructure.Messaging.Tests
     [TestFixture]
     public class BusTests
     {
-        private Bus _bus;
+        private MessageBus _bus;
 
         [SetUp]
         public void SetUp()
         {
-            _bus = new Bus();
+            _bus = new MessageBus();
         }
 
         [Test]
@@ -24,8 +24,8 @@ namespace Proteus.Infrastructure.Messaging.Tests
         public void CanPreventMoreThanOneSubscriberRegisteredPerCommand()
         {
             var commands = new CommandSubscribers();
-            _bus.RegisterSubscriberFor<TestCommand>(commands.Handle);
-            _bus.RegisterSubscriberFor<TestCommand>(commands.Handle);
+            _bus.RegisterSubscriptionFor<TestCommand>(commands.Handle);
+            _bus.RegisterSubscriptionFor<TestCommand>(commands.Handle);
 
             Assert.Throws<DuplicateSubscriberRegisteredException>(() => _bus.Send(new TestCommand(string.Empty)));
         }
@@ -39,14 +39,14 @@ namespace Proteus.Infrastructure.Messaging.Tests
         [Test]
         public void CanReportNoSubscribers()
         {
-            Assert.That(_bus.IsSubscriberRegisteredFor<TestCommand>(), Is.False);
+            Assert.That(_bus.HasSubscriptionFor<TestCommand>(), Is.False);
         }
 
         [Test]
         public void CanReportSubscribers()
         {
-            _bus.RegisterSubscriberFor<TestCommand>(new CommandSubscribers().Handle);
-            Assert.That(_bus.IsSubscriberRegisteredFor<TestCommand>(), Is.True);
+            _bus.RegisterSubscriptionFor<TestCommand>(new CommandSubscribers().Handle);
+            Assert.That(_bus.HasSubscriptionFor<TestCommand>(), Is.True);
         }
 
         [Test]
@@ -54,6 +54,21 @@ namespace Proteus.Infrastructure.Messaging.Tests
         {
             //publish the event without registering any handlers
             Assert.DoesNotThrow(() => _bus.Publish(new TestEvent(string.Empty)));
+        }
+
+        [Test]
+        public void CanClearSubscribers()
+        {
+            Assume.That(_bus.HasSubscriptionFor<TestCommand>(), Is.False, "Expected the bus to not have any subscribers for TestCommand");
+            
+            _bus.RegisterSubscriptionFor<TestCommand>(new CommandSubscribers().Handle);
+            
+            Assume.That(_bus.HasSubscriptionFor<TestCommand>(), Is.True, "Expected the bus to have a subscriber for TestCommand");
+
+            _bus.RegisterSubscriptionFor<TestCommand>(new CommandSubscribers().Handle);
+            _bus.UnRegisterAllSubscriptionsFor<TestCommand>();
+
+            Assert.That(_bus.HasSubscriptionFor<TestCommand>(), Is.False, "Expected that all subscriptions for TestCommand would be cleared.");
         }
 
         [Test]
@@ -66,8 +81,8 @@ namespace Proteus.Infrastructure.Messaging.Tests
             var expected = string.Format("{0}{0}", input);
 
             var events = new EventSubscribers();
-            _bus.RegisterSubscriberFor<TestEvent>(events.Handle);
-            _bus.RegisterSubscriberFor<TestEvent>(events.Handle);
+            _bus.RegisterSubscriptionFor<TestEvent>(events.Handle);
+            _bus.RegisterSubscriptionFor<TestEvent>(events.Handle);
 
             _bus.Publish(new TestEvent(input));
 
@@ -80,7 +95,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             const string expectedPayload = "payload";
 
             var commands = new CommandSubscribers();
-            _bus.RegisterSubscriberFor<TestCommand>(commands.Handle);
+            _bus.RegisterSubscriptionFor<TestCommand>(commands.Handle);
 
             _bus.Send(new TestCommand(expectedPayload));
 
