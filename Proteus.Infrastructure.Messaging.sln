@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proteus.Infrastructure.Messaging", "Proteus.Infrastructure.Messaging\Proteus.Infrastructure.Messaging.csproj", "{CD09367E-F9E9-4E67-91B8-5E4333FAB812}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proteus.Infrastructure.Messaging.Tests", "Proteus.Infrastructure.Messaging.Tests\Proteus.Infrastructure.Messaging.Tests.csproj", "{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proteus.Infrastructure.Messaging.Portable", "Proteus.Infrastructure.Messaging.Portable\Proteus.Infrastructure.Messaging.Portable.csproj", "{9CE08989-240C-4F66-B523-5BEF6E2F6BF6}"
@@ -13,10 +11,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CD09367E-F9E9-4E67-91B8-5E4333FAB812}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD09367E-F9E9-4E67-91B8-5E4333FAB812}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD09367E-F9E9-4E67-91B8-5E4333FAB812}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD09367E-F9E9-4E67-91B8-5E4333FAB812}.Release|Any CPU.Build.0 = Release|Any CPU
 		{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
