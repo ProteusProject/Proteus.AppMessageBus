@@ -64,7 +64,7 @@ namespace Windows8TestingHarness
                 // When the navigation stack isn't restored navigate to the first page,
                 // configuring the new page by passing required information as a navigation
                 // parameter
-                if (!rootFrame.Navigate(typeof(MainPage), args.Arguments))
+                if (!rootFrame.Navigate(typeof(EditPage), args.Arguments))
                 {
                     throw new Exception("Failed to create initial page");
                 }
@@ -85,6 +85,26 @@ namespace Windows8TestingHarness
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
             deferral.Complete();
+        }
+
+        private static readonly Dictionary<Type, object> ViewModels = new Dictionary<Type, object>();
+
+        public static void SetViewModelFor<TPage>(object model) where TPage : Page
+        {
+            if (ViewModels.ContainsKey(typeof(TPage)))
+            {
+                ViewModels.Remove(typeof(TPage));
+            }
+
+            ViewModels.Add(typeof(TPage), model);
+
+        }
+
+        public static object GetViewModelFor<TPage>() where TPage : Page
+        {
+            object value;
+            ViewModels.TryGetValue(typeof(TPage), out value);
+            return value;
         }
     }
 }

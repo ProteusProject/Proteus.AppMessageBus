@@ -115,6 +115,7 @@
     <Compile Include="DisplayPage.xaml.cs">
       <DependentUpon>DisplayPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DisplayPageViewModel.cs" />
     <Compile Include="EditPage.xaml.cs">
       <DependentUpon>EditPage.xaml</DependentUpon>
     </Compile>

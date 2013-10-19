@@ -12,8 +12,7 @@
 
     <Page.Resources>
 
-        <!-- TODO: Delete this line if the key AppName is declared in App.xaml -->
-        <x:String x:Key="AppName">My Application</x:String>
+      
     </Page.Resources>
 
     <!--
@@ -26,6 +25,18 @@
             <RowDefinition Height="140"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"  Text="{Binding Path=Firstname}" HorizontalAlignment="Center" Style="{StaticResource HeaderTextStyle}"/>
+            <TextBlock Grid.Row="1" Text="{Binding Path=Lastname}" HorizontalAlignment="Center" Style="{StaticResource HeaderTextStyle}" />
+
+        </Grid>
 
         <!-- Back button and page title -->
         <Grid>

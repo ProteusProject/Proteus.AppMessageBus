@@ -12,8 +12,7 @@
 
     <Page.Resources>
 
-        <!-- TODO: Delete this line if the key AppName is declared in App.xaml -->
-        <x:String x:Key="AppName">My Application</x:String>
+       
     </Page.Resources>
 
     <!--
@@ -27,6 +26,38 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <Grid>
+            <Grid.Row>1</Grid.Row>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid  Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="First Name" Style="{StaticResource GroupHeaderTextStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 30 0"/>
+                <TextBox Grid.Column="1" x:Name="Firstname" Width="200" Height="20" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            </Grid>
+
+            <Grid  Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Last Name" Style="{StaticResource GroupHeaderTextStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 30 0"/>
+                <TextBox Grid.Column="1" x:Name="Lastname" Width="200" Height="20" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            </Grid>
+
+            <Grid  Grid.Row="2">
+                <Button x:Name="Save" Content="Save" HorizontalAlignment="Center" VerticalAlignment="Top" Click="Save_OnClick"/>
+            </Grid>
+        </Grid>
+        
         <!-- Back button and page title -->
         <Grid>
             <Grid.ColumnDefinitions>

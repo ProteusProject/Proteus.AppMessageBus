@@ -11,6 +11,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Windows8TestingHarness.Common;
 
 // The Basic Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234237
 
@@ -37,6 +38,10 @@ namespace Windows8TestingHarness
         /// session.  This will be null the first time a page is visited.</param>
         protected override void LoadState(Object navigationParameter, Dictionary<String, Object> pageState)
         {
+            var nameValues = App.GetViewModelFor<DisplayPage>() as DisplayPageViewModel;
+
+            this.DefaultViewModel["Firstname"] = null != nameValues ? nameValues.Firstname : "Unknown";
+            this.DefaultViewModel["Lastname"] = null != nameValues ? nameValues.Lastname : "Unknown";
         }
 
         /// <summary>
