@@ -12,6 +12,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Windows8TestingHarness.Common;
+using Windows8TestingHarness.Messages;
 
 // The Basic Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234237
 
@@ -52,7 +53,7 @@ namespace Windows8TestingHarness
 
         private void Save_OnClick(object sender, RoutedEventArgs e)
         {
-            App.SetViewModelFor<DisplayPage>(new DisplayPageViewModel(Firstname.Text, Lastname.Text));
+            App.Bus.Send(new ChangeNameCommand(Firstname.Text, Lastname.Text));
             this.Frame.Navigate(typeof(DisplayPage));
         }
     }
