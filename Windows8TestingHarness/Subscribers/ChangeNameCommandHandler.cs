@@ -9,7 +9,7 @@ namespace Windows8TestingHarness.Subscribers
         {
             //TODO: actually change the backing data in persistence (or other work!)
 
-            //let anyone who cares know that this has happened
+            //once its actually completed, let anyone who cares know that this has happened
             App.Bus.Publish(new NameChangedEvent(message.NewFirstname, message.NewLastname));
         }
     }

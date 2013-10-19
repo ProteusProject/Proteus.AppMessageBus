@@ -7,8 +7,7 @@ namespace Windows8TestingHarness.Subscribers
     {
         public void Handle(NameChangedEvent message)
         {
-            var viewModel = new DisplayPageViewModel(message.Firstname, message.Lastname);
-            App.SetViewModelFor<DisplayPage>(viewModel);
+            App.SetViewModelFor<DisplayPage>(new DisplayPageViewModel(message.Firstname, message.Lastname));
         }
     }
 }
