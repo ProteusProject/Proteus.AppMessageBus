@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Windows8TestingHarness", "Windows8TestingHarness\Windows8TestingHarness.csproj", "{FA0A75ED-2328-4894-8A52-55A321B3B7AC}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proteus.Infrastructure.Messaging.Tests", "Proteus.Infrastructure.Messaging.Tests\Proteus.Infrastructure.Messaging.Tests.csproj", "{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proteus.Infrastructure.Messaging.Portable", "Proteus.Infrastructure.Messaging.Portable\Proteus.Infrastructure.Messaging.Portable.csproj", "{9CE08989-240C-4F66-B523-5BEF6E2F6BF6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Windows8TestingHarness", "Windows8TestingHarness\Windows8TestingHarness.csproj", "{FA0A75ED-2328-4894-8A52-55A321B3B7AC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
