@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using Proteus.Infrastructure.Messaging.Portable;
 
 namespace Proteus.Infrastructure.Messaging.Tests
@@ -36,7 +37,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
         }
 
         [TestFixture]
-        public class WhenEnvelopeHasNonZeroRetryPolicy
+        public class WhenEnvelopeHasNonZeroRetryPolicyAndNotYetExpired
         {
             private RetryPolicy _retryPolicy;
             private Envelope<TestCommand> _envelope;
@@ -44,6 +45,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [SetUp]
             public void SetUp()
             {
+                RetryPolicy.DateTimeProvider = TestingDateTimeProviderUtility.OneYearFromNowUtc;
                 _retryPolicy = new RetryPolicy(3);
                 _envelope = new Envelope<TestCommand>(new TestCommand(string.Empty), _retryPolicy);
             }

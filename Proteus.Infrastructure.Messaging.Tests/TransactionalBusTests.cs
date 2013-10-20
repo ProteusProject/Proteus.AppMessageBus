@@ -8,7 +8,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
     public class TransactionalBusTests
     {
         [TestFixture]
-        public class WhenConfiguredWithNonZeroEventAndCommandRetry
+        public class WhenConfiguredWithNonZeroEventAndCommandRetryAndMessagesHaveNotExpired
         {
             private TransactionalMessageBus _bus;
             private CommandSubscribers _commands;
@@ -19,7 +19,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [SetUp]
             public void SetUp()
             {
-
+                RetryPolicy.DateTimeProvider = TestingDateTimeProviderUtility.OneYearFromNowUtc;
                 var retryPolicy = new RetryPolicy(1);
                 _bus = new TransactionalMessageBus(retryPolicy, retryPolicy);
 
