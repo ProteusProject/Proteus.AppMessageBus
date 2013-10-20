@@ -6,9 +6,9 @@ namespace Proteus.Infrastructure.Messaging.Portable
 {
     public class MessageBus : ISendCommands, IPublishEvents
     {
-        private readonly Dictionary<Type, List<Action<IMessage>>> _routes = new Dictionary<Type, List<Action<IMessage>>>();
+        protected readonly Dictionary<Type, List<Action<IMessage>>> _routes = new Dictionary<Type, List<Action<IMessage>>>();
 
-        public void RegisterSubscriptionFor<TMessage>(Action<TMessage> handler) where TMessage : IMessage
+        public virtual void RegisterSubscriptionFor<TMessage>(Action<TMessage> handler) where TMessage : IMessage
         {
             List<Action<IMessage>> subscribers;
             if (!_routes.TryGetValue(typeof(TMessage), out subscribers))
@@ -16,15 +16,15 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 subscribers = new List<Action<IMessage>>();
                 _routes.Add(typeof(TMessage), subscribers);
             }
-            subscribers.Add(DelegateAdjuster.CastArgument<IMessage, TMessage>(x => handler(x)));
+            subscribers.Add(DelegateConverter.CastArgument<IMessage, TMessage>(x => handler(x)));
         }
 
-        public bool HasSubscriptionFor<TMessage>() where TMessage : IMessage
+        public virtual bool HasSubscriptionFor<TMessage>() where TMessage : IMessage
         {
             return _routes.ContainsKey(typeof (TMessage));
         }
 
-        public void UnRegisterAllSubscriptionsFor<TMessage>() where TMessage : IMessage
+        public virtual void UnRegisterAllSubscriptionsFor<TMessage>() where TMessage : IMessage
         {
             if (HasSubscriptionFor<TMessage>())
             {
@@ -32,12 +32,12 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        public void Send<TCommand>(TCommand command) where TCommand : Command
+        public virtual void Send<TCommand>(TCommand command) where TCommand : Command
         {
             const string reminderMessage = "Each Command must have exacty one subscriber registered.";
 
             List<Action<IMessage>> subscribers;
-            if (_routes.TryGetValue(typeof(TCommand), out subscribers))
+            if (_routes.TryGetValue(command.GetType(), out subscribers))
             {
                 if (subscribers.Count != 1) throw new DuplicateSubscriberRegisteredException(string.Format("There are {0} handlers registered for Commands of type {1}.  {2}", subscribers.Count, typeof(TCommand), reminderMessage));
                 subscribers[0](command);
@@ -48,7 +48,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        public void Publish<TEvent>(TEvent @event) where TEvent : Event
+        public virtual void Publish<TEvent>(TEvent @event) where TEvent : Event
         {
             List<Action<IMessage>> subscribers;
             if (!_routes.TryGetValue(@event.GetType(), out subscribers)) return;

@@ -102,45 +102,45 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
             Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(expectedPayload));
         }
+    }
 
-        public class TestEvent : Event
+    public class EventSubscribers : IHandle<TestEvent>
+    {
+        public string ProcessedMessagePayload { get; private set; }
+
+        public void Handle(TestEvent message)
         {
-            public string Payload { get; set; }
-
-            public TestEvent(string payload)
-            {
-                Payload = payload;
-            }
+            ProcessedMessagePayload += message.Payload;
         }
+    }
 
-        public class TestCommand : Command
+    public class CommandSubscribers : IHandle<TestCommand>
+    {
+        public string ProcessedMessagePayload { get; private set; }
+
+        public void Handle(TestCommand message)
         {
-            public string Payload { get; set; }
-
-            public TestCommand(string payload)
-            {
-                Payload = payload;
-            }
+            ProcessedMessagePayload += message.Payload;
         }
+    }
 
-        public class CommandSubscribers : IHandle<TestCommand>
+    public class TestCommand : Command
+    {
+        public string Payload { get; set; }
+
+        public TestCommand(string payload)
         {
-            public string ProcessedMessagePayload { get; private set; }
-
-            public void Handle(TestCommand message)
-            {
-                ProcessedMessagePayload = message.Payload;
-            }
+            Payload = payload;
         }
+    }
 
-        public class EventSubscribers : IHandle<TestEvent>
+    public class TestEvent : Event
+    {
+        public string Payload { get; set; }
+
+        public TestEvent(string payload)
         {
-            public string ProcessedMessagePayload { get; private set; }
-
-            public void Handle(TestEvent message)
-            {
-                ProcessedMessagePayload += message.Payload;
-            }
+            Payload = payload;
         }
     }
 }

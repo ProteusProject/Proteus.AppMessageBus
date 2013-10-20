@@ -4,8 +4,11 @@ using System.Linq.Expressions;
 
 namespace Proteus.Infrastructure.Messaging.Portable
 {
+    /*
+     * borrowed from http://codebetter.com/gregyoung/2009/10/03/delegate-mapper/
+     */
     [DebuggerStepThrough]
-    public class DelegateAdjuster
+    public class DelegateConverter
     {
         public static Action<TBase> CastArgument<TBase, TDerived>(Expression<Action<TDerived>> source) where TDerived : TBase
         {

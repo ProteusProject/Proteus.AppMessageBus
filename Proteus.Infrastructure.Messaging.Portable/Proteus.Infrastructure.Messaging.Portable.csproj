@@ -42,11 +42,14 @@
     <Compile Include="Abstractions\IMessage.cs" />
     <Compile Include="Abstractions\IPublishEvents.cs" />
     <Compile Include="Abstractions\ISendCommands.cs" />
-    <Compile Include="DelegateAdjuster.cs" />
+    <Compile Include="Abstractions\IStartable.cs" />
+    <Compile Include="Abstractions\IStoppable.cs" />
+    <Compile Include="DelegateConverter.cs" />
     <Compile Include="DuplicateSubscriberRegisteredException.cs" />
     <Compile Include="MessageBus.cs" />
     <Compile Include="NoSubscriberRegisteredException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TransactionalMessageBus.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
