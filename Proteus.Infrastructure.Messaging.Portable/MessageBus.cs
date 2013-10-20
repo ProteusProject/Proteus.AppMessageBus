@@ -6,29 +6,29 @@ namespace Proteus.Infrastructure.Messaging.Portable
 {
     public class MessageBus : ISendCommands, IPublishEvents
     {
-        protected readonly Dictionary<Type, List<Action<IMessage>>> _routes = new Dictionary<Type, List<Action<IMessage>>>();
+        protected readonly Dictionary<Type, List<Action<IMessage>>> Routes = new Dictionary<Type, List<Action<IMessage>>>();
 
         public virtual void RegisterSubscriptionFor<TMessage>(Action<TMessage> handler) where TMessage : IMessage
         {
             List<Action<IMessage>> subscribers;
-            if (!_routes.TryGetValue(typeof(TMessage), out subscribers))
+            if (!Routes.TryGetValue(typeof(TMessage), out subscribers))
             {
                 subscribers = new List<Action<IMessage>>();
-                _routes.Add(typeof(TMessage), subscribers);
+                Routes.Add(typeof(TMessage), subscribers);
             }
             subscribers.Add(DelegateConverter.CastArgument<IMessage, TMessage>(x => handler(x)));
         }
 
         public virtual bool HasSubscriptionFor<TMessage>() where TMessage : IMessage
         {
-            return _routes.ContainsKey(typeof (TMessage));
+            return Routes.ContainsKey(typeof (TMessage));
         }
 
         public virtual void UnRegisterAllSubscriptionsFor<TMessage>() where TMessage : IMessage
         {
             if (HasSubscriptionFor<TMessage>())
             {
-                _routes.Remove(typeof (TMessage));
+                Routes.Remove(typeof (TMessage));
             }
         }
 
@@ -37,7 +37,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             const string reminderMessage = "Each Command must have exacty one subscriber registered.";
 
             List<Action<IMessage>> subscribers;
-            if (_routes.TryGetValue(command.GetType(), out subscribers))
+            if (Routes.TryGetValue(command.GetType(), out subscribers))
             {
                 if (subscribers.Count != 1) throw new DuplicateSubscriberRegisteredException(string.Format("There are {0} handlers registered for Commands of type {1}.  {2}", subscribers.Count, typeof(TCommand), reminderMessage));
                 subscribers[0](command);
@@ -51,7 +51,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
         public virtual void Publish<TEvent>(TEvent @event) where TEvent : Event
         {
             List<Action<IMessage>> subscribers;
-            if (!_routes.TryGetValue(@event.GetType(), out subscribers)) return;
+            if (!Routes.TryGetValue(@event.GetType(), out subscribers)) return;
             foreach (var subscriber in subscribers)
             {
                 //assign to local var to avoid the .net foreach bug

@@ -7,8 +7,8 @@ namespace Proteus.Infrastructure.Messaging.Portable
 {
     public class TransactionalMessageBus : MessageBus, IStartable
     {
-        private readonly List<Event> _queuedEvents = new List<Event>();
-        private readonly List<Command> _queuedCommands = new List<Command>();
+        private readonly List<Envelope<Event>> _queuedEvents = new List<Envelope<Event>>();
+        private readonly List<Envelope<Command>> _queuedCommands = new List<Envelope<Command>>();
 
         public void Start()
         {
@@ -20,7 +20,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
             foreach (var eventEntry in _queuedEvents)
             {
-                base.Publish(eventEntry);
+                base.Publish(eventEntry.Message);
             }
         }
 
@@ -28,7 +28,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
             foreach (var command in _queuedCommands)
             {
-                base.Send(command);
+                base.Send(command.Message);
             }
         }
 
@@ -40,7 +40,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         private void StoreEvent(Event @event)
         {
-            _queuedEvents.Add(@event);
+            _queuedEvents.Add(new Envelope<Event>(@event));
         }
 
         public override void Send<TCommand>(TCommand command)
@@ -51,7 +51,17 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         private void StoreCommand(Command command)
         {
-            _queuedCommands.Add(command);
+            _queuedCommands.Add(new Envelope<Command>(command));
+        }
+    }
+
+    public class Envelope<TMessage> where TMessage : IMessage
+    {
+        public TMessage Message { get;  private set; }
+
+        public Envelope(TMessage message)
+        {
+            Message = message;
         }
     }
 }
