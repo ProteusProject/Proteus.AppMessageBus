@@ -4,33 +4,107 @@ using Proteus.Infrastructure.Messaging.Portable;
 
 namespace Proteus.Infrastructure.Messaging.Tests
 {
-    [TestFixture]
+
     public class TransactionalBusTests
     {
-        [Test]
-        public void UnhandledMessagesAreRetransmittedWhenBusIsRestarted()
+        [TestFixture]
+        public class WhenConfiguredWithNonZeroEventAndCommandRetry
         {
-            const string singleValue = "value";
-            var doubleValue = string.Format("{0}{0}", singleValue);
+            private TransactionalMessageBus _bus;
+            private CommandSubscribers _commands;
+            private EventSubscribers _events;
+            private readonly string _doubleValue = string.Format("{0}{0}", SingleValue);
+            private const string SingleValue = "ImTheMessagePayload";
 
-            var bus = new TransactionalMessageBus();
-            var commands = new CommandSubscribers();
-            var events = new EventSubscribers();
+            [SetUp]
+            public void SetUp()
+            {
 
-            bus.RegisterSubscriptionFor<TestCommand>(commands.Handle);
-            bus.RegisterSubscriptionFor<TestEvent>(events.Handle);
+                var retryPolicy = new RetryPolicy(1);
+                _bus = new TransactionalMessageBus(retryPolicy, retryPolicy);
 
-            bus.Send(new TestCommand(singleValue));
-            bus.Publish(new TestEvent(singleValue));
+                _commands = new CommandSubscribers();
+                _events = new EventSubscribers();
+                _bus.RegisterSubscriptionFor<TestCommand>(_commands.Handle);
+                _bus.RegisterSubscriptionFor<TestEvent>(_events.Handle);
+            }
 
-            Assume.That(commands.ProcessedMessagePayload, Is.EqualTo(singleValue));
-            Assume.That(events.ProcessedMessagePayload, Is.EqualTo(singleValue));
+            [Test]
+            public void CommandAndEventAreRetriedOnNextStart()
+            {
+                _bus.Send(new TestCommand(SingleValue));
+                _bus.Publish(new TestEvent(SingleValue));
 
-            bus.Start();
+                Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
+                Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
-            Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(doubleValue));
-            Assert.That(events.ProcessedMessagePayload, Is.EqualTo(doubleValue));
+                _bus.Start();
+
+                Assert.That(_commands.ProcessedMessagePayload, Is.EqualTo(_doubleValue));
+                Assert.That(_events.ProcessedMessagePayload, Is.EqualTo(_doubleValue));
+            }
+
+            [Test]
+            public void CommandAndEventRetriesRespectRetryPolicyAcrossAdditionalStarts()
+            {
+                _bus.Send(new TestCommand(SingleValue));
+                _bus.Publish(new TestEvent(SingleValue));
+
+                Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
+                Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
+
+                //despite multiple calls to Start(), messages are only retried ONCE as per the retry policy setting
+                for (int i = 0; i < 10; i++)
+                {
+                    _bus.Start();
+                }
+
+                Assert.That(_commands.ProcessedMessagePayload, Is.EqualTo(_doubleValue));
+                Assert.That(_events.ProcessedMessagePayload, Is.EqualTo(_doubleValue));
+            }
+
         }
 
+        [TestFixture]
+        public class WhenConfiguredWithZeroEventAndCommandRetry
+        {
+            private TransactionalMessageBus _bus;
+            private CommandSubscribers _commands;
+            private EventSubscribers _events;
+            private readonly string _doubleValue = string.Format("{0}{0}", SingleValue);
+            private const string SingleValue = "ImTheMessagePayload";
+
+            [SetUp]
+            public void SetUp()
+            {
+                //default retry policy is 0, but set it explicity in this test anyway just to be sure :)
+                var retryPolicy = new RetryPolicy(0);
+                _bus = new TransactionalMessageBus(retryPolicy, retryPolicy);
+
+                _commands = new CommandSubscribers();
+                _events = new EventSubscribers();
+                _bus.RegisterSubscriptionFor<TestCommand>(_commands.Handle);
+                _bus.RegisterSubscriptionFor<TestEvent>(_events.Handle);
+            }
+
+            [Test]
+            public void CommandAndEventAreNotRetriedAcrossAdditionalStarts()
+            {
+                _bus.Send(new TestCommand(SingleValue));
+                _bus.Publish(new TestEvent(SingleValue));
+
+                Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
+                Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
+
+                //despite multiple calls to Start(), messages are only retried ONCE as per the retry policy setting
+                for (int i = 0; i < 10; i++)
+                {
+                    _bus.Start();
+                }
+
+                Assert.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
+                Assert.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
+            }
+        }
     }
 }

@@ -11,9 +11,14 @@ namespace Proteus.Infrastructure.Messaging.Portable
         private readonly List<Envelope<Command>> _queuedCommands = new List<Envelope<Command>>();
 
         public TransactionalMessageBus()
+            : this(new RetryPolicy(), new RetryPolicy())
         {
-            DefaultCommandRetryPolicy = new RetryPolicy();
-            DefaultEventRetryPolicy = new RetryPolicy();
+        }
+
+        public TransactionalMessageBus(RetryPolicy defaultCommandRetryPolicy, RetryPolicy defaultEventRetryPolicy)
+        {
+            DefaultCommandRetryPolicy = defaultCommandRetryPolicy;
+            DefaultEventRetryPolicy = defaultEventRetryPolicy;
         }
 
         public void Start()
@@ -24,17 +29,27 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         private void ProcessPendingEvents()
         {
-            foreach (var eventEntry in _queuedEvents)
+            foreach (var envelope in _queuedEvents.Where(envelope => envelope.ShouldRetry).ToList())
             {
-                base.Publish(eventEntry.Message);
+                base.Publish(envelope.Message);
+                envelope.Retried();
+                if (!envelope.ShouldRetry)
+                {
+                    _queuedEvents.Remove(envelope);
+                }
             }
         }
 
         private void ProcessPendingCommands()
         {
-            foreach (var command in _queuedCommands)
+            foreach (var envelope in _queuedCommands.Where(envelope => envelope.ShouldRetry).ToList())
             {
-                base.Send(command.Message);
+                base.Send(envelope.Message);
+                envelope.Retried();
+                if (!envelope.ShouldRetry)
+                {
+                    _queuedCommands.Remove(envelope);
+                }
             }
         }
 
@@ -78,12 +93,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
     {
         public int Retries { get; private set; }
 
-        public RetryPolicy()
-        {
-            Retries = 0;
-        }
-
-        public RetryPolicy(int retries)
+        public RetryPolicy(int retries = 0)
         {
             Retries = retries;
         }
@@ -91,8 +101,14 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
     public class Envelope<TMessage> where TMessage : IMessage
     {
+        private int _retriesRemaining;
         public TMessage Message { get; private set; }
         public RetryPolicy RetryPolicy { get; private set; }
+
+        public bool ShouldRetry
+        {
+            get { return _retriesRemaining > 0; }
+        }
 
         public Envelope(TMessage message)
             : this(message, new RetryPolicy())
@@ -103,6 +119,12 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
             Message = message;
             RetryPolicy = retryPolicy;
+            _retriesRemaining = retryPolicy.Retries;
+        }
+
+        public void Retried()
+        {
+            _retriesRemaining--;
         }
     }
 }
