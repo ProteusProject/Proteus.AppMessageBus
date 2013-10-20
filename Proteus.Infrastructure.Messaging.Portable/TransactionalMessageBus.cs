@@ -32,7 +32,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             foreach (var envelope in _queuedEvents.Where(envelope => envelope.ShouldRetry).ToList())
             {
                 base.Publish(envelope.Message);
-                envelope.Retried();
+                envelope.HasBeenRetried();
                 if (!envelope.ShouldRetry)
                 {
                     _queuedEvents.Remove(envelope);
@@ -45,7 +45,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             foreach (var envelope in _queuedCommands.Where(envelope => envelope.ShouldRetry).ToList())
             {
                 base.Send(envelope.Message);
-                envelope.Retried();
+                envelope.HasBeenRetried();
                 if (!envelope.ShouldRetry)
                 {
                     _queuedCommands.Remove(envelope);
@@ -86,45 +86,6 @@ namespace Proteus.Infrastructure.Messaging.Portable
         private void StoreCommand(Command command, RetryPolicy retryPolicy)
         {
             _queuedCommands.Add(new Envelope<Command>(command, retryPolicy));
-        }
-    }
-
-    public class RetryPolicy
-    {
-        public int Retries { get; private set; }
-
-        public RetryPolicy(int retries = 0)
-        {
-            Retries = retries;
-        }
-    }
-
-    public class Envelope<TMessage> where TMessage : IMessage
-    {
-        private int _retriesRemaining;
-        public TMessage Message { get; private set; }
-        public RetryPolicy RetryPolicy { get; private set; }
-
-        public bool ShouldRetry
-        {
-            get { return _retriesRemaining > 0; }
-        }
-
-        public Envelope(TMessage message)
-            : this(message, new RetryPolicy())
-        {
-        }
-
-        public Envelope(TMessage message, RetryPolicy retryPolicy)
-        {
-            Message = message;
-            RetryPolicy = retryPolicy;
-            _retriesRemaining = retryPolicy.Retries;
-        }
-
-        public void Retried()
-        {
-            _retriesRemaining--;
         }
     }
 }

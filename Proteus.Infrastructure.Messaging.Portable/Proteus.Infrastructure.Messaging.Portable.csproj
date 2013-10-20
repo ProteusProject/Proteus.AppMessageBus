@@ -46,9 +46,11 @@
     <Compile Include="Abstractions\IStoppable.cs" />
     <Compile Include="DelegateConverter.cs" />
     <Compile Include="DuplicateSubscriberRegisteredException.cs" />
+    <Compile Include="Envelope.cs" />
     <Compile Include="MessageBus.cs" />
     <Compile Include="NoSubscriberRegisteredException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RetryPolicy.cs" />
     <Compile Include="TransactionalMessageBus.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
