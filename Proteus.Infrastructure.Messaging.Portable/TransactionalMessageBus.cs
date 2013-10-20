@@ -10,6 +10,12 @@ namespace Proteus.Infrastructure.Messaging.Portable
         private readonly List<Envelope<Event>> _queuedEvents = new List<Envelope<Event>>();
         private readonly List<Envelope<Command>> _queuedCommands = new List<Envelope<Command>>();
 
+        public TransactionalMessageBus()
+        {
+            DefaultCommandRetryPolicy = new RetryPolicy();
+            DefaultEventRetryPolicy = new RetryPolicy();
+        }
+
         public void Start()
         {
             ProcessPendingCommands();
@@ -32,36 +38,71 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        public override void Publish<TEvent>(TEvent @event)
+        public void Publish<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : Event
         {
-            StoreEvent(@event);
+            StoreEvent(@event, retryPolicy);
             base.Publish(@event);
         }
 
-        private void StoreEvent(Event @event)
+        public override void Publish<TEvent>(TEvent @event)
         {
-            _queuedEvents.Add(new Envelope<Event>(@event));
+            Publish(@event, DefaultEventRetryPolicy);
+        }
+
+        protected RetryPolicy DefaultEventRetryPolicy { get; private set; }
+        protected RetryPolicy DefaultCommandRetryPolicy { get; private set; }
+
+        private void StoreEvent(Event @event, RetryPolicy retryPolicy)
+        {
+            _queuedEvents.Add(new Envelope<Event>(@event, retryPolicy));
+        }
+
+        public void Send<TCommand>(TCommand command, RetryPolicy retryPolicy) where TCommand : Command
+        {
+            StoreCommand(command, retryPolicy);
+            base.Send(command);
         }
 
         public override void Send<TCommand>(TCommand command)
         {
-            StoreCommand(command);
-            base.Send(command);
+            Send(command, DefaultCommandRetryPolicy);
         }
 
-        private void StoreCommand(Command command)
+        private void StoreCommand(Command command, RetryPolicy retryPolicy)
         {
-            _queuedCommands.Add(new Envelope<Command>(command));
+            _queuedCommands.Add(new Envelope<Command>(command, retryPolicy));
+        }
+    }
+
+    public class RetryPolicy
+    {
+        public int Retries { get; private set; }
+
+        public RetryPolicy()
+        {
+            Retries = 0;
+        }
+
+        public RetryPolicy(int retries)
+        {
+            Retries = retries;
         }
     }
 
     public class Envelope<TMessage> where TMessage : IMessage
     {
-        public TMessage Message { get;  private set; }
+        public TMessage Message { get; private set; }
+        public RetryPolicy RetryPolicy { get; private set; }
 
         public Envelope(TMessage message)
+            : this(message, new RetryPolicy())
+        {
+        }
+
+        public Envelope(TMessage message, RetryPolicy retryPolicy)
         {
             Message = message;
+            RetryPolicy = retryPolicy;
         }
     }
 }
