@@ -16,7 +16,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             public void SetUp()
             {
                 _retryPolicy = new RetryPolicy(0, DateTimeUtility.Positive_OneHourTimeSpan());
-                _envelope = new Envelope<TestCommand>(new TestCommand(string.Empty), _retryPolicy);
+                _envelope = new Envelope<TestCommand>(new TestCommand(string.Empty), _retryPolicy, 0);
             }
 
             [Test]
@@ -46,7 +46,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             public void SetUp()
             {
                 _retryPolicy = new RetryPolicy(3, DateTimeUtility.Positive_OneHourTimeSpan());
-                _envelope = new Envelope<TestCommand>(new TestCommand(string.Empty), _retryPolicy);
+                _envelope = new Envelope<TestCommand>(new TestCommand(string.Empty), _retryPolicy, 0);
             }
 
             [Test]

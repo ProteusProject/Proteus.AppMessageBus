@@ -53,6 +53,23 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
+        public void Acknowledge<TMessage>(TMessage message) where TMessage : IMessage
+        {
+            if (message is Command)
+            {
+                var envelope = _queuedCommands.Single(env => env.Message.Id == message.Id);
+                envelope.HasBeenAcknowledged();
+                
+            }
+
+            if (message is Event)
+            {
+                var envelope = _queuedEvents.Single(env => env.Message.Id == message.Id);
+                envelope.HasBeenAcknowledged();
+
+            }
+        }
+
         public void Publish<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : Event
         {
             StoreEvent(@event, retryPolicy);
@@ -69,7 +86,19 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         private void StoreEvent(Event @event, RetryPolicy retryPolicy)
         {
-            _queuedEvents.Add(new Envelope<Event>(@event, retryPolicy));
+            _queuedEvents.Add(new Envelope<Event>(@event, retryPolicy, SubscriberCountFor(@event.GetType())));
+        }
+
+        private int SubscriberCountFor(Type messageType)
+        {
+            List<Action<IMessage>> subscribers;
+
+            if (Routes.TryGetValue(messageType, out subscribers))
+            {
+                return subscribers.Count;
+            }
+
+            return 0;
         }
 
         public void Send<TCommand>(TCommand command, RetryPolicy retryPolicy) where TCommand : Command
@@ -85,7 +114,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         private void StoreCommand(Command command, RetryPolicy retryPolicy)
         {
-            _queuedCommands.Add(new Envelope<Command>(command, retryPolicy));
+            _queuedCommands.Add(new Envelope<Command>(command, retryPolicy, SubscriberCountFor(command.GetType())));
         }
     }
 }

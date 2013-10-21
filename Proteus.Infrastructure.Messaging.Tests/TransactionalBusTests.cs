@@ -1,6 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 using Proteus.Infrastructure.Messaging.Portable;
+using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
 namespace Proteus.Infrastructure.Messaging.Tests
 {
@@ -142,6 +143,73 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 Assert.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
             }
 
+        }
+
+        [TestFixture]
+        public class Stuff
+        {
+            [Test]
+            public void Test()
+            {
+
+                var retryPolicy = new RetryPolicy(3, DateTimeUtility.Positive_OneHourTimeSpan());
+                var bus = new TransactionalMessageBus(retryPolicy, retryPolicy);
+
+                var commands = new CommandSubscribers();
+                var events = new EventSubscribers();
+                bus.RegisterSubscriptionFor<TestCommand>(commands.Handle);
+                bus.RegisterSubscriptionFor<TestEvent>(events.Handle);
+                bus.RegisterSubscriptionFor<TestEvent>(events.Handle);
+
+
+                const string singleValue = "payload";
+                var doubleValue = string.Format("{0}{0}", singleValue);
+                var quadrupleValue = string.Format("{0}{0}", doubleValue);
+
+
+                var testCommand = new TestCommand(singleValue);
+                bus.Send(testCommand);
+                var testEvent = new TestEvent(singleValue);
+                bus.Publish(testEvent);
+
+                Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(singleValue));
+                Assert.That(events.ProcessedMessagePayload, Is.EqualTo(doubleValue));
+                
+                bus.Start();
+
+                Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(doubleValue));
+                Assert.That(events.ProcessedMessagePayload, Is.EqualTo(quadrupleValue));
+                
+                bus.Acknowledge(testCommand);
+                bus.Acknowledge(testEvent);
+                bus.Acknowledge(testEvent);
+                
+                bus.Start();
+
+
+
+
+            }
+
+            public class TransactionalEventSubscribers : IHandle<TestEvent>
+            {
+                public string ProcessedMessagePayload { get; private set; }
+
+                public void Handle(TestEvent message)
+                {
+                    ProcessedMessagePayload += message.Payload;
+                }
+            }
+
+            public class TransactionalCommandSubscribers : IHandle<TestCommand>
+            {
+                public string ProcessedMessagePayload { get; private set; }
+
+                public void Handle(TestCommand message)
+                {
+                    ProcessedMessagePayload += message.Payload;
+                }
+            }
         }
     }
 }
