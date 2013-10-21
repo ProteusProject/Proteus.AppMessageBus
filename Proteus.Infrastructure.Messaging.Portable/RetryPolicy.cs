@@ -12,9 +12,9 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
         }
 
-        public RetryPolicy(int retries, TimeSpan expiryDuration)
+        public RetryPolicy(int retries, TimeSpan durationUntilExpiry)
         {
-            Expiry = DateTime.UtcNow + expiryDuration;
+            Expiry = DateTime.UtcNow + durationUntilExpiry;
             Retries = retries;
         }
     }
