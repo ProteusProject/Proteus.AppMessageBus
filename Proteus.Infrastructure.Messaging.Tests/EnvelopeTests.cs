@@ -7,7 +7,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
     public class EnvelopeTests
     {
         [TestFixture]
-        public class WhenEnvelopeHasZeroRetryPolicy
+        public class WhenEnvelopeHasZeroRetryPolicyAndIsNotExpired
         {
             private RetryPolicy _retryPolicy;
             private Envelope<TestCommand> _envelope;
@@ -15,7 +15,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [SetUp]
             public void SetUp()
             {
-                _retryPolicy = new RetryPolicy(0);
+                _retryPolicy = new RetryPolicy(0, DateTimeUtility.Positive_OneHourTimeSpan());
                 _envelope = new Envelope<TestCommand>(new TestCommand(string.Empty), _retryPolicy);
             }
 
@@ -45,8 +45,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [SetUp]
             public void SetUp()
             {
-                RetryPolicy.DateTimeProvider = TestingDateTimeProviderUtility.OneYearFromNowUtc;
-                _retryPolicy = new RetryPolicy(3);
+                _retryPolicy = new RetryPolicy(3, DateTimeUtility.Positive_OneHourTimeSpan());
                 _envelope = new Envelope<TestCommand>(new TestCommand(string.Empty), _retryPolicy);
             }
 

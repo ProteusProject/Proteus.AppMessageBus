@@ -18,9 +18,6 @@ namespace Proteus.Infrastructure.Messaging.Tests
         [Test]
         public void DefaultCtorSetsZeroTimespanForExpiry()
         {
-            //make sure that we're back to the default actual provider for DateTime.UtcNow
-            RetryPolicy.DateTimeProvider = null;
-
             var policy = new RetryPolicy();
             Assert.That(policy.Expiry - DateTime.UtcNow, Is.LessThanOrEqualTo(TimeSpan.Zero));
         }
@@ -28,7 +25,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
         [Test]
         public void CanSetRetriesInCtor()
         {
-            var policy = new RetryPolicy(10);
+            var policy = new RetryPolicy(10, DateTimeUtility.Positive_OneHourTimeSpan());
             Assert.That(policy.Retries, Is.EqualTo(10));
         }
     }

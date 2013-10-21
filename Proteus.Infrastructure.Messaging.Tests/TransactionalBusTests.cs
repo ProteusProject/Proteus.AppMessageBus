@@ -8,7 +8,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
     public class TransactionalBusTests
     {
         [TestFixture]
-        public class WhenConfiguredWithNonZeroEventAndCommandRetryAndMessagesHaveNotExpired
+        public class WhenConfiguredWithNonZeroEventRetryAndCommandRetryAndMessagesHaveNotExpired
         {
             private TransactionalMessageBus _bus;
             private CommandSubscribers _commands;
@@ -19,8 +19,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [SetUp]
             public void SetUp()
             {
-                RetryPolicy.DateTimeProvider = TestingDateTimeProviderUtility.OneYearFromNowUtc;
-                var retryPolicy = new RetryPolicy(1);
+                var retryPolicy = new RetryPolicy(1, DateTimeUtility.Positive_OneHourTimeSpan());
                 _bus = new TransactionalMessageBus(retryPolicy, retryPolicy);
 
                 _commands = new CommandSubscribers();
@@ -66,7 +65,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
         }
 
         [TestFixture]
-        public class WhenConfiguredWithZeroEventAndCommandRetry
+        public class WhenConfiguredWithZeroEventRetryAndZeroCommandRetry
         {
             private TransactionalMessageBus _bus;
             private CommandSubscribers _commands;
@@ -77,8 +76,9 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [SetUp]
             public void SetUp()
             {
-                //default retry policy is 0, but set it explicity in this test anyway just to be sure :)
-                var retryPolicy = new RetryPolicy(0);
+                var retryPolicy = new RetryPolicy();
+                Assume.That(retryPolicy.Retries, Is.EqualTo(0));
+
                 _bus = new TransactionalMessageBus(retryPolicy, retryPolicy);
 
                 _commands = new CommandSubscribers();
@@ -105,6 +105,43 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 Assert.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
                 Assert.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
             }
+        }
+
+        [TestFixture]
+        public class WhenConfiguredWithNonZeroEventRetryAndNonZeroCommandRetryAndMessagesHaveAlreadyExpired
+        {
+            private TransactionalMessageBus _bus;
+            private CommandSubscribers _commands;
+            private EventSubscribers _events;
+            private const string SingleValue = "ImTheMessagePayload";
+
+            [SetUp]
+            public void SetUp()
+            {
+                var retryPolicy = new RetryPolicy(1, DateTimeUtility.Negative_OneHourTimeSpan());
+                _bus = new TransactionalMessageBus(retryPolicy, retryPolicy);
+
+                _commands = new CommandSubscribers();
+                _events = new EventSubscribers();
+                _bus.RegisterSubscriptionFor<TestCommand>(_commands.Handle);
+                _bus.RegisterSubscriptionFor<TestEvent>(_events.Handle);
+            }
+
+            [Test]
+            public void CommandAndEventAreNotRetriedOnNextStart()
+            {
+                _bus.Send(new TestCommand(SingleValue));
+                _bus.Publish(new TestEvent(SingleValue));
+
+                Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
+                Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
+
+                _bus.Start();
+
+                Assert.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
+                Assert.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
+            }
+
         }
     }
 }
