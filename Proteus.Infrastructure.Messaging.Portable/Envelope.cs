@@ -40,23 +40,18 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public void HasBeenRetried()
         {
-           _retriesRemaining = SafeDecrement(_retriesRemaining);
+           _retriesRemaining = ZeroSafeDecrement(_retriesRemaining);
         }
         
         public void HasBeenAcknowledged()
         {
-            _acknowedgementsRemaining = SafeDecrement(_acknowedgementsRemaining);
+            _acknowedgementsRemaining = ZeroSafeDecrement(_acknowedgementsRemaining);
         }
 
-        private int SafeDecrement(int value)
+        private int ZeroSafeDecrement(int value)
         {
-            value--;
-            if (value < 0)
-            {
-                value = 0;
-            }
-
-            return value;
+            value = value -1;
+            return value < 0 ? 0 : value;
         }
 
     }
