@@ -6,7 +6,6 @@ namespace Proteus.Infrastructure.Messaging.Portable
     public class Envelope<TMessage> where TMessage : IMessage
     {
         private int _retriesRemaining;
-        private int _acknowedgementsRemaining;
         public TMessage Message { get; private set; }
         public RetryPolicy RetryPolicy { get; private set; }
 
@@ -26,16 +25,15 @@ namespace Proteus.Infrastructure.Messaging.Portable
         }
 
         public Envelope(TMessage message)
-            : this(message, new RetryPolicy(), 1)
+            : this(message, new RetryPolicy())
         {
         }
 
-        public Envelope(TMessage message, RetryPolicy retryPolicy, int subscriberCount)
+        public Envelope(TMessage message, RetryPolicy retryPolicy)
         {
             Message = message;
             RetryPolicy = retryPolicy;
             _retriesRemaining = retryPolicy.Retries;
-            _acknowedgementsRemaining = subscriberCount;
         }
 
         public void HasBeenRetried()
@@ -43,11 +41,6 @@ namespace Proteus.Infrastructure.Messaging.Portable
            _retriesRemaining = ZeroSafeDecrement(_retriesRemaining);
         }
         
-        public void HasBeenAcknowledged()
-        {
-            _acknowedgementsRemaining = ZeroSafeDecrement(_acknowedgementsRemaining);
-        }
-
         private int ZeroSafeDecrement(int value)
         {
             value = value -1;

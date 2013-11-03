@@ -58,16 +58,26 @@ namespace Proteus.Infrastructure.Messaging.Portable
             if (message is Command)
             {
                 var envelope = _queuedCommands.Single(env => env.Message.Id == message.Id);
-                envelope.HasBeenAcknowledged();
+                RecordAcknowledgement(envelope);
                 
             }
 
             if (message is Event)
             {
                 var envelope = _queuedEvents.Single(env => env.Message.Id == message.Id);
-                envelope.HasBeenAcknowledged();
+                RecordAcknowledgement(envelope);
 
             }
+        }
+
+        private void RecordAcknowledgement(Envelope<Command> envelope)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void RecordAcknowledgement(Envelope<Event> envelope)
+        {
+            throw new NotImplementedException();
         }
 
         public void Publish<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : Event
@@ -86,7 +96,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         private void StoreEvent(Event @event, RetryPolicy retryPolicy)
         {
-            _queuedEvents.Add(new Envelope<Event>(@event, retryPolicy, SubscriberCountFor(@event.GetType())));
+            _queuedEvents.Add(new Envelope<Event>(@event, retryPolicy));
         }
 
         private int SubscriberCountFor(Type messageType)
@@ -114,7 +124,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         private void StoreCommand(Command command, RetryPolicy retryPolicy)
         {
-            _queuedCommands.Add(new Envelope<Command>(command, retryPolicy, SubscriberCountFor(command.GetType())));
+            _queuedCommands.Add(new Envelope<Command>(command, retryPolicy));
         }
     }
 }
