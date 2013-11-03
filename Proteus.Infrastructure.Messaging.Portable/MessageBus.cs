@@ -55,8 +55,8 @@ namespace Proteus.Infrastructure.Messaging.Portable
             foreach (var subscriber in subscribers)
             {
                 //assign to local var to avoid the .net foreach bug
-                var subscriber1 = subscriber;
-                subscriber1(@event);
+                var subscriberDelegate = subscriber;
+                subscriberDelegate(@event);
             }
         }
     }

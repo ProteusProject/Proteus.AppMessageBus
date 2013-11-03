@@ -38,10 +38,14 @@
   <ItemGroup>
     <Compile Include="Abstractions\Command.cs" />
     <Compile Include="Abstractions\Event.cs" />
+    <Compile Include="Abstractions\IAcceptMessageAcknowledgements.cs" />
     <Compile Include="Abstractions\IHandle.cs" />
+    <Compile Include="Abstractions\IHandleTransactional.cs" />
     <Compile Include="Abstractions\IMessage.cs" />
     <Compile Include="Abstractions\IPublishEvents.cs" />
+    <Compile Include="Abstractions\IPublishTransactionalEvents.cs" />
     <Compile Include="Abstractions\ISendCommands.cs" />
+    <Compile Include="Abstractions\ISendTransactionalCommands.cs" />
     <Compile Include="Abstractions\IStartable.cs" />
     <Compile Include="Abstractions\IStoppable.cs" />
     <Compile Include="DelegateConverter.cs" />

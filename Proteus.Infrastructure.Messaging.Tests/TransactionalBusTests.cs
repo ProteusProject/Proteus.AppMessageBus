@@ -155,11 +155,11 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 var retryPolicy = new RetryPolicy(3, DateTimeUtility.Positive_OneHourTimeSpan());
                 var bus = new TransactionalMessageBus(retryPolicy, retryPolicy);
 
-                var commands = new CommandSubscribers();
-                var events = new EventSubscribers();
-                bus.RegisterSubscriptionFor<TestCommand>(commands.Handle);
-                bus.RegisterSubscriptionFor<TestEvent>(events.Handle);
-                bus.RegisterSubscriptionFor<TestEvent>(events.Handle);
+                var commands = new TransactionalCommandSubscribers();
+                var events = new TransactionalEventSubscribers();
+                bus.RegisterSubscriptionForTx<TestCommand>(commands.Handle);
+                bus.RegisterSubscriptionForTx<TestEvent>(events.Handle);
+                bus.RegisterSubscriptionForTx<TestEvent>(events.Handle);
 
 
                 const string singleValue = "payload";
@@ -168,9 +168,10 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
 
                 var testCommand = new TestCommand(singleValue);
-                bus.Send(testCommand);
+                bus.SendTx(testCommand);
                 var testEvent = new TestEvent(singleValue);
-                bus.Publish(testEvent);
+                bus.PublishTx(testEvent);
+
 
                 Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(singleValue));
                 Assert.That(events.ProcessedMessagePayload, Is.EqualTo(doubleValue));
@@ -179,10 +180,12 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(doubleValue));
                 Assert.That(events.ProcessedMessagePayload, Is.EqualTo(quadrupleValue));
+
+                var envelope = new Envelope<IMessage>(testCommand);
                 
-                bus.Acknowledge(testCommand);
-                bus.Acknowledge(testEvent);
-                bus.Acknowledge(testEvent);
+                bus.Acknowledge(envelope);
+                //bus.Acknowledge(testEvent);
+                //bus.Acknowledge(testEvent);
                 
                 bus.Start();
 
@@ -191,23 +194,23 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
             }
 
-            public class TransactionalEventSubscribers : IHandle<TestEvent>
+            public class TransactionalEventSubscribers : IHandleTransactional<TestEvent>
             {
                 public string ProcessedMessagePayload { get; private set; }
 
-                public void Handle(TestEvent message)
+                public void Handle(Envelope<TestEvent> envelope)
                 {
-                    ProcessedMessagePayload += message.Payload;
+                    ProcessedMessagePayload += envelope.Message.Payload;
                 }
             }
 
-            public class TransactionalCommandSubscribers : IHandle<TestCommand>
+            public class TransactionalCommandSubscribers : IHandleTransactional<TestCommand>
             {
                 public string ProcessedMessagePayload { get; private set; }
 
-                public void Handle(TestCommand message)
+                public void Handle(Envelope<TestCommand> envelope)
                 {
-                    ProcessedMessagePayload += message.Payload;
+                    ProcessedMessagePayload += envelope.Message.Payload;
                 }
             }
         }

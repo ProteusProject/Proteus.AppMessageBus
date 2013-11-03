@@ -5,10 +5,35 @@ using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
 namespace Proteus.Infrastructure.Messaging.Portable
 {
-    public class TransactionalMessageBus : MessageBus, IStartable
+    public class TransactionalMessageBus : MessageBus, IStartable, ISendTransactionalCommands, IPublishTransactionalEvents, IAcceptMessageAcknowledgements
     {
         private readonly List<Envelope<Event>> _queuedEvents = new List<Envelope<Event>>();
         private readonly List<Envelope<Command>> _queuedCommands = new List<Envelope<Command>>();
+
+        protected readonly Dictionary<Type, List<Action<Envelope<IMessage>>>> RoutesTx = new Dictionary<Type, List<Action<Envelope<IMessage>>>>();
+
+        public void RegisterSubscriptionForTx<TMessage>(Action<Envelope<TMessage>> handler) where TMessage : IMessage 
+        {
+            List<Action<Envelope<IMessage>>> subscribers;
+            if (!RoutesTx.TryGetValue(typeof(Envelope<TMessage>), out subscribers))
+            {
+                subscribers = new List<Action<Envelope<IMessage>>>();
+                RoutesTx.Add(typeof(Envelope<TMessage>), subscribers);
+            }
+            subscribers.Add(DelegateConverter.CastArgument<Envelope<IMessage>, Envelope<TMessage>>(x => handler(x)));
+        }
+
+        //public void RegisterSubscriptionForTx<TEnvelope>(Action<TEnvelope> handler) where TEnvelope : Envelope<IMessage>
+        //{
+        //    List<Action<Envelope<IMessage>>> subscribers;
+        //    if (!RoutesTx.TryGetValue(typeof(TEnvelope), out subscribers))
+        //    {
+        //        subscribers = new List<Action<Envelope<IMessage>>>();
+        //        RoutesTx.Add(typeof(TEnvelope), subscribers);
+        //    }
+        //    subscribers.Add(DelegateConverter.CastArgument<Envelope<IMessage>, TEnvelope>(x => handler(x)));
+        //}
+
 
         public TransactionalMessageBus()
             : this(new RetryPolicy(), new RetryPolicy())
@@ -53,19 +78,20 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        public void Acknowledge<TMessage>(TMessage message) where TMessage : IMessage
+        public void Acknowledge<TEnvelope>(TEnvelope envelope) where TEnvelope : Envelope<IMessage>
         {
+            var message = envelope.Message;
+
             if (message is Command)
             {
-                var envelope = _queuedCommands.Single(env => env.Message.Id == message.Id);
-                RecordAcknowledgement(envelope);
-                
+                //RecordAcknowledgement(envelope);
+
             }
 
             if (message is Event)
             {
-                var envelope = _queuedEvents.Single(env => env.Message.Id == message.Id);
-                RecordAcknowledgement(envelope);
+                //var envelope = _queuedEvents.Single(env => env.Message.Id == message.Id);
+                //RecordAcknowledgement(envelope);
 
             }
         }
@@ -80,15 +106,29 @@ namespace Proteus.Infrastructure.Messaging.Portable
             throw new NotImplementedException();
         }
 
-        public void Publish<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : Event
+        public void PublishTx<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : Event
         {
             StoreEvent(@event, retryPolicy);
-            base.Publish(@event);
+            PublishTransactionalEvent(@event);
         }
 
-        public override void Publish<TEvent>(TEvent @event)
+        private void PublishTransactionalEvent<TEvent>(TEvent @event) where TEvent : Event
         {
-            Publish(@event, DefaultEventRetryPolicy);
+            List<Action<Envelope<IMessage>>> subscribers;
+            if (!RoutesTx.TryGetValue(@event.GetType(), out subscribers)) return;
+            foreach (var subscriber in subscribers)
+            {
+                //assign to local var to avoid the .net foreach bug
+                var subscriberDelegate = subscriber;
+                var envelope = new Envelope<IMessage>(@event);
+
+                subscriberDelegate(envelope);
+            }
+        }
+
+        public void PublishTx<TEvent>(TEvent @event) where TEvent : Event
+        {
+            PublishTx(@event, DefaultEventRetryPolicy);
         }
 
         protected RetryPolicy DefaultEventRetryPolicy { get; private set; }
@@ -111,15 +151,15 @@ namespace Proteus.Infrastructure.Messaging.Portable
             return 0;
         }
 
-        public void Send<TCommand>(TCommand command, RetryPolicy retryPolicy) where TCommand : Command
+        public void SendTx<TCommand>(TCommand command, RetryPolicy retryPolicy) where TCommand : Command
         {
             StoreCommand(command, retryPolicy);
             base.Send(command);
         }
 
-        public override void Send<TCommand>(TCommand command)
+        public void SendTx<TCommand>(TCommand command) where TCommand : Command
         {
-            Send(command, DefaultCommandRetryPolicy);
+            SendTx(command, DefaultCommandRetryPolicy);
         }
 
         private void StoreCommand(Command command, RetryPolicy retryPolicy)

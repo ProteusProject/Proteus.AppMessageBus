@@ -3,8 +3,45 @@ using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
 namespace Proteus.Infrastructure.Messaging.Portable
 {
-    public class Envelope<TMessage> where TMessage : IMessage
+    public class Envelope<TMessage> : IEquatable<Envelope<TMessage>> where TMessage : IMessage
     {
+        public bool Equals(Envelope<TMessage> other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return _id.Equals(other._id);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Envelope<TMessage>) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return _id.GetHashCode();
+        }
+
+        public static bool operator ==(Envelope<TMessage> left, Envelope<TMessage> right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(Envelope<TMessage> left, Envelope<TMessage> right)
+        {
+            return !Equals(left, right);
+        }
+
+        private readonly Guid _id = Guid.NewGuid();
+
+        public Guid Id
+        {
+            get { return _id; }
+        }
+
         private int _retriesRemaining;
         public TMessage Message { get; private set; }
         public RetryPolicy RetryPolicy { get; private set; }
