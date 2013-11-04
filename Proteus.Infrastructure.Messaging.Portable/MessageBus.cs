@@ -32,7 +32,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        public virtual void Send<TCommand>(TCommand command) where TCommand : Command
+        public virtual void Send<TCommand>(TCommand command) where TCommand : ICommand
         {
             const string reminderMessage = "Each Command must have exacty one subscriber registered.";
 
@@ -48,7 +48,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        public virtual void Publish<TEvent>(TEvent @event) where TEvent : Event
+        public virtual void Publish<TEvent>(TEvent @event) where TEvent : IEvent
         {
             List<Action<IMessage>> subscribers;
             if (!Routes.TryGetValue(@event.GetType(), out subscribers)) return;

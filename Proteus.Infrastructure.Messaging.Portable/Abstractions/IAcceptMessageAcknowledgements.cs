@@ -2,6 +2,6 @@
 {
     public interface IAcceptMessageAcknowledgements
     {
-        void Acknowledge<TEnvelope>(TEnvelope envelope) where TEnvelope : Envelope<IMessage>;
+        void Acknowledge<TMessage>(TMessage message) where TMessage : IMessageTx;
     }
 }

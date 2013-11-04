@@ -2,8 +2,7 @@
 {
     public interface ISendTransactionalCommands
     {
-        void SendTx<TCommand>(TCommand command) where TCommand : Command;
-        void SendTx<TCommand>(TCommand command, RetryPolicy retryPolicy) where TCommand : Command;
-         
+        void SendTx<TCommand>(TCommand command) where TCommand : ICommand, IMessageTx;
+        void SendTx<TCommand>(TCommand command, RetryPolicy retryPolicy) where TCommand : ICommand, IMessageTx;
     }
 }

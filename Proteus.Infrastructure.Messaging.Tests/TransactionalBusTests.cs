@@ -14,7 +14,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             private TransactionalMessageBus _bus;
             private CommandSubscribers _commands;
             private EventSubscribers _events;
-            private readonly string _doubleValue = string.Format("{0}{0}", SingleValue);
+            private readonly string _doubleValue = String.Format("{0}{0}", SingleValue);
             private const string SingleValue = "ImTheMessagePayload";
 
             [SetUp]
@@ -71,7 +71,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             private TransactionalMessageBus _bus;
             private CommandSubscribers _commands;
             private EventSubscribers _events;
-            private readonly string _doubleValue = string.Format("{0}{0}", SingleValue);
+            private readonly string _doubleValue = String.Format("{0}{0}", SingleValue);
             private const string SingleValue = "ImTheMessagePayload";
 
             [SetUp]
@@ -157,62 +157,84 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 var commands = new TransactionalCommandSubscribers();
                 var events = new TransactionalEventSubscribers();
-                bus.RegisterSubscriptionForTx<TestCommand>(commands.Handle);
-                bus.RegisterSubscriptionForTx<TestEvent>(events.Handle);
-                bus.RegisterSubscriptionForTx<TestEvent>(events.Handle);
+                bus.RegisterSubscriptionForTx<TestCommandTx>(commands.Handle);
+                bus.RegisterSubscriptionForTx<TestEventTx>(events.Handle);
+                bus.RegisterSubscriptionForTx<TestEventTx>(events.Handle);
 
 
                 const string singleValue = "payload";
-                var doubleValue = string.Format("{0}{0}", singleValue);
-                var quadrupleValue = string.Format("{0}{0}", doubleValue);
+                var doubleValue = String.Format("{0}{0}", singleValue);
+                var quadrupleValue = String.Format("{0}{0}", doubleValue);
 
 
-                var testCommand = new TestCommand(singleValue);
+                var testCommand = new TestCommandTx(singleValue);
                 bus.SendTx(testCommand);
-                var testEvent = new TestEvent(singleValue);
+                var testEvent = new TestEventTx(singleValue);
                 bus.PublishTx(testEvent);
 
 
                 Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(singleValue));
                 Assert.That(events.ProcessedMessagePayload, Is.EqualTo(doubleValue));
-                
+
                 bus.Start();
 
                 Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(doubleValue));
                 Assert.That(events.ProcessedMessagePayload, Is.EqualTo(quadrupleValue));
 
-                var envelope = new Envelope<IMessage>(testCommand);
-                
-                bus.Acknowledge(envelope);
-                //bus.Acknowledge(testEvent);
-                //bus.Acknowledge(testEvent);
-                
+                bus.Acknowledge(testCommand);
+                bus.Acknowledge(testEvent);
+                bus.Acknowledge(testEvent);
+
                 bus.Start();
 
 
 
 
             }
+        }
 
-            public class TransactionalEventSubscribers : IHandleTransactional<TestEvent>
+        public class TransactionalEventSubscribers : IHandleTransactional<TestEventTx>
+        {
+            public string ProcessedMessagePayload { get; private set; }
+
+            public void Handle(TestEventTx message)
             {
-                public string ProcessedMessagePayload { get; private set; }
-
-                public void Handle(Envelope<TestEvent> envelope)
-                {
-                    ProcessedMessagePayload += envelope.Message.Payload;
-                }
-            }
-
-            public class TransactionalCommandSubscribers : IHandleTransactional<TestCommand>
-            {
-                public string ProcessedMessagePayload { get; private set; }
-
-                public void Handle(Envelope<TestCommand> envelope)
-                {
-                    ProcessedMessagePayload += envelope.Message.Payload;
-                }
+                ProcessedMessagePayload += message.Payload;
             }
         }
+
+        public class TransactionalCommandSubscribers : IHandleTransactional<TestCommandTx>
+        {
+            public string ProcessedMessagePayload { get; private set; }
+
+            public void Handle(TestCommandTx message)
+            {
+                ProcessedMessagePayload += message.Payload;
+            }
+        }
+
+        public class TestEventTx : TestEvent, IMessageTx
+        {
+            public TestEventTx(string payload)
+                : base(payload)
+            {
+                AcknowledgementId = Guid.NewGuid();
+            }
+
+            public Guid AcknowledgementId { get; private set; }
+        }
+
+
+        public class TestCommandTx : TestCommand, IMessageTx
+        {
+            public TestCommandTx(string payload)
+                : base(payload)
+            {
+                AcknowledgementId = Guid.NewGuid();
+            }
+
+            public Guid AcknowledgementId { get; private set; }
+        }
+
     }
 }

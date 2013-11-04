@@ -2,8 +2,8 @@
 
 namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
 {
-    public class Command : Message, ICommand
+    public interface IMessageTx : IMessage
     {
-       
+        Guid AcknowledgementId { get; }
     }
 }

@@ -37,17 +37,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Abstractions\Command.cs" />
+    <Compile Include="Abstractions\CommandTx.cs" />
     <Compile Include="Abstractions\Event.cs" />
+    <Compile Include="Abstractions\EventTx.cs" />
     <Compile Include="Abstractions\IAcceptMessageAcknowledgements.cs" />
+    <Compile Include="Abstractions\ICommand.cs" />
+    <Compile Include="Abstractions\IEvent.cs" />
     <Compile Include="Abstractions\IHandle.cs" />
     <Compile Include="Abstractions\IHandleTransactional.cs" />
     <Compile Include="Abstractions\IMessage.cs" />
+    <Compile Include="Abstractions\IMessageTx.cs" />
     <Compile Include="Abstractions\IPublishEvents.cs" />
     <Compile Include="Abstractions\IPublishTransactionalEvents.cs" />
     <Compile Include="Abstractions\ISendCommands.cs" />
     <Compile Include="Abstractions\ISendTransactionalCommands.cs" />
     <Compile Include="Abstractions\IStartable.cs" />
     <Compile Include="Abstractions\IStoppable.cs" />
+    <Compile Include="Abstractions\Message.cs" />
     <Compile Include="DelegateConverter.cs" />
     <Compile Include="DuplicateSubscriberRegisteredException.cs" />
     <Compile Include="Envelope.cs" />

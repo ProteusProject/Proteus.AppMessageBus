@@ -53,7 +53,7 @@ namespace Windows8TestingHarness
 
         private void Save_OnClick(object sender, RoutedEventArgs e)
         {
-            App.Bus.SendTx(new ChangeNameCommand(Firstname.Text, Lastname.Text));
+            App.Bus.Send(new ChangeNameCommand(Firstname.Text, Lastname.Text));
             this.Frame.Navigate(typeof(DisplayPage));
         }
     }
