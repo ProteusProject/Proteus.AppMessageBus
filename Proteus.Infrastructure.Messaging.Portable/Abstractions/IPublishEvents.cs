@@ -2,6 +2,6 @@
 {
     public interface IPublishEvents
     {
-        void Publish<TEvent>(TEvent @event) where TEvent : IEvent;
+        void Publish<TEvent>(TEvent @event) where TEvent : IMessage;
     }
 }

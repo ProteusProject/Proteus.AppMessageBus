@@ -21,18 +21,18 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public virtual bool HasSubscriptionFor<TMessage>() where TMessage : IMessage
         {
-            return Routes.ContainsKey(typeof (TMessage));
+            return Routes.ContainsKey(typeof(TMessage));
         }
 
         public virtual void UnRegisterAllSubscriptionsFor<TMessage>() where TMessage : IMessage
         {
             if (HasSubscriptionFor<TMessage>())
             {
-                Routes.Remove(typeof (TMessage));
+                Routes.Remove(typeof(TMessage));
             }
         }
 
-        public virtual void Send<TCommand>(TCommand command) where TCommand : ICommand
+        public virtual void Send<TCommand>(TCommand command) where TCommand : IMessage
         {
             const string reminderMessage = "Each Command must have exacty one subscriber registered.";
 
@@ -40,6 +40,11 @@ namespace Proteus.Infrastructure.Messaging.Portable
             if (Routes.TryGetValue(command.GetType(), out subscribers))
             {
                 if (subscribers.Count != 1) throw new DuplicateSubscriberRegisteredException(string.Format("There are {0} handlers registered for Commands of type {1}.  {2}", subscribers.Count, typeof(TCommand), reminderMessage));
+
+                command = PrepareCommandForPublishing(command, subscribers[0]);
+
+                if (!ShouldSendCommand(command, subscribers[0])) return;
+
                 subscribers[0](command);
             }
             else
@@ -48,16 +53,43 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        public virtual void Publish<TEvent>(TEvent @event) where TEvent : IEvent
+        protected virtual bool ShouldSendCommand(IMessage command, Action<IMessage> subscriber)
+        {
+            //effectively a no-op unless overridden in a derived class
+            return true;
+        }
+
+        protected virtual TCommand PrepareCommandForPublishing<TCommand>(TCommand command, Action<IMessage> subscribers)
+        {
+            //effectively a no-op unless overridden in derived class
+            return command;
+        }
+
+        protected virtual TEvent PrepareEventForPublishing<TEvent>(TEvent @event, int subscriberIndex, List<Action<IMessage>> subscribers)
+        {
+            //effectively a no-op unless overridden in derived class
+            return @event;
+        }
+
+        public virtual void Publish<TEvent>(TEvent @event) where TEvent : IMessage
         {
             List<Action<IMessage>> subscribers;
             if (!Routes.TryGetValue(@event.GetType(), out subscribers)) return;
-            foreach (var subscriber in subscribers)
+            for (int index = 0; index < subscribers.Count; index++)
             {
-                //assign to local var to avoid the .net foreach bug
-                var subscriberDelegate = subscriber;
-                subscriberDelegate(@event);
+                @event = PrepareEventForPublishing(@event, index, subscribers);
+
+                if (!ShouldPublishEvent(@event, index, subscribers)) continue;
+                
+                var subscriber = subscribers[index];
+                subscriber(@event);
             }
+        }
+
+        protected virtual bool ShouldPublishEvent(IMessage @event, int index, List<Action<IMessage>> subscribers)
+        {
+            //effectively a no-op unless overridden in derived class
+            return true;
         }
     }
 }

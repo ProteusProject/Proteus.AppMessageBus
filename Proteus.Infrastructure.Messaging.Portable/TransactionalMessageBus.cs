@@ -7,44 +7,8 @@ namespace Proteus.Infrastructure.Messaging.Portable
 {
     public class TransactionalMessageBus : MessageBus, IStartable, ISendTransactionalCommands, IPublishTransactionalEvents, IAcceptMessageAcknowledgements
     {
-        private readonly List<Envelope<IEvent>> _queuedEvents = new List<Envelope<IEvent>>();
-        private readonly List<Envelope<ICommand>> _queuedCommands = new List<Envelope<ICommand>>();
-
-        protected readonly Dictionary<Type, List<Action<IMessageTx>>> RoutesTx = new Dictionary<Type, List<Action<IMessageTx>>>();
-
-        public void RegisterSubscriptionForTx<TMessage>(Action<TMessage> handler) where TMessage : IMessageTx
-        {
-            List<Action<IMessageTx>> subscribers;
-            if (!RoutesTx.TryGetValue(typeof(TMessage), out subscribers))
-            {
-                subscribers = new List<Action<IMessageTx>>();
-                RoutesTx.Add(typeof(TMessage), subscribers);
-            }
-            subscribers.Add(DelegateConverter.CastArgument<IMessageTx, TMessage>(x => handler(x)));
-
-            base.RegisterSubscriptionFor(handler);
-        }
-
-        public override bool HasSubscriptionFor<TMessage>()
-        {
-            return HasTransactionalSubscriptionFor<TMessage>() || base.HasSubscriptionFor<TMessage>();
-        }
-
-        private bool HasTransactionalSubscriptionFor<TMessage>()
-        {
-            return RoutesTx.ContainsKey(typeof(TMessage));
-        }
-
-        public override void UnRegisterAllSubscriptionsFor<TMessage>()
-        {
-            if (HasTransactionalSubscriptionFor<TMessage>())
-            {
-                RoutesTx.Remove(typeof(TMessage));
-            }
-
-            base.UnRegisterAllSubscriptionsFor<TMessage>();
-        }
-
+        private readonly List<Envelope<IMessageTx>> _queuedEvents = new List<Envelope<IMessageTx>>();
+        private readonly List<Envelope<IMessageTx>> _queuedCommands = new List<Envelope<IMessageTx>>();
 
         public TransactionalMessageBus()
             : this(new RetryPolicy(), new RetryPolicy())
@@ -93,47 +57,35 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
             if (message is ICommand)
             {
-                //RecordAcknowledgement(envelope);
+                var envelopes = _queuedCommands.Where(env => env.Message.AcknowledgementId == message.AcknowledgementId);
+
+                if (envelopes.Count() == 1)
+                {
+                    _queuedCommands.Remove(envelopes.First());
+                }
 
             }
 
+            //TODO: this wont work -- whoever first acknowledges the message will clear it under this model :(
             if (message is IEvent)
             {
-                //var envelope = _queuedEvents.Single(env => env.Message.Id == message.Id);
-                //RecordAcknowledgement(envelope);
+                var envelopes = _queuedEvents.Where(env => env.Message.AcknowledgementId == message.AcknowledgementId);
+
+                if (envelopes.Count() == 1)
+                {
+                    _queuedEvents.Remove(envelopes.First());
+                }
 
             }
         }
 
-        private void RecordAcknowledgement(Envelope<ICommand> envelope)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void RecordAcknowledgement(Envelope<IEvent> envelope)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void PublishTx<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : IEvent, IMessageTx
+        public void PublishTx<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : IMessageTx
         {
             StoreEvent(@event, retryPolicy);
-            PublishTransactionalEvent(@event);
+            base.Publish(@event);
         }
 
-        private void PublishTransactionalEvent<TEvent>(TEvent @event) where TEvent : IEvent, IMessageTx
-        {
-            List<Action<IMessageTx>> subscribers;
-            if (!RoutesTx.TryGetValue(@event.GetType(), out subscribers)) return;
-            foreach (var subscriber in subscribers)
-            {
-                //assign to local var to avoid the .net foreach bug
-                var subscriberDelegate = subscriber;
-                subscriberDelegate(@event);
-            }
-        }
-
-        public void PublishTx<TEvent>(TEvent @event) where TEvent : IEvent, IMessageTx
+        public void PublishTx<TEvent>(TEvent @event) where TEvent : IMessageTx
         {
             PublishTx(@event, DefaultEventRetryPolicy);
         }
@@ -141,21 +93,9 @@ namespace Proteus.Infrastructure.Messaging.Portable
         protected RetryPolicy DefaultEventRetryPolicy { get; private set; }
         protected RetryPolicy DefaultCommandRetryPolicy { get; private set; }
 
-        private void StoreEvent(IEvent @event, RetryPolicy retryPolicy)
+        private void StoreEvent(IMessageTx @event, RetryPolicy retryPolicy)
         {
-            _queuedEvents.Add(new Envelope<IEvent>(@event, retryPolicy));
-        }
-
-        private int SubscriberCountFor(Type messageType)
-        {
-            List<Action<IMessage>> subscribers;
-
-            if (Routes.TryGetValue(messageType, out subscribers))
-            {
-                return subscribers.Count;
-            }
-
-            return 0;
+            _queuedEvents.Add(new Envelope<IMessageTx>(@event, retryPolicy));
         }
 
         public void SendTx<TCommand>(TCommand command, RetryPolicy retryPolicy) where TCommand : ICommand, IMessageTx
@@ -169,9 +109,9 @@ namespace Proteus.Infrastructure.Messaging.Portable
             SendTx(command, DefaultCommandRetryPolicy);
         }
 
-        private void StoreCommand(ICommand command, RetryPolicy retryPolicy)
+        private void StoreCommand(IMessageTx command, RetryPolicy retryPolicy)
         {
-            _queuedCommands.Add(new Envelope<ICommand>(command, retryPolicy));
+            _queuedCommands.Add(new Envelope<IMessageTx>(command, retryPolicy));
         }
     }
 }
