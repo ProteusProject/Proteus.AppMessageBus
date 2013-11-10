@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using Proteus.Infrastructure.Messaging.Portable;
 using Proteus.Infrastructure.Messaging.Portable.Abstractions;
@@ -15,7 +16,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             private CommandSubscribers _commands;
             private EventSubscribers _events;
             private readonly string _doubleValue = String.Format("{0}{0}", SingleValue);
-            private const string SingleValue = "ImTheMessagePayload";
+            private const string SingleValue = "0";
 
             [SetUp]
             public void SetUp()
@@ -73,7 +74,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             private CommandSubscribers _commands;
             private EventSubscribers _events;
             private readonly string _doubleValue = String.Format("{0}{0}", SingleValue);
-            private const string SingleValue = "ImTheMessagePayload";
+            private const string SingleValue = "0";
 
             [SetUp]
             public void SetUp()
@@ -115,7 +116,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             private TransactionalMessageBus _bus;
             private CommandSubscribers _commands;
             private EventSubscribers _events;
-            private const string SingleValue = "ImTheMessagePayload";
+            private const string SingleValue = "0";
 
             [SetUp]
             public void SetUp()
@@ -161,33 +162,35 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 var nonAckEvents = new TransactionalEventSubscriberThatIsNeverAcknowledged();
                 bus.RegisterSubscriptionFor<TestCommandTx>(commands.Handle);
                 bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
-                bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
+                
+                //bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
+                
                 bus.RegisterSubscriptionFor<TestEventTx>(nonAckEvents.Handle);
 
 
-                const string singleValue = "0";
-                var doubleValue = String.Format("{0}{0}", singleValue);
-                var quadrupleValue = String.Format("{0}{0}", doubleValue);
+                const string singleResult = "0";
+                var doubleResult = String.Format("{0}{0}", singleResult);
+                var quadrupleResult = String.Format("{0}{0}", doubleResult);
 
 
-                var testCommand = new TestCommandTx(singleValue);
+                var testCommand = new TestCommandTx(singleResult);
                 bus.SendTx(testCommand);
-                var testEvent = new TestEventTx(singleValue);
+                var testEvent = new TestEventTx(singleResult);
                 bus.PublishTx(testEvent);
 
                 //initial results of subscribers should be 1 for the command and 2 for the event
-                Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(singleValue));
-                Assert.That(events.ProcessedMessagePayload, Is.EqualTo(doubleValue));
+                Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(singleResult));
+                Assert.That(events.ProcessedMessagePayload, Is.EqualTo(singleResult));
 
                 bus.Start();
 
                 //starting the bus should result in +1 to the command payload and +2 to the event payload
-                Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(doubleValue));
-                Assert.That(events.ProcessedMessagePayload, Is.EqualTo(quadrupleValue));
+                Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(doubleResult));
+                Assert.That(events.ProcessedMessagePayload, Is.EqualTo(doubleResult));
 
                 bus.Acknowledge(testCommand);
                 bus.Acknowledge(testEvent);
-                bus.Acknowledge(testEvent);
+                //bus.Acknowledge(testEvent);
 
                 for (int i = 0; i < 10; i++)
                 {
@@ -196,39 +199,63 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 //now that all messages have been acknowledged, we should have the SAME results
                 // even after the repeeated calls to bus.Start()
-                Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(doubleValue), "Commands not acknowledged properly!");
-                Assert.That(events.ProcessedMessagePayload, Is.EqualTo(quadrupleValue), "Events not acknowledged properly!");
-                Assert.That(nonAckEvents.ProcessedMessagePayload, Is.EqualTo(string.Format("{0}{0}{0}{0}{0}{0}{0}{0}{0}{0}{0}{0}", singleValue)), "Unacknowledged Event not handled properly!");
+                Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(doubleResult), "Commands not acknowledged properly!");
+                Assert.That(events.ProcessedMessagePayload, Is.EqualTo(doubleResult), "Events not acknowledged properly!");
+                Assert.That(nonAckEvents.ProcessedMessagePayload, Is.EqualTo(string.Format("{0}{0}{0}{0}{0}{0}{0}{0}{0}{0}{0}{0}", singleResult)), "Unacknowledged Event not handled properly!");
             }
         }
 
         public class TransactionalEventSubscribers : IHandleTransactional<TestEventTx>
         {
             public string ProcessedMessagePayload { get; private set; }
+            public IList<Tuple<Guid, Guid>> ProcessedMessageIds { get; private set; }
 
             public void Handle(TestEventTx message)
             {
                 ProcessedMessagePayload += message.Payload;
+                ProcessedMessageIds.Add(new Tuple<Guid, Guid>(message.Id, message.AcknowledgementId));
+            }
+
+            public TransactionalEventSubscribers()
+            {
+                ProcessedMessageIds = new List<Tuple<Guid, Guid>>();                
             }
         }
 
         public class TransactionalEventSubscriberThatIsNeverAcknowledged : IHandleTransactional<TestEventTx>
         {
             public string ProcessedMessagePayload { get; private set; }
+            public IList<Tuple<Guid, Guid>> ProcessedMessageIds { get; private set; }
+
 
             public void Handle(TestEventTx message)
             {
                 ProcessedMessagePayload += message.Payload;
+                ProcessedMessageIds.Add(new Tuple<Guid, Guid>(message.Id, message.AcknowledgementId));
+
+            }
+
+            public TransactionalEventSubscriberThatIsNeverAcknowledged()
+            {
+                ProcessedMessageIds = new List<Tuple<Guid, Guid>>();
             }
         }
 
         public class TransactionalCommandSubscribers : IHandleTransactional<TestCommandTx>
         {
             public string ProcessedMessagePayload { get; private set; }
+            public IList<Tuple<Guid, Guid>> ProcessedMessageIds { get; private set; }
 
+            
             public void Handle(TestCommandTx message)
             {
                 ProcessedMessagePayload += message.Payload;
+                ProcessedMessageIds.Add(new Tuple<Guid, Guid>(message.Id, message.AcknowledgementId));
+            }
+
+            public TransactionalCommandSubscribers()
+            {
+                ProcessedMessageIds = new List<Tuple<Guid, Guid>>();
             }
         }
 
@@ -237,10 +264,9 @@ namespace Proteus.Infrastructure.Messaging.Tests
             public TestEventTx(string payload)
                 : base(payload)
             {
-                AcknowledgementId = Guid.NewGuid();
             }
 
-            public Guid AcknowledgementId { get; private set; }
+            public Guid AcknowledgementId { get; set; }
         }
 
 
@@ -249,10 +275,9 @@ namespace Proteus.Infrastructure.Messaging.Tests
             public TestCommandTx(string payload)
                 : base(payload)
             {
-                AcknowledgementId = Guid.NewGuid();
             }
 
-            public Guid AcknowledgementId { get; private set; }
+            public Guid AcknowledgementId { get; set; }
         }
 
     }

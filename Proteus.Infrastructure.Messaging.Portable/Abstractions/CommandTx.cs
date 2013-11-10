@@ -4,11 +4,6 @@ namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
 {
     public class CommandTx : Command, IMessageTx
     {
-        public Guid AcknowledgementId { get; private set; }
-
-        public CommandTx()
-        {
-            AcknowledgementId = Guid.NewGuid();
-        }
+        public Guid AcknowledgementId { get; set; }
     }
 }

@@ -5,6 +5,8 @@ namespace Proteus.Infrastructure.Messaging.Portable
 {
     public class Envelope<TMessage> : IEquatable<Envelope<TMessage>> where TMessage : IMessage
     {
+        public int SubscriberIndex { get; private set; }
+
         public bool Equals(Envelope<TMessage> other)
         {
             if (ReferenceEquals(null, other)) return false;
@@ -62,12 +64,13 @@ namespace Proteus.Infrastructure.Messaging.Portable
         }
 
         public Envelope(TMessage message)
-            : this(message, new RetryPolicy())
+            : this(message, new RetryPolicy(), 0)
         {
         }
 
-        public Envelope(TMessage message, RetryPolicy retryPolicy)
+        public Envelope(TMessage message, RetryPolicy retryPolicy, int subscriberIndex = 0)
         {
+            SubscriberIndex = subscriberIndex;
             Message = message;
             RetryPolicy = retryPolicy;
             _retriesRemaining = retryPolicy.Retries;

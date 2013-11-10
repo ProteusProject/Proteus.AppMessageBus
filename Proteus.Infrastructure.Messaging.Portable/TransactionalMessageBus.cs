@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
@@ -9,6 +10,8 @@ namespace Proteus.Infrastructure.Messaging.Portable
     {
         private readonly List<Envelope<IMessageTx>> _queuedEvents = new List<Envelope<IMessageTx>>();
         private readonly List<Envelope<IMessageTx>> _queuedCommands = new List<Envelope<IMessageTx>>();
+        private RetryPolicy _activeRetryPolicy;
+        private bool _isInStart;
 
         public TransactionalMessageBus()
             : this(new RetryPolicy(), new RetryPolicy())
@@ -23,13 +26,17 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public void Start()
         {
+            _isInStart = true;
             ProcessPendingCommands();
             ProcessPendingEvents();
+            _isInStart = false;
         }
 
         private void ProcessPendingEvents()
         {
-            foreach (var envelope in _queuedEvents.Where(envelope => envelope.ShouldRetry).ToList())
+            var envelopes = _queuedEvents.Where(envelope => envelope.ShouldRetry).ToList();
+
+            foreach (var envelope in envelopes)
             {
                 base.Publish(envelope.Message);
                 envelope.HasBeenRetried();
@@ -71,6 +78,9 @@ namespace Proteus.Infrastructure.Messaging.Portable
             {
                 var envelopes = _queuedEvents.Where(env => env.Message.AcknowledgementId == message.AcknowledgementId);
 
+                //Debug.Assert(envelopes.Count() <= 1);
+
+
                 if (envelopes.Count() == 1)
                 {
                     _queuedEvents.Remove(envelopes.First());
@@ -79,10 +89,53 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
+        protected override TEvent PrepareEventForPublishing<TEvent>(TEvent @event, int subscriberIndex, List<Action<IMessage>> subscribers)
+        {
+            if (_isInStart)
+            {
+                return @event;
+            }
+
+            var txEvent = @event as IMessageTx;
+
+            if (null == txEvent)
+                return @event;
+
+            //if (txEvent.AcknowledgementId == Guid.Empty)
+            //{
+            txEvent.AcknowledgementId = Guid.NewGuid();
+            //}
+
+            return (TEvent)txEvent;
+        }
+
         public void PublishTx<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : IMessageTx
         {
-            StoreEvent(@event, retryPolicy);
+            _activeRetryPolicy = retryPolicy;
             base.Publish(@event);
+        }
+
+        protected override bool ShouldPublishEvent(IMessage @event, int subscriberIndex, List<Action<IMessage>> subscribers)
+        {
+            var txEvent = @event as IMessageTx;
+
+            if (!_isInStart || null == txEvent) return true;
+
+            var shouldPublishEvent = _queuedEvents.Count(env => env.Message.Id == txEvent.Id && env.Message.AcknowledgementId == txEvent.AcknowledgementId && env.SubscriberIndex == subscriberIndex) == 1;
+            return shouldPublishEvent;
+        }
+
+        protected override void OnAfterPublishEvent(IMessage @event, int index, List<Action<IMessage>> subscribers)
+        {
+            if (_isInStart)
+                return;
+
+            var txEvent = @event as IMessageTx;
+
+            if (null != txEvent)
+            {
+                _queuedEvents.Add(new Envelope<IMessageTx>(txEvent, _activeRetryPolicy, index));
+            }
         }
 
         public void PublishTx<TEvent>(TEvent @event) where TEvent : IMessageTx
@@ -93,15 +146,10 @@ namespace Proteus.Infrastructure.Messaging.Portable
         protected RetryPolicy DefaultEventRetryPolicy { get; private set; }
         protected RetryPolicy DefaultCommandRetryPolicy { get; private set; }
 
-        private void StoreEvent(IMessageTx @event, RetryPolicy retryPolicy)
-        {
-            _queuedEvents.Add(new Envelope<IMessageTx>(@event, retryPolicy));
-        }
-
         public void SendTx<TCommand>(TCommand command, RetryPolicy retryPolicy) where TCommand : ICommand, IMessageTx
         {
-            StoreCommand(command, retryPolicy);
             base.Send(command);
+            StoreCommand(command, retryPolicy);
         }
 
         public void SendTx<TCommand>(TCommand command) where TCommand : ICommand, IMessageTx

@@ -46,11 +46,18 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 if (!ShouldSendCommand(command, subscribers[0])) return;
 
                 subscribers[0](command);
+
+                OnAfterSendCommand(command, subscribers[0]);
             }
             else
             {
                 throw new NoSubscriberRegisteredException(string.Format("No subscriber registered for Commands of type {0}.  {1}", typeof(TCommand), reminderMessage));
             }
+        }
+
+        protected virtual void OnAfterSendCommand(IMessage command, Action<IMessage> subscriber)
+        {
+            //no-op
         }
 
         protected virtual bool ShouldSendCommand(IMessage command, Action<IMessage> subscriber)
@@ -83,10 +90,17 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 
                 var subscriber = subscribers[index];
                 subscriber(@event);
+
+                OnAfterPublishEvent(@event, index, subscribers);
             }
         }
 
-        protected virtual bool ShouldPublishEvent(IMessage @event, int index, List<Action<IMessage>> subscribers)
+        protected virtual void OnAfterPublishEvent(IMessage @event, int subscriberIndex, List<Action<IMessage>> subscribers)
+        {
+            //no-op
+        }
+
+        protected virtual bool ShouldPublishEvent(IMessage @event, int subscriberIndex, List<Action<IMessage>> subscribers)
         {
             //effectively a no-op unless overridden in derived class
             return true;
