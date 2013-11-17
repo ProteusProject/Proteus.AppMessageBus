@@ -13,6 +13,8 @@ namespace Proteus.Infrastructure.Messaging.Portable
         private readonly List<Envelope<IMessageTx>> _queuedCommands = new List<Envelope<IMessageTx>>();
         private RetryPolicy _activeRetryPolicy;
 
+        public ISerializer Serializer { get; set; }
+
         public TransactionalMessageBus()
             : this(new RetryPolicy(), new RetryPolicy())
         {
@@ -22,6 +24,8 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
             DefaultCommandRetryPolicy = defaultCommandRetryPolicy;
             DefaultEventRetryPolicy = defaultEventRetryPolicy;
+
+            Serializer = new JsonNetSerializer();
         }
 
         public void Start()
@@ -141,10 +145,10 @@ namespace Proteus.Infrastructure.Messaging.Portable
         }
 
 
-        private T Clone<T>(T source)
+        private TSource Clone<TSource>(TSource source)
         {
-            var serialized = JsonConvert.SerializeObject(source);
-            return JsonConvert.DeserializeObject<T>(serialized);
+            var serialized = Serializer.Serialize(source);
+            return Serializer.Deserialize<TSource>(serialized);
         }
 
         public void PublishTx<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : IMessageTx

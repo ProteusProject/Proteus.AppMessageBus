@@ -48,12 +48,14 @@
     <Compile Include="Abstractions\IPublishTransactionalEvents.cs" />
     <Compile Include="Abstractions\ISendCommands.cs" />
     <Compile Include="Abstractions\ISendTransactionalCommands.cs" />
+    <Compile Include="Abstractions\ISerializer.cs" />
     <Compile Include="Abstractions\IStartable.cs" />
     <Compile Include="Abstractions\IStoppable.cs" />
     <Compile Include="Abstractions\Message.cs" />
     <Compile Include="DelegateConverter.cs" />
     <Compile Include="DuplicateSubscriberRegisteredException.cs" />
     <Compile Include="Envelope.cs" />
+    <Compile Include="JsonNetSerializer.cs" />
     <Compile Include="MessageBus.cs" />
     <Compile Include="NoSubscriberRegisteredException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
