@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
 namespace Proteus.Infrastructure.Messaging.Portable
@@ -72,27 +73,51 @@ namespace Proteus.Infrastructure.Messaging.Portable
             return command;
         }
 
-        protected virtual TEvent PrepareEventForPublishing<TEvent>(TEvent @event, int subscriberIndex, List<Action<IMessage>> subscribers)
+        protected virtual TEvent PrepareEventForPublishing<TEvent>(TEvent @event, int subscriberIndex, List<Action<IMessage>> subscribers) where TEvent : IMessage
         {
             //effectively a no-op unless overridden in derived class
             return @event;
         }
 
-        public virtual void Publish<TEvent>(TEvent @event) where TEvent : IMessage
+        protected virtual SubscribersResult GetSubscribersFor<TMessage>(TMessage message) where TMessage : IMessage
         {
             List<Action<IMessage>> subscribers;
-            if (!Routes.TryGetValue(@event.GetType(), out subscribers)) return;
+            return new SubscribersResult(Routes.TryGetValue(message.GetType(), out subscribers), subscribers);
+        }
+
+        public virtual void Publish<TEvent>(TEvent @event) where TEvent : IMessage
+        {
+#if LOG
+            Log(string.Format("Entering Publish For EventId={0}, AckId={1}", @event.Id, ((IMessageTx)@event).AcknowledgementId));
+#endif
+            var subscriberResult = GetSubscribersFor(@event);
+
+            if (!subscriberResult.HasSubscribers) return;
+
+            var subscribers = subscriberResult.Subscribers;
+
             for (int index = 0; index < subscribers.Count; index++)
             {
-                @event = PrepareEventForPublishing(@event, index, subscribers);
+#if LOG
+                Log(string.Format("About to Prepare EventId={0}, AckId={1}", @event.Id, ((IMessageTx)@event).AcknowledgementId));
+#endif
+                var preparedEvent = PrepareEventForPublishing(@event, index, subscribers);
+#if LOG                
+                Log(string.Format("Finished Preparing EventId={0}, AckId={1}", preparedEvent.Id, ((IMessageTx)preparedEvent).AcknowledgementId));
+#endif
 
-                if (!ShouldPublishEvent(@event, index, subscribers)) continue;
-                
+                if (!ShouldPublishEvent(preparedEvent, index, subscribers)) continue;
+
                 var subscriber = subscribers[index];
-                subscriber(@event);
+                subscriber(preparedEvent);
 
-                OnAfterPublishEvent(@event, index, subscribers);
+                OnAfterPublishEvent(preparedEvent, index, subscribers);
             }
+        }
+
+        protected void Log(string message)
+        {
+            Debug.WriteLine(message + "\n");
         }
 
         protected virtual void OnAfterPublishEvent(IMessage @event, int subscriberIndex, List<Action<IMessage>> subscribers)
@@ -104,6 +129,18 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
             //effectively a no-op unless overridden in derived class
             return true;
+        }
+    }
+
+    public class SubscribersResult
+    {
+        public bool HasSubscribers { get; private set; }
+        public List<Action<IMessage>> Subscribers { get; private set; }
+
+        public SubscribersResult(bool hasSubscribers, List<Action<IMessage>> subscribers)
+        {
+            HasSubscribers = hasSubscribers;
+            Subscribers = subscribers;
         }
     }
 }

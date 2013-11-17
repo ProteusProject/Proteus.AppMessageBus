@@ -3,7 +3,7 @@ using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
 namespace Proteus.Infrastructure.Messaging.Portable
 {
-    public class Envelope<TMessage> : IEquatable<Envelope<TMessage>> where TMessage : IMessage
+    public class Envelope<TMessage> : IEquatable<Envelope<TMessage>> where TMessage : IMessageTx
     {
         public int SubscriberIndex { get; private set; }
 
@@ -19,7 +19,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((Envelope<TMessage>) obj);
+            return Equals((Envelope<TMessage>)obj);
         }
 
         public override int GetHashCode()
@@ -45,7 +45,19 @@ namespace Proteus.Infrastructure.Messaging.Portable
         }
 
         private int _retriesRemaining;
-        public TMessage Message { get; private set; }
+        
+        private TMessage _message;
+        
+        public TMessage Message
+        {
+            get
+            {
+                _message.AcknowledgementId = AcknowledgementId;
+                return _message;
+            }
+            private set { _message = value; }
+        }
+
         public RetryPolicy RetryPolicy { get; private set; }
 
         public bool ShouldRetry
@@ -64,26 +76,29 @@ namespace Proteus.Infrastructure.Messaging.Portable
         }
 
         public Envelope(TMessage message)
-            : this(message, new RetryPolicy(), 0)
+            : this(message, new RetryPolicy(), Guid.NewGuid())
         {
         }
 
-        public Envelope(TMessage message, RetryPolicy retryPolicy, int subscriberIndex = 0)
+        public Envelope(TMessage message, RetryPolicy retryPolicy, Guid acknowledgementId, int subscriberIndex = 0)
         {
+            AcknowledgementId = acknowledgementId;
             SubscriberIndex = subscriberIndex;
             Message = message;
             RetryPolicy = retryPolicy;
             _retriesRemaining = retryPolicy.Retries;
         }
 
+        public Guid AcknowledgementId { get; private set; }
+        
         public void HasBeenRetried()
         {
-           _retriesRemaining = ZeroSafeDecrement(_retriesRemaining);
+            _retriesRemaining = ZeroSafeDecrement(_retriesRemaining);
         }
-        
+
         private int ZeroSafeDecrement(int value)
         {
-            value = value -1;
+            value = value - 1;
             return value < 0 ? 0 : value;
         }
 

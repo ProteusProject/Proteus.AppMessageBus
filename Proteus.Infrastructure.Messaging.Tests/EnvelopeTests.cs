@@ -1,6 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 using Proteus.Infrastructure.Messaging.Portable;
+using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
 namespace Proteus.Infrastructure.Messaging.Tests
 {
@@ -10,13 +11,13 @@ namespace Proteus.Infrastructure.Messaging.Tests
         public class WhenEnvelopeHasZeroRetryPolicyAndIsNotExpired
         {
             private RetryPolicy _retryPolicy;
-            private Envelope<TestCommand> _envelope;
+            private Envelope<IMessageTx> _envelope;
 
             [SetUp]
             public void SetUp()
             {
                 _retryPolicy = new RetryPolicy(0, DateTimeUtility.Positive_OneHourTimeSpan());
-                _envelope = new Envelope<TestCommand>(new TestCommand(string.Empty), _retryPolicy);
+                _envelope = new Envelope<IMessageTx>(new TransactionalBusTests.TestCommandTx(string.Empty), _retryPolicy, Guid.NewGuid());
             }
 
             [Test]
@@ -40,13 +41,13 @@ namespace Proteus.Infrastructure.Messaging.Tests
         public class WhenEnvelopeHasNonZeroRetryPolicyAndNotYetExpired
         {
             private RetryPolicy _retryPolicy;
-            private Envelope<TestCommand> _envelope;
+            private Envelope<IMessageTx> _envelope;
 
             [SetUp]
             public void SetUp()
             {
                 _retryPolicy = new RetryPolicy(3, DateTimeUtility.Positive_OneHourTimeSpan());
-                _envelope = new Envelope<TestCommand>(new TestCommand(string.Empty), _retryPolicy);
+                _envelope = new Envelope<IMessageTx>(new TransactionalBusTests.TestCommandTx(string.Empty), _retryPolicy, Guid.NewGuid());
             }
 
             [Test]
@@ -78,12 +79,12 @@ namespace Proteus.Infrastructure.Messaging.Tests
         [TestFixture]
         public class WhenEnvelopeHasNoRetryPolicy
         {
-            private Envelope<TestCommand> _envelope;
+            private Envelope<IMessageTx> _envelope;
 
             [SetUp]
             public void SetUp()
             {
-                _envelope = new Envelope<TestCommand>(new TestCommand(string.Empty));
+                _envelope = new Envelope<IMessageTx>(new TransactionalBusTests.TestCommandTx(string.Empty));
             }
 
             [Test]

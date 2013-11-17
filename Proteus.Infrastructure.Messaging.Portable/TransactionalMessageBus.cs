@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Newtonsoft.Json;
 using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
 namespace Proteus.Infrastructure.Messaging.Portable
@@ -11,7 +12,6 @@ namespace Proteus.Infrastructure.Messaging.Portable
         private readonly List<Envelope<IMessageTx>> _queuedEvents = new List<Envelope<IMessageTx>>();
         private readonly List<Envelope<IMessageTx>> _queuedCommands = new List<Envelope<IMessageTx>>();
         private RetryPolicy _activeRetryPolicy;
-        private bool _isInStart;
 
         public TransactionalMessageBus()
             : this(new RetryPolicy(), new RetryPolicy())
@@ -26,10 +26,21 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public void Start()
         {
-            _isInStart = true;
+            ClearExpiredCommands();
             ProcessPendingCommands();
+
+            ClearExpiredEvents();
             ProcessPendingEvents();
-            _isInStart = false;
+        }
+
+        private void ClearExpiredEvents()
+        {
+            _queuedEvents.RemoveAll(env => !env.ShouldRetry);
+        }
+
+        private void ClearExpiredCommands()
+        {
+            _queuedCommands.RemoveAll(env => !env.ShouldRetry);
         }
 
         private void ProcessPendingEvents()
@@ -38,8 +49,21 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
             foreach (var envelope in envelopes)
             {
-                base.Publish(envelope.Message);
+                var subscribersResult = GetSubscribersFor(envelope.Message);
+
+                //if there are no longer any subscribers to the message, we need to remove it from the queue
+                //  so won't be around for further processing
+                if (!subscribersResult.HasSubscribers || subscribersResult.Subscribers.Count <= envelope.SubscriberIndex)
+                {
+                    _queuedEvents.Remove(envelope);
+                    continue;
+                }
+
+                var subscriber = subscribersResult.Subscribers[envelope.SubscriberIndex];
+                subscriber(envelope.Message);
+
                 envelope.HasBeenRetried();
+
                 if (!envelope.ShouldRetry)
                 {
                     _queuedEvents.Remove(envelope);
@@ -51,8 +75,21 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
             foreach (var envelope in _queuedCommands.Where(envelope => envelope.ShouldRetry).ToList())
             {
-                base.Send(envelope.Message);
+                var subscribersResult = GetSubscribersFor(envelope.Message);
+
+                //if there are no longer any subscribers to the message, we need to remove it from the queue
+                //  so won't be around for further processing
+                if (!subscribersResult.HasSubscribers || subscribersResult.Subscribers.Count <= envelope.SubscriberIndex)
+                {
+                    _queuedEvents.Remove(envelope);
+                    continue;
+                }
+
+                var subscriber = subscribersResult.Subscribers[envelope.SubscriberIndex];
+                subscriber(envelope.Message);
+
                 envelope.HasBeenRetried();
+
                 if (!envelope.ShouldRetry)
                 {
                     _queuedCommands.Remove(envelope);
@@ -64,49 +101,50 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
             if (message is ICommand)
             {
-                var envelopes = _queuedCommands.Where(env => env.Message.AcknowledgementId == message.AcknowledgementId);
-
-                if (envelopes.Count() == 1)
-                {
-                    _queuedCommands.Remove(envelopes.First());
-                }
-
+                Log(string.Format("Acknowledging command, message.Id={0}, AckId={1}", message.Id, message.AcknowledgementId));
+                _queuedCommands.RemoveAll(env => env.Message.AcknowledgementId == message.AcknowledgementId);
             }
 
-            //TODO: this wont work -- whoever first acknowledges the message will clear it under this model :(
             if (message is IEvent)
             {
-                var envelopes = _queuedEvents.Where(env => env.Message.AcknowledgementId == message.AcknowledgementId);
+                Log(string.Format("Acknowledging event, message.Id={0}, AckId={1}", message.Id, message.AcknowledgementId));
 
-                //Debug.Assert(envelopes.Count() <= 1);
-
-
-                if (envelopes.Count() == 1)
+                Log("QueuedEvents before removal...");
+                foreach (var envelope in _queuedEvents)
                 {
-                    _queuedEvents.Remove(envelopes.First());
+                    Log(string.Format("... EnvelopeId={0}, EnvelopeAckId={1}, EventId={2}, EventAckId={3}", envelope.Id, envelope.AcknowledgementId, envelope.Message.Id, envelope.Message.AcknowledgementId));
                 }
 
+                var acknowledgementId = message.AcknowledgementId;
+
+                _queuedEvents.RemoveAll(env => env.Message.AcknowledgementId == acknowledgementId);
+
+                Log("QueuedEvents after removal...");
+
+                foreach (var envelope in _queuedEvents)
+                {
+                    Log(string.Format("... EnvelopeId={0}, EnvelopeAckId={1}, EventId={2}, EventAckId={3}", envelope.Id, envelope.AcknowledgementId, envelope.Message.Id, envelope.Message.AcknowledgementId));
+                }
             }
         }
 
         protected override TEvent PrepareEventForPublishing<TEvent>(TEvent @event, int subscriberIndex, List<Action<IMessage>> subscribers)
         {
-            if (_isInStart)
-            {
-                return @event;
-            }
-
             var txEvent = @event as IMessageTx;
 
             if (null == txEvent)
                 return @event;
 
-            //if (txEvent.AcknowledgementId == Guid.Empty)
-            //{
             txEvent.AcknowledgementId = Guid.NewGuid();
-            //}
 
-            return (TEvent)txEvent;
+            return Clone((TEvent)txEvent);
+        }
+
+
+        private T Clone<T>(T source)
+        {
+            var serialized = JsonConvert.SerializeObject(source);
+            return JsonConvert.DeserializeObject<T>(serialized);
         }
 
         public void PublishTx<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : IMessageTx
@@ -115,27 +153,22 @@ namespace Proteus.Infrastructure.Messaging.Portable
             base.Publish(@event);
         }
 
-        protected override bool ShouldPublishEvent(IMessage @event, int subscriberIndex, List<Action<IMessage>> subscribers)
-        {
-            var txEvent = @event as IMessageTx;
-
-            if (!_isInStart || null == txEvent) return true;
-
-            var shouldPublishEvent = _queuedEvents.Count(env => env.Message.Id == txEvent.Id && env.Message.AcknowledgementId == txEvent.AcknowledgementId && env.SubscriberIndex == subscriberIndex) == 1;
-            return shouldPublishEvent;
-        }
-
         protected override void OnAfterPublishEvent(IMessage @event, int index, List<Action<IMessage>> subscribers)
         {
-            if (_isInStart)
-                return;
+#if LOG
+            Log(string.Format("Preparing To post-publish process EventId={0}, AckId={1}", @event.Id,
+                              ((IMessageTx)@event).AcknowledgementId));
+#endif
 
             var txEvent = @event as IMessageTx;
 
-            if (null != txEvent)
-            {
-                _queuedEvents.Add(new Envelope<IMessageTx>(txEvent, _activeRetryPolicy, index));
-            }
+            if (null == txEvent)
+                return;
+
+            var envelope = new Envelope<IMessageTx>(txEvent, _activeRetryPolicy, txEvent.AcknowledgementId, index);
+            _queuedEvents.Add(envelope);
+
+            Log(string.Format("Envelope stored with EnvelopeId={0}, EventId={1}, EnvelopeAckId={2}, EventAckId={3}", envelope.Id, txEvent.Id, envelope.AcknowledgementId, txEvent.AcknowledgementId));
         }
 
         public void PublishTx<TEvent>(TEvent @event) where TEvent : IMessageTx
@@ -159,7 +192,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         private void StoreCommand(IMessageTx command, RetryPolicy retryPolicy)
         {
-            _queuedCommands.Add(new Envelope<IMessageTx>(command, retryPolicy));
+            _queuedCommands.Add(new Envelope<IMessageTx>(command, retryPolicy, Guid.NewGuid()));
         }
     }
 }

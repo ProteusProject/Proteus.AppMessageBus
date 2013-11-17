@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using Proteus.Infrastructure.Messaging.Portable;
 using Proteus.Infrastructure.Messaging.Portable.Abstractions;
@@ -162,16 +163,11 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 var nonAckEvents = new TransactionalEventSubscriberThatIsNeverAcknowledged();
                 bus.RegisterSubscriptionFor<TestCommandTx>(commands.Handle);
                 bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
-                
-                //bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
-                
-                bus.RegisterSubscriptionFor<TestEventTx>(nonAckEvents.Handle);
 
+                bus.RegisterSubscriptionFor<TestEventTx>(nonAckEvents.Handle);
 
                 const string singleResult = "0";
                 var doubleResult = String.Format("{0}{0}", singleResult);
-                var quadrupleResult = String.Format("{0}{0}", doubleResult);
-
 
                 var testCommand = new TestCommandTx(singleResult);
                 bus.SendTx(testCommand);
@@ -184,13 +180,12 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 bus.Start();
 
-                //starting the bus should result in +1 to the command payload and +2 to the event payload
+                //starting the bus should result in +1 (now 2x) to each of the payloads
                 Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(doubleResult));
                 Assert.That(events.ProcessedMessagePayload, Is.EqualTo(doubleResult));
 
-                bus.Acknowledge(testCommand);
-                bus.Acknowledge(testEvent);
-                //bus.Acknowledge(testEvent);
+                commands.AcknowledgeLastMessage(bus);
+                events.AcknowledgeLastMessage(bus);
 
                 for (int i = 0; i < 10; i++)
                 {
@@ -201,11 +196,13 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 // even after the repeeated calls to bus.Start()
                 Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(doubleResult), "Commands not acknowledged properly!");
                 Assert.That(events.ProcessedMessagePayload, Is.EqualTo(doubleResult), "Events not acknowledged properly!");
+                
+                //unacknowledged events should be repeated ea time .Start() is called...
                 Assert.That(nonAckEvents.ProcessedMessagePayload, Is.EqualTo(string.Format("{0}{0}{0}{0}{0}{0}{0}{0}{0}{0}{0}{0}", singleResult)), "Unacknowledged Event not handled properly!");
             }
         }
 
-        public class TransactionalEventSubscribers : IHandleTransactional<TestEventTx>
+        public class TransactionalEventSubscribers : TransactionalSubscribers, IHandleTransactional<TestEventTx>
         {
             public string ProcessedMessagePayload { get; private set; }
             public IList<Tuple<Guid, Guid>> ProcessedMessageIds { get; private set; }
@@ -214,11 +211,12 @@ namespace Proteus.Infrastructure.Messaging.Tests
             {
                 ProcessedMessagePayload += message.Payload;
                 ProcessedMessageIds.Add(new Tuple<Guid, Guid>(message.Id, message.AcknowledgementId));
+                Messages.Add(message);
             }
 
             public TransactionalEventSubscribers()
             {
-                ProcessedMessageIds = new List<Tuple<Guid, Guid>>();                
+                ProcessedMessageIds = new List<Tuple<Guid, Guid>>();
             }
         }
 
@@ -232,7 +230,6 @@ namespace Proteus.Infrastructure.Messaging.Tests
             {
                 ProcessedMessagePayload += message.Payload;
                 ProcessedMessageIds.Add(new Tuple<Guid, Guid>(message.Id, message.AcknowledgementId));
-
             }
 
             public TransactionalEventSubscriberThatIsNeverAcknowledged()
@@ -241,16 +238,32 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
         }
 
-        public class TransactionalCommandSubscribers : IHandleTransactional<TestCommandTx>
+
+        public class TransactionalSubscribers
+        {
+            public void AcknowledgeLastMessage(TransactionalMessageBus bus)
+            {
+                bus.Acknowledge(Messages.Last());
+            }
+
+            public IList<IMessageTx> Messages { get; private set; }
+
+            public TransactionalSubscribers()
+            {
+                Messages = new List<IMessageTx>();
+            }
+        }
+
+        public class TransactionalCommandSubscribers : TransactionalSubscribers, IHandleTransactional<TestCommandTx>
         {
             public string ProcessedMessagePayload { get; private set; }
             public IList<Tuple<Guid, Guid>> ProcessedMessageIds { get; private set; }
 
-            
             public void Handle(TestCommandTx message)
             {
                 ProcessedMessagePayload += message.Payload;
                 ProcessedMessageIds.Add(new Tuple<Guid, Guid>(message.Id, message.AcknowledgementId));
+                Messages.Add(message);
             }
 
             public TransactionalCommandSubscribers()
