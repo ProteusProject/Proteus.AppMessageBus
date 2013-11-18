@@ -9,8 +9,12 @@ namespace Proteus.Infrastructure.Messaging.Portable
     {
         protected readonly Dictionary<Type, List<Action<IMessage>>> Routes = new Dictionary<Type, List<Action<IMessage>>>();
 
+        public Action<string> Logger { get; set; }
+
         public virtual void RegisterSubscriptionFor<TMessage>(Action<TMessage> handler) where TMessage : IMessage
         {
+            Logger(string.Format("Registering Subscriber for Messages of type {0}", typeof(TMessage).AssemblyQualifiedName));
+
             List<Action<IMessage>> subscribers;
             if (!Routes.TryGetValue(typeof(TMessage), out subscribers))
             {
@@ -27,6 +31,8 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public virtual void UnRegisterAllSubscriptionsFor<TMessage>() where TMessage : IMessage
         {
+            Logger(string.Format("Unregistering all Subscribers for Messages of type {0}", typeof(TMessage).AssemblyQualifiedName));
+
             if (HasSubscriptionFor<TMessage>())
             {
                 Routes.Remove(typeof(TMessage));
@@ -35,12 +41,16 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public virtual void Send<TCommand>(TCommand command) where TCommand : IMessage
         {
+            Logger(string.Format("Sending Command of type {0}, MessageId = {1}", typeof(TCommand).AssemblyQualifiedName, command.Id));
+
             const string reminderMessage = "Each Command must have exacty one subscriber registered.";
 
             List<Action<IMessage>> subscribers;
             if (Routes.TryGetValue(command.GetType(), out subscribers))
             {
                 if (subscribers.Count != 1) throw new DuplicateSubscriberRegisteredException(string.Format("There are {0} handlers registered for Commands of type {1}.  {2}", subscribers.Count, typeof(TCommand), reminderMessage));
+
+                OnBeforeSendCommand(command, subscribers[0]);
 
                 command = PrepareCommandForPublishing(command, subscribers[0]);
 
@@ -56,7 +66,47 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
+        public virtual void Publish<TEvent>(TEvent @event) where TEvent : IMessage
+        {
+            var subscriberResult = GetSubscribersFor(@event);
+
+            if (!subscriberResult.HasSubscribers) return;
+
+            var subscribers = subscriberResult.Subscribers;
+
+            for (var index = 0; index < subscribers.Count; index++)
+            {
+                OnBeforePublishEvent(@event, index, subscribers);
+
+                var preparedEvent = PrepareEventForPublishing(@event, index, subscribers);
+
+                if (!ShouldPublishEvent(preparedEvent, index, subscribers)) continue;
+
+                Logger(string.Format("Publishing Event of type {0}, MessageId = {1}, Subscriber Index = {2}", typeof(TEvent).AssemblyQualifiedName, @event.Id, index));
+
+                var subscriber = subscribers[index];
+                subscriber(preparedEvent);
+
+                OnAfterPublishEvent(preparedEvent, index, subscribers);
+            }
+        }
+
+        protected virtual void OnBeforeSendCommand(IMessage command, Action<IMessage> subscriber)
+        {
+            //no-op
+        }
+
         protected virtual void OnAfterSendCommand(IMessage command, Action<IMessage> subscriber)
+        {
+            //no-op
+        }
+
+        protected virtual void OnBeforePublishEvent(IMessage @event, int subscriberIndex, List<Action<IMessage>> subscribers)
+        {
+            //no-op
+        }
+
+        protected virtual void OnAfterPublishEvent(IMessage @event, int subscriberIndex, List<Action<IMessage>> subscribers)
         {
             //no-op
         }
@@ -85,62 +135,16 @@ namespace Proteus.Infrastructure.Messaging.Portable
             return new SubscribersResult(Routes.TryGetValue(message.GetType(), out subscribers), subscribers);
         }
 
-        public virtual void Publish<TEvent>(TEvent @event) where TEvent : IMessage
-        {
-#if LOG
-            Log(string.Format("Entering Publish For EventId={0}, AckId={1}", @event.Id, ((IMessageTx)@event).AcknowledgementId));
-#endif
-            var subscriberResult = GetSubscribersFor(@event);
-
-            if (!subscriberResult.HasSubscribers) return;
-
-            var subscribers = subscriberResult.Subscribers;
-
-            for (int index = 0; index < subscribers.Count; index++)
-            {
-#if LOG
-                Log(string.Format("About to Prepare EventId={0}, AckId={1}", @event.Id, ((IMessageTx)@event).AcknowledgementId));
-#endif
-                var preparedEvent = PrepareEventForPublishing(@event, index, subscribers);
-#if LOG                
-                Log(string.Format("Finished Preparing EventId={0}, AckId={1}", preparedEvent.Id, ((IMessageTx)preparedEvent).AcknowledgementId));
-#endif
-
-                if (!ShouldPublishEvent(preparedEvent, index, subscribers)) continue;
-
-                var subscriber = subscribers[index];
-                subscriber(preparedEvent);
-
-                OnAfterPublishEvent(preparedEvent, index, subscribers);
-            }
-        }
-
-        protected void Log(string message)
-        {
-            Debug.WriteLine(message + "\n");
-        }
-
-        protected virtual void OnAfterPublishEvent(IMessage @event, int subscriberIndex, List<Action<IMessage>> subscribers)
-        {
-            //no-op
-        }
-
         protected virtual bool ShouldPublishEvent(IMessage @event, int subscriberIndex, List<Action<IMessage>> subscribers)
         {
             //effectively a no-op unless overridden in derived class
             return true;
         }
-    }
 
-    public class SubscribersResult
-    {
-        public bool HasSubscribers { get; private set; }
-        public List<Action<IMessage>> Subscribers { get; private set; }
-
-        public SubscribersResult(bool hasSubscribers, List<Action<IMessage>> subscribers)
+        public MessageBus()
         {
-            HasSubscribers = hasSubscribers;
-            Subscribers = subscribers;
+            //set null-logger as default unless overridden later
+            Logger = (message) => { };
         }
     }
 }

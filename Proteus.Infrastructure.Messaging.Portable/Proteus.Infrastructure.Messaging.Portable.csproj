@@ -60,6 +60,7 @@
     <Compile Include="NoSubscriberRegisteredException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RetryPolicy.cs" />
+    <Compile Include="SubscribersResult.cs" />
     <Compile Include="TransactionalMessageBus.cs" />
   </ItemGroup>
   <ItemGroup>

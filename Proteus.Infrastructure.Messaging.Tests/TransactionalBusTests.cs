@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework;
 using Proteus.Infrastructure.Messaging.Portable;
@@ -157,6 +158,8 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 var retryPolicy = new RetryPolicy(20, DateTimeUtility.Positive_OneHourTimeSpan());
                 var bus = new TransactionalMessageBus(retryPolicy, retryPolicy);
+
+                bus.Logger = (messge) => Debug.WriteLine("{0} - {1}", DateTime.Now, messge);
 
                 var commands = new TransactionalCommandSubscribers();
                 var events = new TransactionalEventSubscribers();
