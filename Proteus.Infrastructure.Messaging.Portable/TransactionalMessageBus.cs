@@ -84,7 +84,12 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         private void ProcessPendingEvents()
         {
+
+            Logger("Processing Pending Events...");
+
             var envelopes = _queuedEvents.Where(envelope => envelope.ShouldRetry).ToList();
+
+            Logger(string.Format("{0} Pending Events found.", envelopes.Count));
 
             foreach (var envelope in envelopes)
             {
@@ -94,9 +99,13 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 //  so won't be around for further processing
                 if (!subscribersResult.HasSubscribers || subscribersResult.Subscribers.Count <= envelope.SubscriberIndex)
                 {
+                    Logger(string.Format("No Subscribers found for Envelope Id = {0}.  Removing from Pending Events.", envelope.Id));
+
                     _queuedEvents.Remove(envelope);
                     continue;
                 }
+
+                Logger(string.Format("Republishing Pending Event Id = {0} from Envelope Id = {1} to Subscriber Index = {2}", envelope.Message.Id, envelope.Id, envelope.SubscriberIndex));
 
                 var subscriber = subscribersResult.Subscribers[envelope.SubscriberIndex];
                 subscriber(envelope.Message);
@@ -105,6 +114,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
                 if (!envelope.ShouldRetry)
                 {
+                    Logger(string.Format("Event in Envelope Id = {0} has invalid/expired Retry Policy.  Removing from Pending Events.", envelope.Id));
                     _queuedEvents.Remove(envelope);
                 }
             }
@@ -112,13 +122,22 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public void Acknowledge<TMessage>(TMessage message) where TMessage : IMessageTx
         {
+            Logger(string.Format("Acknowledgement received for Message Id = {0} having Acknowledgement Id = {1}", message.Id,
+                                 message.AcknowledgementId));
+
             if (message is ICommand)
             {
+                Logger(string.Format("Acknowledging Command Id = {0} having Acknowledgement Id = {1}",
+                                     message.Id, message.AcknowledgementId));
+
                 _queuedCommands.RemoveAll(env => env.Message.AcknowledgementId == message.AcknowledgementId);
             }
 
             if (message is IEvent)
             {
+                Logger(string.Format("Acknowledging Event Id = {0} having Acknowledgement Id = {1}",
+                                     message.Id, message.AcknowledgementId));
+
                 var acknowledgementId = message.AcknowledgementId;
                 _queuedEvents.RemoveAll(env => env.Message.AcknowledgementId == acknowledgementId);
             }
@@ -152,6 +171,8 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public void SendTx<TCommand>(TCommand command, RetryPolicy retryPolicy) where TCommand : ICommand, IMessageTx
         {
+            Logger(string.Format("Transactionally sending Command Id = {0}", command.Id));
+
             base.Send(command);
             StoreCommand(command, retryPolicy);
         }
@@ -163,6 +184,8 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public void PublishTx<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : IMessageTx
         {
+            Logger(string.Format("Transactionally publishing Event Id = {0}",@event.Id));
+
             _activeRetryPolicy = retryPolicy;
             base.Publish(@event);
         }
