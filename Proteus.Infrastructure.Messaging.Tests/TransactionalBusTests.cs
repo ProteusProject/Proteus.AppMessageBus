@@ -155,12 +155,10 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [Test]
             public void Test()
             {
-
                 var retryPolicy = new RetryPolicy(20, DateTimeUtility.Positive_OneHourTimeSpan());
-                var bus = new TransactionalMessageBus(retryPolicy, retryPolicy)
-                    {
-                        Logger = (messge) => Debug.WriteLine("{0} - {1}", DateTime.Now, messge)
-                    };
+                var bus = new TransactionalMessageBus(retryPolicy);
+
+                bus.Logger = (messge) => Debug.WriteLine("{0} - {1}", DateTime.Now, messge);
 
                 var commands = new TransactionalCommandSubscribers();
                 var events = new TransactionalEventSubscribers();

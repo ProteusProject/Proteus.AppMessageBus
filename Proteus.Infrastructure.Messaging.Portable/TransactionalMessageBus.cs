@@ -22,6 +22,11 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
         }
 
+        public TransactionalMessageBus(RetryPolicy defaultMessageRetryPolicy)
+            :this(defaultMessageRetryPolicy, defaultMessageRetryPolicy)
+        {
+        }
+
         public TransactionalMessageBus(RetryPolicy defaultCommandRetryPolicy, RetryPolicy defaultEventRetryPolicy)
         {
             DefaultCommandRetryPolicy = defaultCommandRetryPolicy;
