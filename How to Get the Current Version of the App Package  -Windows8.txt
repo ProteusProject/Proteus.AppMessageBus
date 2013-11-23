@@ -1,0 +1,6 @@
+1. Get a Windows.ApplicationModel.Package object
+2. version = Package.id.version
+
+var pkg = Windows.ApplicationModel.Package.current;
+var version = pkg.id.version;
+
