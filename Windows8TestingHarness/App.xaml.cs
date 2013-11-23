@@ -107,10 +107,13 @@ namespace Windows8TestingHarness
         {
             if (ViewModels.ContainsKey(typeof(TPage)))
             {
-                ViewModels.Remove(typeof(TPage));
+                ViewModels[typeof(TPage)] = model;
+            }
+            else
+            {
+                ViewModels.Add(typeof(TPage), model);
             }
 
-            ViewModels.Add(typeof(TPage), model);
 
         }
 
