@@ -75,6 +75,10 @@ namespace Proteus.Infrastructure.Messaging.Portable
             get { return RetryPolicy.Expiry.ToUniversalTime() - DateTime.UtcNow <= TimeSpan.Zero; }
         }
 
+        protected Envelope()
+        {
+        }
+
         public Envelope(TMessage message)
             : this(message, new RetryPolicy(), Guid.NewGuid())
         {

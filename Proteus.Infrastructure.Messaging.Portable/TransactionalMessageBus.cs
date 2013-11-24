@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using Proteus.Infrastructure.Messaging.Portable.Abstractions;
@@ -9,8 +10,8 @@ namespace Proteus.Infrastructure.Messaging.Portable
 {
     public class TransactionalMessageBus : MessageBus, IStartable, IStoppable, ISendTransactionalCommands, IPublishTransactionalEvents, IAcceptMessageAcknowledgements
     {
-        private readonly List<Envelope<IMessageTx>> _queuedEvents = new List<Envelope<IMessageTx>>();
-        private readonly List<Envelope<IMessageTx>> _queuedCommands = new List<Envelope<IMessageTx>>();
+        private List<Envelope<IMessageTx>> _queuedEvents = new List<Envelope<IMessageTx>>();
+        private List<Envelope<IMessageTx>> _queuedCommands = new List<Envelope<IMessageTx>>();
         private RetryPolicy _activeRetryPolicy;
 
         protected RetryPolicy DefaultEventRetryPolicy { get; private set; }
@@ -23,7 +24,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
         }
 
         public TransactionalMessageBus(RetryPolicy defaultMessageRetryPolicy)
-            :this(defaultMessageRetryPolicy, defaultMessageRetryPolicy)
+            : this(defaultMessageRetryPolicy, defaultMessageRetryPolicy)
         {
         }
 
@@ -37,6 +38,8 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public bool Start()
         {
+            LoadPendingMessages();
+
             ClearExpiredCommands();
             ProcessPendingCommands();
 
@@ -48,7 +51,46 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public bool Stop()
         {
+            SavePendingMessages();
             return true;
+        }
+
+        private void SavePendingMessages()
+        {
+            var commands = Serializer.Serialize(_queuedCommands);
+            var events = Serializer.Serialize(_queuedEvents);
+
+            //events.Seek(0, SeekOrigin.Begin);
+            //commands.Seek(0, SeekOrigin.Begin);
+
+            //using (var fileStream = File.Create("C:\\Path\\To\\File"))
+            //{
+            //    myOtherObject.InputStream.CopyTo(fileStream);
+            //}
+
+            SerializedCommands = commands;
+            SerializedEvents = events;
+
+        }
+
+        public Stream SerializedCommands { get; set; }
+        public Stream SerializedEvents { get; set; }
+
+
+        private void LoadPendingMessages()
+        {
+            if (SerializedCommands != null)
+            {
+                SerializedCommands.Seek(0, SeekOrigin.Begin);
+                _queuedCommands = Serializer.Deserialize<List<Envelope<IMessageTx>>>(SerializedCommands);
+            }
+            
+            if (SerializedEvents != null)
+            {
+                SerializedEvents.Seek(0, SeekOrigin.Begin);
+                _queuedEvents = Serializer.Deserialize<List<Envelope<IMessageTx>>>(SerializedEvents);
+            }
+            
         }
 
         private void ClearExpiredCommands()
@@ -189,7 +231,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public void PublishTx<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : IMessageTx
         {
-            Logger(string.Format("Transactionally publishing Event Id = {0}",@event.Id));
+            Logger(string.Format("Transactionally publishing Event Id = {0}", @event.Id));
 
             _activeRetryPolicy = retryPolicy;
             base.Publish(@event);

@@ -271,6 +271,8 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [Test]
             public void MessageIsNotSendToSubscriberOnStart()
             {
+                const string singleValue = "0";
+
                 //we need a retry policy with at least one retry
                 //  so that we'd expect the call to Start() to attemp a retry
                 var retryPolicy = new RetryPolicy(1, DateTimeUtility.PositiveOneHourTimeSpan);
@@ -279,15 +281,15 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 var events = new EventSubscribers();
                 bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
 
-                bus.PublishTx(new TestEventTx("0"));
+                bus.PublishTx(new TestEventTx(singleValue));
 
-                Assume.That(events.ProcessedMessagePayload, Is.EqualTo("0"), "Event Subscriber didn't receive the expected message.");
+                Assume.That(events.ProcessedMessagePayload, Is.EqualTo(singleValue), "Event Subscriber didn't receive the expected message.");
 
                 bus.UnRegisterAllSubscriptionsFor<TestEventTx>();
 
                 bus.Start();
 
-                Assert.That(events.ProcessedMessagePayload, Is.EqualTo("0"), "Bus did not properly ignore queued event.");
+                Assert.That(events.ProcessedMessagePayload, Is.EqualTo(singleValue), "Bus did not properly ignore queued event.");
 
             }
         }
@@ -298,6 +300,8 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [Test]
             public void MessageIsNotSendToSubscriberOnStart()
             {
+                const string singleValue = "0";
+
                 //we need a retry policy with at least one retry
                 //  so that we'd expect the call to Start() to attemp a retry
                 var retryPolicy = new RetryPolicy(1, DateTimeUtility.PositiveOneHourTimeSpan);
@@ -306,17 +310,71 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 var commands = new CommandSubscribers();
                 bus.RegisterSubscriptionFor<TestCommandTx>(commands.Handle);
 
-                bus.PublishTx(new TestCommandTx("0"));
+                bus.PublishTx(new TestCommandTx(singleValue));
 
-                Assume.That(commands.ProcessedMessagePayload, Is.EqualTo("0"), "Command Subscriber didn't receive the expected message.");
+                Assume.That(commands.ProcessedMessagePayload, Is.EqualTo(singleValue), "Command Subscriber didn't receive the expected message.");
 
                 bus.UnRegisterAllSubscriptionsFor<TestCommandTx>();
 
                 bus.Start();
 
-                Assert.That(commands.ProcessedMessagePayload, Is.EqualTo("0"), "Bus did not properly ignore queued command.");
+                Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(singleValue), "Bus did not properly ignore queued command.");
 
             }
+        }
+
+
+        [TestFixture]
+        public class MyClass
+        {
+             [Test]
+             public void Test()
+             {
+                 const string singleValue = "0";
+                 string doubleValue = string.Format("{0}{0}", singleValue);
+                 string tripleValue = string.Format("{0}{0}{0}", singleValue);
+
+                 var retryPolicy = new RetryPolicy(10, DateTimeUtility.PositiveOneHourTimeSpan);
+                 var bus = new TransactionalMessageBus(retryPolicy);
+
+                 var events = new TransactionalEventSubscribers();
+
+                 bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
+
+                 bus.PublishTx(new TestEventTx(singleValue));
+
+                 Assume.That(events.ProcessedMessagePayload, Is.EqualTo(singleValue), "Event Subscriber not registered for event as expected.");
+
+                 bus.Start();
+
+                 Assume.That(events.ProcessedMessagePayload, Is.EqualTo(doubleValue), "Event Subscriber not registered for event as expected.");
+
+                 bus.Stop();
+
+                 var savedCommands = bus.SerializedCommands;
+                 var savedEvents = bus.SerializedEvents;
+
+                 bus = null;
+
+                 Assume.That(bus, Is.Null);
+
+                 //recreate the bus from scratch
+                 bus = new TransactionalMessageBus(retryPolicy);
+
+                 //re-register the event subscriber
+                 bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
+
+                 bus.SerializedCommands = savedCommands;
+                 bus.SerializedEvents = savedEvents;
+
+                 //calling start should re-hydrate the list of pending (unacknowledged) events
+                 // and then process them using the re-registered subscriber
+                 bus.Start();
+
+                 //we should now have one more payload element received
+                 Assert.That(events.ProcessedMessagePayload, Is.EqualTo(tripleValue), "Event not properly re-hydrated.");
+
+             }
         }
 
 
