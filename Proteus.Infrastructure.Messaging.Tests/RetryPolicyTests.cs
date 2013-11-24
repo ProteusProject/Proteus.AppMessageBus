@@ -25,7 +25,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
         [Test]
         public void CanSetRetriesInCtor()
         {
-            var policy = new RetryPolicy(10, DateTimeUtility.Positive_OneHourTimeSpan());
+            var policy = new RetryPolicy(10, DateTimeUtility.PositiveOneHourTimeSpan);
             Assert.That(policy.Retries, Is.EqualTo(10));
         }
     }

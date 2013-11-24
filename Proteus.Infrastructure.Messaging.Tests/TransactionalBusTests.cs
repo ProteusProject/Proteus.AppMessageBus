@@ -23,8 +23,8 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [SetUp]
             public void SetUp()
             {
-                var retryPolicy = new RetryPolicy(1, DateTimeUtility.Positive_OneHourTimeSpan());
-                _bus = new TransactionalMessageBus(retryPolicy, retryPolicy);
+                var retryPolicy = new RetryPolicy(1, DateTimeUtility.PositiveOneHourTimeSpan);
+                _bus = new TransactionalMessageBus(retryPolicy);
 
                 _commands = new CommandSubscribers();
                 _events = new EventSubscribers();
@@ -84,19 +84,19 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 var retryPolicy = new RetryPolicy();
                 Assume.That(retryPolicy.Retries, Is.EqualTo(0));
 
-                _bus = new TransactionalMessageBus(retryPolicy, retryPolicy);
+                _bus = new TransactionalMessageBus(retryPolicy);
 
                 _commands = new CommandSubscribers();
                 _events = new EventSubscribers();
-                _bus.RegisterSubscriptionFor<TestCommand>(_commands.Handle);
-                _bus.RegisterSubscriptionFor<TestEvent>(_events.Handle);
+                _bus.RegisterSubscriptionFor<TestCommandTx>(_commands.Handle);
+                _bus.RegisterSubscriptionFor<TestEventTx>(_events.Handle);
             }
 
             [Test]
             public void CommandAndEventAreNotRetriedAcrossAdditionalStarts()
             {
-                _bus.Send(new TestCommand(SingleValue));
-                _bus.Publish(new TestEvent(SingleValue));
+                _bus.SendTx(new TestCommandTx(SingleValue));
+                _bus.PublishTx(new TestEventTx(SingleValue));
 
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
                 Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
@@ -123,20 +123,20 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [SetUp]
             public void SetUp()
             {
-                var retryPolicy = new RetryPolicy(1, DateTimeUtility.Negative_OneHourTimeSpan());
-                _bus = new TransactionalMessageBus(retryPolicy, retryPolicy);
+                var retryPolicy = new RetryPolicy(1, DateTimeUtility.NegativeOneHourTimeSpan);
+                _bus = new TransactionalMessageBus(retryPolicy);
 
                 _commands = new CommandSubscribers();
                 _events = new EventSubscribers();
-                _bus.RegisterSubscriptionFor<TestCommand>(_commands.Handle);
-                _bus.RegisterSubscriptionFor<TestEvent>(_events.Handle);
+                _bus.RegisterSubscriptionFor<TestCommandTx>(_commands.Handle);
+                _bus.RegisterSubscriptionFor<TestEventTx>(_events.Handle);
             }
 
             [Test]
             public void CommandAndEventAreNotRetriedOnNextStart()
             {
-                _bus.Send(new TestCommand(SingleValue));
-                _bus.Publish(new TestEvent(SingleValue));
+                _bus.SendTx(new TestCommandTx(SingleValue));
+                _bus.PublishTx(new TestEventTx(SingleValue));
 
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
                 Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
@@ -149,60 +149,176 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
         }
 
+
         [TestFixture]
-        public class Stuff
+        public class WhenAcknowledgingCommands
         {
-            [Test]
-            public void Test()
+            private TransactionalMessageBus _bus;
+            private TransactionalCommandSubscribers _commands;
+            private TransactionalEventSubscribers _events;
+            private const string SingleValue = "0";
+
+            [SetUp]
+            public void SetUp()
             {
-                var retryPolicy = new RetryPolicy(20, DateTimeUtility.Positive_OneHourTimeSpan());
-                var bus = new TransactionalMessageBus(retryPolicy);
+                var retryPolicy = new RetryPolicy(1, DateTimeUtility.PositiveOneHourTimeSpan);
+                _bus = new TransactionalMessageBus(retryPolicy);
 
-                bus.Logger = (messge) => Debug.WriteLine("{0} - {1}", DateTime.Now, messge);
+                _commands = new TransactionalCommandSubscribers();
+                _events = new TransactionalEventSubscribers();
+                _bus.RegisterSubscriptionFor<TestCommandTx>(_commands.Handle);
+                _bus.RegisterSubscriptionFor<TestEventTx>(_events.Handle);
+            }
 
-                var commands = new TransactionalCommandSubscribers();
-                var events = new TransactionalEventSubscribers();
-                var nonAckEvents = new TransactionalEventSubscriberThatIsNeverAcknowledged();
-                bus.RegisterSubscriptionFor<TestCommandTx>(commands.Handle);
-                bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
+            [Test]
+            public void UnacknowledgedCommandWithNonExpiredRetryPolicyIsRetriedAcrossAdditionalStarts()
+            {
+                var command = new TestCommandTx(SingleValue);
+                _bus.SendTx(command);
+                Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
-                bus.RegisterSubscriptionFor<TestEventTx>(nonAckEvents.Handle);
+                _bus.Start();
 
-                const string singleResult = "0";
-                var doubleResult = String.Format("{0}{0}", singleResult);
+                Assert.That(_commands.ProcessedMessagePayload, Is.EqualTo(string.Format("{0}{0}", SingleValue)));
+            }
 
-                var testCommand = new TestCommandTx(singleResult);
-                bus.SendTx(testCommand);
-                var testEvent = new TestEventTx(singleResult);
-                bus.PublishTx(testEvent);
+            [Test]
+            public void AcknowledgedCommandWithNonExpiredRetryPolicyIsNotRetriedAcrossAdditionalStarts()
+            {
+                var command = new TestCommandTx(SingleValue);
+                _bus.SendTx(command);
+                Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
-                //initial results of subscribers should be 1 for the command and 2 for the event
-                Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(singleResult));
-                Assert.That(events.ProcessedMessagePayload, Is.EqualTo(singleResult));
+                _commands.AcknowledgeLastMessage(_bus);
+                _bus.Start();
 
-                bus.Start();
+                Assert.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
+            }
+        }
 
-                //starting the bus should result in +1 (now 2x) to each of the payloads
-                Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(doubleResult));
-                Assert.That(events.ProcessedMessagePayload, Is.EqualTo(doubleResult));
+        [TestFixture]
+        public class WhenAcknowledgingEvents
+        {
+            private TransactionalMessageBus _bus;
+            private CommandSubscribers _commands;
+            private TransactionalEventSubscribers _eventsThatWillBeAcknowledged;
+            private TransactionalEventSubscribers _eventsThatWillNotBeAcknowledged;
+            private const string SingleValue = "0";
 
-                commands.AcknowledgeLastMessage(bus);
-                events.AcknowledgeLastMessage(bus);
+            [SetUp]
+            public void SetUp()
+            {
+                var retryPolicy = new RetryPolicy(1, DateTimeUtility.PositiveOneHourTimeSpan);
+                _bus = new TransactionalMessageBus(retryPolicy);
+
+                _commands = new CommandSubscribers();
+                _eventsThatWillBeAcknowledged = new TransactionalEventSubscribers();
+                _eventsThatWillNotBeAcknowledged = new TransactionalEventSubscribers();
+                _bus.RegisterSubscriptionFor<TestCommandTx>(_commands.Handle);
+                _bus.RegisterSubscriptionFor<TestEventTx>(_eventsThatWillBeAcknowledged.Handle);
+                _bus.RegisterSubscriptionFor<TestEventTx>(_eventsThatWillNotBeAcknowledged.Handle);
+            }
+
+            [Test]
+            public void UnacknowledgedEventWithNonExpiredRetryPolicyIsRetriedAcrossAdditionalStarts()
+            {
+                var @event = new TestEventTx(SingleValue);
+                _bus.PublishTx(@event);
+                Assume.That(_eventsThatWillBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(SingleValue));
+
+                _bus.Start();
+
+                Assert.That(_eventsThatWillBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(string.Format("{0}{0}", SingleValue)));
+            }
+
+            [Test]
+            public void AcknowledgedEventWithNonExpiredRetryPolicyIsNotRetriedAcrossAdditionalStarts()
+            {
+                var @event = new TestEventTx(SingleValue);
+                _bus.PublishTx(@event);
+                Assume.That(_eventsThatWillBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(SingleValue));
+
+                _eventsThatWillBeAcknowledged.AcknowledgeLastMessage(_bus);
+                _bus.Start();
+
+                Assert.That(_eventsThatWillBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(SingleValue));
+            }
+
+            [Test]
+            public void UnacknowledgedEventIsUnaffectedByAcknowledgingOtherSubscriberAcrossAdditionalStarts()
+            {
+                var @event = new TestEventTx(SingleValue);
+                _bus.PublishTx(@event);
+                Assume.That(_eventsThatWillNotBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(SingleValue));
+
+                _eventsThatWillBeAcknowledged.AcknowledgeLastMessage(_bus);
 
                 for (int i = 0; i < 10; i++)
                 {
-                    bus.Start();
+                    _bus.Start();
                 }
 
-                //now that all messages have been acknowledged, we should have the SAME results
-                // even after the repeeated calls to bus.Start()
-                Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(doubleResult), "Commands not acknowledged properly!");
-                Assert.That(events.ProcessedMessagePayload, Is.EqualTo(doubleResult), "Events not acknowledged properly!");
-                
-                //unacknowledged events should be repeated ea time .Start() is called...
-                Assert.That(nonAckEvents.ProcessedMessagePayload, Is.EqualTo(string.Format("{0}{0}{0}{0}{0}{0}{0}{0}{0}{0}{0}{0}", singleResult)), "Unacknowledged Event not handled properly!");
+                Assert.That(_eventsThatWillBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(SingleValue));
+                Assert.That(_eventsThatWillNotBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(string.Format("{0}{0}", SingleValue)));
+            }
+
+
+        }
+
+        [TestFixture]
+        public class WhenSubscriberForPendingEventIsNoLongerRegistered
+        {
+            [Test]
+            public void MessageIsNotSendToSubscriberOnStart()
+            {
+                //we need a retry policy with at least one retry
+                //  so that we'd expect the call to Start() to attemp a retry
+                var retryPolicy = new RetryPolicy(1, DateTimeUtility.PositiveOneHourTimeSpan);
+
+                var bus = new TransactionalMessageBus(retryPolicy);
+                var events = new EventSubscribers();
+                bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
+
+                bus.PublishTx(new TestEventTx("0"));
+
+                Assume.That(events.ProcessedMessagePayload, Is.EqualTo("0"), "Event Subscriber didn't receive the expected message.");
+
+                bus.UnRegisterAllSubscriptionsFor<TestEventTx>();
+
+                bus.Start();
+
+                Assert.That(events.ProcessedMessagePayload, Is.EqualTo("0"), "Bus did not properly ignore queued event.");
+
             }
         }
+
+        [TestFixture]
+        public class WhenSubscriberForPendingCommandIsNoLongerRegistered
+        {
+            [Test]
+            public void MessageIsNotSendToSubscriberOnStart()
+            {
+                //we need a retry policy with at least one retry
+                //  so that we'd expect the call to Start() to attemp a retry
+                var retryPolicy = new RetryPolicy(1, DateTimeUtility.PositiveOneHourTimeSpan);
+                
+                var bus = new TransactionalMessageBus(retryPolicy);
+                var commands = new CommandSubscribers();
+                bus.RegisterSubscriptionFor<TestCommandTx>(commands.Handle);
+
+                bus.PublishTx(new TestCommandTx("0"));
+
+                Assume.That(commands.ProcessedMessagePayload, Is.EqualTo("0"), "Command Subscriber didn't receive the expected message.");
+
+                bus.UnRegisterAllSubscriptionsFor<TestCommandTx>();
+
+                bus.Start();
+
+                Assert.That(commands.ProcessedMessagePayload, Is.EqualTo("0"), "Bus did not properly ignore queued command.");
+
+            }
+        }
+
 
         public class TransactionalEventSubscribers : TransactionalSubscribers, IHandleTransactional<TestEventTx>
         {
@@ -221,25 +337,6 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 ProcessedMessageIds = new List<Tuple<Guid, Guid>>();
             }
         }
-
-        public class TransactionalEventSubscriberThatIsNeverAcknowledged : IHandleTransactional<TestEventTx>
-        {
-            public string ProcessedMessagePayload { get; private set; }
-            public IList<Tuple<Guid, Guid>> ProcessedMessageIds { get; private set; }
-
-
-            public void Handle(TestEventTx message)
-            {
-                ProcessedMessagePayload += message.Payload;
-                ProcessedMessageIds.Add(new Tuple<Guid, Guid>(message.Id, message.AcknowledgementId));
-            }
-
-            public TransactionalEventSubscriberThatIsNeverAcknowledged()
-            {
-                ProcessedMessageIds = new List<Tuple<Guid, Guid>>();
-            }
-        }
-
 
         public class TransactionalSubscribers
         {

@@ -4,14 +4,14 @@ namespace Proteus.Infrastructure.Messaging.Tests
 {
     public static class DateTimeUtility
     {
-        public static TimeSpan Positive_OneHourTimeSpan()
+        public static TimeSpan PositiveOneHourTimeSpan
         {
-            return new TimeSpan(1, 0, 0);
+            get { return new TimeSpan(1, 0, 0); }
         }
 
-        public static TimeSpan Negative_OneHourTimeSpan()
+        public static TimeSpan NegativeOneHourTimeSpan
         {
-            return new TimeSpan(-1, 0, 0);
+            get { return new TimeSpan(-1, 0, 0); }
         }
     }
 }

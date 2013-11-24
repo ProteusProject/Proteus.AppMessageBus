@@ -111,12 +111,6 @@ namespace Proteus.Infrastructure.Messaging.Portable
             //no-op
         }
 
-        protected virtual bool ShouldSendCommand(IMessage command, Action<IMessage> subscriber)
-        {
-            //effectively a no-op unless overridden in a derived class
-            return true;
-        }
-
         protected virtual TCommand PrepareCommandForPublishing<TCommand>(TCommand command, Action<IMessage> subscribers)
         {
             //effectively a no-op unless overridden in derived class
@@ -133,6 +127,12 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
             List<Action<IMessage>> subscribers;
             return new SubscribersResult(Routes.TryGetValue(message.GetType(), out subscribers), subscribers);
+        }
+
+        protected virtual bool ShouldSendCommand(IMessage command, Action<IMessage> subscriber)
+        {
+            //effectively a no-op unless overridden in a derived class
+            return true;
         }
 
         protected virtual bool ShouldPublishEvent(IMessage @event, int subscriberIndex, List<Action<IMessage>> subscribers)
