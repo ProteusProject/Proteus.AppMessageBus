@@ -14,8 +14,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
         private List<Envelope<IMessageTx>> _queuedEvents = new List<Envelope<IMessageTx>>();
         private List<Envelope<IMessageTx>> _queuedCommands = new List<Envelope<IMessageTx>>();
         private RetryPolicy _activeRetryPolicy;
-        private Func<string> _messageVersionProvider = () => string.Empty;
-        private string _messageVersion;
+        private Lazy<string> _messageVersion = new Lazy<string>(() => string.Empty);
 
         protected RetryPolicy DefaultEventRetryPolicy { get; private set; }
         protected RetryPolicy DefaultCommandRetryPolicy { get; private set; }
@@ -25,25 +24,15 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
             get
             {
-                if (string.IsNullOrEmpty(_messageVersion))
-                {
-                    _messageVersion = _messageVersionProvider();
-                }
-                return _messageVersion;
+                return _messageVersion.Value;
             }
-            protected set { _messageVersion = value; }
         }
 
         public Func<string> MessageVersionProvider
         {
             set
             {
-                _messageVersionProvider = value;
-                MessageVersion = _messageVersionProvider();
-            }
-            protected get
-            {
-                return _messageVersionProvider;
+                _messageVersion = new Lazy<string>(value);
             }
         }
 
