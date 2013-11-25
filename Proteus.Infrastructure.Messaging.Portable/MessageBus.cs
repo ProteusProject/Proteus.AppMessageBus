@@ -52,7 +52,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
                 OnBeforeSendCommand(command, subscribers[0]);
 
-                command = PrepareCommandForPublishing(command, subscribers[0]);
+                command = PrepareCommandForSending(command, subscribers[0]);
 
                 if (!ShouldSendCommand(command, subscribers[0])) return;
 
@@ -111,7 +111,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             //no-op
         }
 
-        protected virtual TCommand PrepareCommandForPublishing<TCommand>(TCommand command, Action<IMessage> subscribers)
+        protected virtual TCommand PrepareCommandForSending<TCommand>(TCommand command, Action<IMessage> subscribers) where TCommand :IMessage
         {
             //effectively a no-op unless overridden in derived class
             return command;
