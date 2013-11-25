@@ -6,6 +6,6 @@ namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
     {
         Guid Id { get; }
         DateTime UtcTimeStamp { get; }
-        string Version { get; }
+        string Version { get; set; }
     }
 }

@@ -12,7 +12,7 @@ namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
             get { return _utcTimeStamp; }
         }
 
-        public string Version { get; private set; }
+        public string Version { get; set; }
 
         public Guid Id
         {
