@@ -351,6 +351,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                  bus.Stop();
 
+                 //capture the results of the serialization so that we can pass them back to the bus later
                  var savedCommands = bus.SerializedCommands;
                  var savedEvents = bus.SerializedEvents;
 

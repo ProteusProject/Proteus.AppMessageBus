@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using Proteus.Infrastructure.Messaging.Portable.Abstractions;
+using Proteus.Infrastructure.Messaging.Portable.Serializable;
 
 namespace Proteus.Infrastructure.Messaging.Portable
 {
@@ -57,8 +58,12 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         private void SavePendingMessages()
         {
-            var commands = Serializer.Serialize(_queuedCommands);
-            var events = Serializer.Serialize(_queuedEvents);
+            var queuedCommandStates = _queuedCommands.Select(command => command.EnvelopeState).ToList();
+            var queuedEventStates = _queuedEvents.Select(@event => @event.EnvelopeState).ToList();
+
+
+            var commands = Serializer.Serialize(queuedCommandStates);
+            var events = Serializer.Serialize(queuedEventStates);
 
             //events.Seek(0, SeekOrigin.Begin);
             //commands.Seek(0, SeekOrigin.Begin);
@@ -73,6 +78,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         }
 
+        //TODO: remove this access to internals once dev of serialization infrastructure is complete
         public Stream SerializedCommands { get; set; }
         public Stream SerializedEvents { get; set; }
 
@@ -82,13 +88,17 @@ namespace Proteus.Infrastructure.Messaging.Portable
             if (SerializedCommands != null)
             {
                 SerializedCommands.Seek(0, SeekOrigin.Begin);
-                _queuedCommands = Serializer.Deserialize<List<Envelope<IMessageTx>>>(SerializedCommands);
+
+                var queuedCommandStates = Serializer.Deserialize<List<EvenvelopeState<IMessageTx>>>(SerializedCommands);
+                _queuedCommands = queuedCommandStates.Select(state => state.GetEnvelope()).ToList();
             }
             
             if (SerializedEvents != null)
             {
                 SerializedEvents.Seek(0, SeekOrigin.Begin);
-                _queuedEvents = Serializer.Deserialize<List<Envelope<IMessageTx>>>(SerializedEvents);
+                
+                var queuedEventStates = Serializer.Deserialize<List<EvenvelopeState<IMessageTx>>>(SerializedEvents);
+                _queuedCommands = queuedEventStates.Select(state => state.GetEnvelope()).ToList();
             }
             
         }
@@ -244,13 +254,28 @@ namespace Proteus.Infrastructure.Messaging.Portable
             if (null == txEvent)
                 return;
 
-            var envelope = new Envelope<IMessageTx>(txEvent, _activeRetryPolicy, txEvent.AcknowledgementId, index);
-            _queuedEvents.Add(envelope);
+            StoreEvent(txEvent, index);
+        }
+
+        private void StoreEvent(IMessageTx @event, int index)
+        {
+            var envelope = new Envelope<IMessageTx>(@event, _activeRetryPolicy, @event.AcknowledgementId, index);
+
+            if (envelope.ShouldRetry)
+            {
+                _queuedEvents.Add(envelope);
+            }
         }
 
         private void StoreCommand(IMessageTx command, RetryPolicy retryPolicy)
         {
-            _queuedCommands.Add(new Envelope<IMessageTx>(command, retryPolicy, Guid.NewGuid()));
+            var envelope = new Envelope<IMessageTx>(command, retryPolicy, Guid.NewGuid());
+
+            if (envelope.ShouldRetry)
+            {
+                _queuedCommands.Add(envelope);
+            }
+
         }
     }
 }

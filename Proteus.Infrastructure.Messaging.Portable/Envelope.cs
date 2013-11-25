@@ -1,5 +1,6 @@
 ﻿using System;
 using Proteus.Infrastructure.Messaging.Portable.Abstractions;
+using Proteus.Infrastructure.Messaging.Portable.Serializable;
 
 namespace Proteus.Infrastructure.Messaging.Portable
 {
@@ -45,9 +46,9 @@ namespace Proteus.Infrastructure.Messaging.Portable
         }
 
         private int _retriesRemaining;
-        
+
         private TMessage _message;
-        
+
         public TMessage Message
         {
             get
@@ -89,8 +90,18 @@ namespace Proteus.Infrastructure.Messaging.Portable
             _retriesRemaining = retryPolicy.Retries;
         }
 
+        public Envelope(EvenvelopeState<TMessage> state)
+        {
+            SubscriberIndex = state.SubscriberIndex;
+            _id = state.Id;
+            _retriesRemaining = state.RetriesRemaining;
+            _message = state.Message;
+            RetryPolicy = state.RetryPolicyState.GetRetryPolicy();
+            AcknowledgementId = state.AcknowledgementId;
+        }
+
         public Guid AcknowledgementId { get; private set; }
-        
+
         public void HasBeenRetried()
         {
             _retriesRemaining = ZeroSafeDecrement(_retriesRemaining);
@@ -100,6 +111,22 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
             value = value - 1;
             return value < 0 ? 0 : value;
+        }
+
+        public EvenvelopeState<TMessage> EnvelopeState
+        {
+            get
+            {
+                return new EvenvelopeState<TMessage>()
+                    {
+                        AcknowledgementId = AcknowledgementId,
+                        Id = Id,
+                        Message = Message,
+                        RetriesRemaining = _retriesRemaining,
+                        RetryPolicyState = RetryPolicy.RetryPolicyState,
+                        SubscriberIndex = SubscriberIndex
+                    };
+            }
         }
 
     }
