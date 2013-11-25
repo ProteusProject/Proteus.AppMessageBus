@@ -98,7 +98,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 SerializedEvents.Seek(0, SeekOrigin.Begin);
                 
                 var queuedEventStates = Serializer.Deserialize<List<EvenvelopeState<IMessageTx>>>(SerializedEvents);
-                _queuedCommands = queuedEventStates.Select(state => state.GetEnvelope()).ToList();
+                _queuedEvents = queuedEventStates.Select(state => state.GetEnvelope()).ToList();
             }
             
         }
