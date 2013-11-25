@@ -66,6 +66,11 @@ namespace Proteus.Infrastructure.Messaging.Portable
             get { return HasRetriesRemaining && !HasExpired; }
         }
 
+        public bool MessageMatchesVersion(string version)
+        {
+            return Message.Version == version;
+        }
+
         private bool HasRetriesRemaining
         {
             get { return _retriesRemaining > 0; }

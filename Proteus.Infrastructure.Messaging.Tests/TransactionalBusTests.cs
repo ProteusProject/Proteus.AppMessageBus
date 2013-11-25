@@ -305,7 +305,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 //we need a retry policy with at least one retry
                 //  so that we'd expect the call to Start() to attemp a retry
                 var retryPolicy = new RetryPolicy(1, DateTimeUtility.PositiveOneHourTimeSpan);
-                
+
                 var bus = new TransactionalMessageBus(retryPolicy);
                 var commands = new CommandSubscribers();
                 bus.RegisterSubscriptionFor<TestCommandTx>(commands.Handle);
@@ -327,55 +327,96 @@ namespace Proteus.Infrastructure.Messaging.Tests
         [TestFixture]
         public class MyClass
         {
-             [Test]
-             public void Test()
-             {
-                 const string singleValue = "0";
-                 string doubleValue = string.Format("{0}{0}", singleValue);
-                 string tripleValue = string.Format("{0}{0}{0}", singleValue);
+            [Test]
+            public void Test()
+            {
+                const string singleValue = "0";
+                string doubleValue = string.Format("{0}{0}", singleValue);
+                string tripleValue = string.Format("{0}{0}{0}", singleValue);
 
-                 var retryPolicy = new RetryPolicy(10, DateTimeUtility.PositiveOneHourTimeSpan);
-                 var bus = new TransactionalMessageBus(retryPolicy);
+                var retryPolicy = new RetryPolicy(10, DateTimeUtility.PositiveOneHourTimeSpan);
+                var bus = new TransactionalMessageBus(retryPolicy);
 
-                 var events = new TransactionalEventSubscribers();
+                var events = new TransactionalEventSubscribers();
 
-                 bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
+                bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
 
-                 bus.PublishTx(new TestEventTx(singleValue));
+                bus.PublishTx(new TestEventTx(singleValue));
 
-                 Assume.That(events.ProcessedMessagePayload, Is.EqualTo(singleValue), "Event Subscriber not registered for event as expected.");
+                Assume.That(events.ProcessedMessagePayload, Is.EqualTo(singleValue), "Event Subscriber not registered for event as expected.");
 
-                 bus.Start();
+                bus.Start();
 
-                 Assume.That(events.ProcessedMessagePayload, Is.EqualTo(doubleValue), "Event Subscriber not registered for event as expected.");
+                Assume.That(events.ProcessedMessagePayload, Is.EqualTo(doubleValue), "Event Subscriber not registered for event as expected.");
 
-                 bus.Stop();
+                bus.Stop();
 
-                 //capture the results of the serialization so that we can pass them back to the bus later
-                 var savedCommands = bus.SerializedCommands;
-                 var savedEvents = bus.SerializedEvents;
+                //capture the results of the serialization so that we can pass them back to the bus later
+                var savedCommands = bus.SerializedCommands;
+                var savedEvents = bus.SerializedEvents;
 
-                 bus = null;
+                bus = null;
 
-                 Assume.That(bus, Is.Null);
+                Assume.That(bus, Is.Null);
 
-                 //recreate the bus from scratch
-                 bus = new TransactionalMessageBus(retryPolicy);
+                //recreate the bus from scratch
+                bus = new TransactionalMessageBus(retryPolicy);
 
-                 //re-register the event subscriber
-                 bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
+                //re-register the event subscriber
+                bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
 
-                 bus.SerializedCommands = savedCommands;
-                 bus.SerializedEvents = savedEvents;
+                bus.SerializedCommands = savedCommands;
+                bus.SerializedEvents = savedEvents;
 
-                 //calling start should re-hydrate the list of pending (unacknowledged) events
-                 // and then process them using the re-registered subscriber
-                 bus.Start();
+                //calling start should re-hydrate the list of pending (unacknowledged) events
+                // and then process them using the re-registered subscriber
+                bus.Start();
 
-                 //we should now have one more payload element received
-                 Assert.That(events.ProcessedMessagePayload, Is.EqualTo(tripleValue), "Event not properly re-hydrated.");
+                //we should now have one more payload element received
+                Assert.That(events.ProcessedMessagePayload, Is.EqualTo(tripleValue), "Event not properly re-hydrated.");
 
-             }
+            }
+        }
+
+        [TestFixture]
+        public class WhenProcessingMessageVersion
+        {
+            public class VersionProvider
+            {
+                public string Version { get; set; }
+            }
+
+            [Test]
+            public void DefaultValueIsEmptyString()
+            {
+                var bus = new TransactionalMessageBus(new RetryPolicy());
+                
+                Assert.That(bus.MessageVersion, Is.Not.Null);
+                Assert.That(bus.MessageVersion, Is.Empty);
+            }
+
+            [Test]
+            public void VersionIsOnlyCalculatedOnce()
+            {
+                const string expected = "1";
+                const string notExpected = "2";
+
+                var versionProvider = new VersionProvider { Version = expected };
+
+                var bus = new TransactionalMessageBus(new RetryPolicy())
+                    {
+                        MessageVersionProvider = () => versionProvider.Version
+                    };
+
+                Assume.That(bus.MessageVersion, Is.EqualTo(expected), "MessageVersionProvider delegate not wired up properly.");
+
+                //this changes the value returned by the delegate, should it improperly be invoked a second time
+                versionProvider.Version = notExpected;
+
+                //since the delegate should NOT be invoked a second time, we expect the original value to be retained
+                Assert.That(bus.MessageVersion, Is.EqualTo(expected));
+
+            }
         }
 
 

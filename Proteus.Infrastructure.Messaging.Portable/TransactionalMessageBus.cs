@@ -14,10 +14,38 @@ namespace Proteus.Infrastructure.Messaging.Portable
         private List<Envelope<IMessageTx>> _queuedEvents = new List<Envelope<IMessageTx>>();
         private List<Envelope<IMessageTx>> _queuedCommands = new List<Envelope<IMessageTx>>();
         private RetryPolicy _activeRetryPolicy;
+        private Func<string> _messageVersionProvider = () => string.Empty;
+        private string _messageVersion;
 
         protected RetryPolicy DefaultEventRetryPolicy { get; private set; }
         protected RetryPolicy DefaultCommandRetryPolicy { get; private set; }
         public ISerializer Serializer { get; set; }
+
+        public string MessageVersion
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_messageVersion))
+                {
+                    _messageVersion = _messageVersionProvider();
+                }
+                return _messageVersion;
+            }
+            protected set { _messageVersion = value; }
+        }
+
+        public Func<string> MessageVersionProvider
+        {
+            set
+            {
+                _messageVersionProvider = value;
+                MessageVersion = _messageVersionProvider();
+            }
+            protected get
+            {
+                return _messageVersionProvider;
+            }
+        }
 
         public TransactionalMessageBus()
             : this(new RetryPolicy(), new RetryPolicy())
@@ -92,25 +120,25 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 var queuedCommandStates = Serializer.Deserialize<List<EvenvelopeState<IMessageTx>>>(SerializedCommands);
                 _queuedCommands = queuedCommandStates.Select(state => state.GetEnvelope()).ToList();
             }
-            
+
             if (SerializedEvents != null)
             {
                 SerializedEvents.Seek(0, SeekOrigin.Begin);
-                
+
                 var queuedEventStates = Serializer.Deserialize<List<EvenvelopeState<IMessageTx>>>(SerializedEvents);
                 _queuedEvents = queuedEventStates.Select(state => state.GetEnvelope()).ToList();
             }
-            
+
         }
 
         private void ClearExpiredCommands()
         {
-            _queuedCommands.RemoveAll(env => !env.ShouldRetry);
+            _queuedCommands.RemoveAll(env => !env.ShouldRetry && !env.MessageMatchesVersion(MessageVersion));
         }
 
         private void ClearExpiredEvents()
         {
-            _queuedEvents.RemoveAll(env => !env.ShouldRetry);
+            _queuedEvents.RemoveAll(env => !env.ShouldRetry && !env.MessageMatchesVersion(MessageVersion));
         }
 
         private void ProcessPendingCommands()
@@ -121,7 +149,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
                 //if there are no longer any subscribers to the message, we need to remove it from the queue
                 //  so won't be around for further processing
-                if (!subscribersResult.HasSubscribers || subscribersResult.Subscribers.Count <= envelope.SubscriberIndex)
+                if (!subscribersResult.HasSubscribers || subscribersResult.Subscribers.Count < envelope.SubscriberIndex)
                 {
                     _queuedEvents.Remove(envelope);
                     continue;
@@ -200,6 +228,13 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
+
+        protected override TCommand PrepareCommandForSending<TCommand>(TCommand command, Action<IMessage> subscribers)
+        {
+            command.Version = MessageVersion;
+            return command;
+        }
+
         protected override TEvent PrepareEventForPublishing<TEvent>(TEvent @event, int subscriberIndex, List<Action<IMessage>> subscribers)
         {
             Logger(string.Format("Preparing to Publish Event of type {0}, MessageId = {1}, Subscriber Index = {2}", typeof(TEvent).AssemblyQualifiedName, @event.Id, subscriberIndex));
@@ -210,6 +245,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 return @event;
 
             txEvent.AcknowledgementId = Guid.NewGuid();
+            txEvent.Version = MessageVersion;
 
             return Clone((TEvent)txEvent);
         }
