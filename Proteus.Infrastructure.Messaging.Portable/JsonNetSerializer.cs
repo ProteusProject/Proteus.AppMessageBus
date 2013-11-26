@@ -9,10 +9,14 @@ namespace Proteus.Infrastructure.Messaging.Portable
     {
         private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto };
 
-        public Stream Serialize<TSource>(TSource source)
+        public Stream SerializeToStream<TSource>(TSource source)
         {
-            var serializedString = JsonConvert.SerializeObject(source, _serializerSettings);
-            return new MemoryStream(Encoding.UTF8.GetBytes(serializedString));
+            return new MemoryStream(Encoding.UTF8.GetBytes(SerializeToString(source)));
+        }
+
+        public string SerializeToString<TSource>(TSource source)
+        {
+            return JsonConvert.SerializeObject(source, _serializerSettings);
         }
 
         public TTarget Deserialize<TTarget>(Stream serialized)
@@ -20,7 +24,12 @@ namespace Proteus.Infrastructure.Messaging.Portable
             var reader = new StreamReader(serialized);
             var serializedString = reader.ReadToEnd();
 
-            return JsonConvert.DeserializeObject<TTarget>(serializedString, _serializerSettings);
+            return Deserialize<TTarget>(serializedString);
+        }
+
+        public TTarget Deserialize<TTarget>(string serialized)
+        {
+            return JsonConvert.DeserializeObject<TTarget>(serialized, _serializerSettings);
         }
     }
 }

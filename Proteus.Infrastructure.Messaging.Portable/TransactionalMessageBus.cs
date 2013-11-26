@@ -79,8 +79,8 @@ namespace Proteus.Infrastructure.Messaging.Portable
             var queuedEventStates = _queuedEvents.Select(@event => @event.EnvelopeState).ToList();
 
 
-            var commands = Serializer.Serialize(queuedCommandStates);
-            var events = Serializer.Serialize(queuedEventStates);
+            var commands = Serializer.SerializeToStream(queuedCommandStates);
+            var events = Serializer.SerializeToStream(queuedEventStates);
 
             //events.Seek(0, SeekOrigin.Begin);
             //commands.Seek(0, SeekOrigin.Begin);
@@ -242,7 +242,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         private TSource Clone<TSource>(TSource source)
         {
-            var serialized = Serializer.Serialize(source);
+            var serialized = Serializer.SerializeToStream(source);
             return Serializer.Deserialize<TSource>(serialized);
         }
 

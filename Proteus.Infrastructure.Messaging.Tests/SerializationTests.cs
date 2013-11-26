@@ -16,7 +16,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             var env = new Envelope<TransactionalBusTests.TestEventTx>(new TransactionalBusTests.TestEventTx("0"), retryPolicy, Guid.NewGuid());
 
             var serializer = new JsonNetSerializer();
-            var serialized = serializer.Serialize(env.EnvelopeState);
+            var serialized = serializer.SerializeToStream(env.EnvelopeState);
             var deserialized = serializer.Deserialize<EvenvelopeState<TransactionalBusTests.TestEventTx>>(serialized);
 
             var envelope = deserialized.GetEnvelope();
@@ -31,7 +31,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
             var serializer = new JsonNetSerializer();
 
-            var serialized = serializer.Serialize(msg);
+            var serialized = serializer.SerializeToStream(msg);
             var deserialized = serializer.Deserialize<TransactionalBusTests.TestEventTx>(serialized);
 
             Assert.That(deserialized, Is.Not.Null);
@@ -49,7 +49,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
             var serializer = new JsonNetSerializer();
 
-            var serialized = serializer.Serialize(env);
+            var serialized = serializer.SerializeToStream(env);
             var deserialized = serializer.Deserialize<AltEnvelope<TransactionalBusTests.TestEventTx>>(serialized);
 
             Assert.That(deserialized.Message, Is.Not.Null);
