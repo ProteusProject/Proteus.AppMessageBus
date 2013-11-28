@@ -2,15 +2,30 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
+using PCLStorage;
 using Proteus.Infrastructure.Messaging.Portable;
 using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
 namespace Proteus.Infrastructure.Messaging.Tests
 {
-
     public class TransactionalBusTests
     {
+        async public static Task ClearAllDataFiles()
+        {
+            IFolder rootFolder = FileSystem.Current.LocalStorage;
+
+            Debug.WriteLine(rootFolder.Path);
+
+            var folders = await rootFolder.GetFoldersAsync();
+
+            foreach (var folder in folders.Where(element => element.Name == "Proteus.Messaging.Messages"))
+            {
+                await folder.DeleteAsync();
+            }
+        }
+
         [TestFixture]
         public class WhenConfiguredWithNonZeroEventRetryAndCommandRetryAndMessagesHaveNotExpired
         {
@@ -21,8 +36,10 @@ namespace Proteus.Infrastructure.Messaging.Tests
             private const string SingleValue = "0";
 
             [SetUp]
-            public void SetUp()
+            async public void SetUp()
             {
+                await ClearAllDataFiles();
+
                 var retryPolicy = new RetryPolicy(1, DateTimeUtility.PositiveOneHourTimeSpan);
                 _bus = new TransactionalMessageBus(retryPolicy);
 
@@ -34,7 +51,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
 
             [Test]
-            public void CommandAndEventAreRetriedOnNextStart()
+            async public void CommandAndEventAreRetriedOnNextStart()
             {
                 _bus.SendTx(new TestCommandTx(SingleValue));
                 _bus.PublishTx(new TestEventTx(SingleValue));
@@ -42,14 +59,14 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
                 Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
-                _bus.Start();
+                await _bus.Start();
 
                 Assert.That(_commands.ProcessedMessagePayload, Is.EqualTo(_doubleValue));
                 Assert.That(_events.ProcessedMessagePayload, Is.EqualTo(_doubleValue));
             }
 
             [Test]
-            public void CommandAndEventRetriesRespectRetryPolicyAcrossAdditionalStarts()
+            async public void CommandAndEventRetriesRespectRetryPolicyAcrossAdditionalStarts()
             {
                 _bus.SendTx(new TestCommandTx(SingleValue));
                 _bus.PublishTx(new TestEventTx(SingleValue));
@@ -60,7 +77,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 //despite multiple calls to Start(), messages are only retried ONCE as per the retry policy setting
                 for (int i = 0; i < 10; i++)
                 {
-                    _bus.Start();
+                    await _bus.Start();
                 }
 
                 Assert.That(_commands.ProcessedMessagePayload, Is.EqualTo(_doubleValue));
@@ -79,8 +96,10 @@ namespace Proteus.Infrastructure.Messaging.Tests
             private const string SingleValue = "0";
 
             [SetUp]
-            public void SetUp()
+            async public void SetUp()
             {
+                await ClearAllDataFiles();
+
                 var retryPolicy = new RetryPolicy();
                 Assume.That(retryPolicy.Retries, Is.EqualTo(0));
 
@@ -93,7 +112,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
 
             [Test]
-            public void CommandAndEventAreNotRetriedAcrossAdditionalStarts()
+            async public void CommandAndEventAreNotRetriedAcrossAdditionalStarts()
             {
                 _bus.SendTx(new TestCommandTx(SingleValue));
                 _bus.PublishTx(new TestEventTx(SingleValue));
@@ -104,7 +123,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 //despite multiple calls to Start(), messages are only retried ONCE as per the retry policy setting
                 for (int i = 0; i < 10; i++)
                 {
-                    _bus.Start();
+                    await _bus.Start();
                 }
 
                 Assert.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
@@ -121,8 +140,10 @@ namespace Proteus.Infrastructure.Messaging.Tests
             private const string SingleValue = "0";
 
             [SetUp]
-            public void SetUp()
+            async public void SetUp()
             {
+                await ClearAllDataFiles();
+
                 var retryPolicy = new RetryPolicy(1, DateTimeUtility.NegativeOneHourTimeSpan);
                 _bus = new TransactionalMessageBus(retryPolicy);
 
@@ -133,7 +154,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
 
             [Test]
-            public void CommandAndEventAreNotRetriedOnNextStart()
+            async public void CommandAndEventAreNotRetriedOnNextStart()
             {
                 _bus.SendTx(new TestCommandTx(SingleValue));
                 _bus.PublishTx(new TestEventTx(SingleValue));
@@ -141,7 +162,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
                 Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
-                _bus.Start();
+                await _bus.Start();
 
                 Assert.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
                 Assert.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
@@ -159,8 +180,10 @@ namespace Proteus.Infrastructure.Messaging.Tests
             private const string SingleValue = "0";
 
             [SetUp]
-            public void SetUp()
+            async public void SetUp()
             {
+                await ClearAllDataFiles();
+
                 var retryPolicy = new RetryPolicy(1, DateTimeUtility.PositiveOneHourTimeSpan);
                 _bus = new TransactionalMessageBus(retryPolicy);
 
@@ -171,26 +194,26 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
 
             [Test]
-            public void UnacknowledgedCommandWithNonExpiredRetryPolicyIsRetriedAcrossAdditionalStarts()
+            async public void UnacknowledgedCommandWithNonExpiredRetryPolicyIsRetriedAcrossAdditionalStarts()
             {
                 var command = new TestCommandTx(SingleValue);
                 _bus.SendTx(command);
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
-                _bus.Start();
+                await _bus.Start();
 
                 Assert.That(_commands.ProcessedMessagePayload, Is.EqualTo(string.Format("{0}{0}", SingleValue)));
             }
 
             [Test]
-            public void AcknowledgedCommandWithNonExpiredRetryPolicyIsNotRetriedAcrossAdditionalStarts()
+            async public void AcknowledgedCommandWithNonExpiredRetryPolicyIsNotRetriedAcrossAdditionalStarts()
             {
                 var command = new TestCommandTx(SingleValue);
                 _bus.SendTx(command);
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
                 _commands.AcknowledgeLastMessage(_bus);
-                _bus.Start();
+                await _bus.Start();
 
                 Assert.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
             }
@@ -206,8 +229,10 @@ namespace Proteus.Infrastructure.Messaging.Tests
             private const string SingleValue = "0";
 
             [SetUp]
-            public void SetUp()
+            async public void SetUp()
             {
+                await ClearAllDataFiles();
+
                 var retryPolicy = new RetryPolicy(1, DateTimeUtility.PositiveOneHourTimeSpan);
                 _bus = new TransactionalMessageBus(retryPolicy);
 
@@ -220,32 +245,32 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
 
             [Test]
-            public void UnacknowledgedEventWithNonExpiredRetryPolicyIsRetriedAcrossAdditionalStarts()
+            async public void UnacknowledgedEventWithNonExpiredRetryPolicyIsRetriedAcrossAdditionalStarts()
             {
                 var @event = new TestEventTx(SingleValue);
                 _bus.PublishTx(@event);
                 Assume.That(_eventsThatWillBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
-                _bus.Start();
+                await _bus.Start();
 
                 Assert.That(_eventsThatWillBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(string.Format("{0}{0}", SingleValue)));
             }
 
             [Test]
-            public void AcknowledgedEventWithNonExpiredRetryPolicyIsNotRetriedAcrossAdditionalStarts()
+            async public void AcknowledgedEventWithNonExpiredRetryPolicyIsNotRetriedAcrossAdditionalStarts()
             {
                 var @event = new TestEventTx(SingleValue);
                 _bus.PublishTx(@event);
                 Assume.That(_eventsThatWillBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
                 _eventsThatWillBeAcknowledged.AcknowledgeLastMessage(_bus);
-                _bus.Start();
+                await _bus.Start();
 
                 Assert.That(_eventsThatWillBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(SingleValue));
             }
 
             [Test]
-            public void UnacknowledgedEventIsUnaffectedByAcknowledgingOtherSubscriberAcrossAdditionalStarts()
+            async public void UnacknowledgedEventIsUnaffectedByAcknowledgingOtherSubscriberAcrossAdditionalStarts()
             {
                 var @event = new TestEventTx(SingleValue);
                 _bus.PublishTx(@event);
@@ -255,7 +280,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 for (int i = 0; i < 10; i++)
                 {
-                    _bus.Start();
+                    await _bus.Start();
                 }
 
                 Assert.That(_eventsThatWillBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(SingleValue));
@@ -268,8 +293,15 @@ namespace Proteus.Infrastructure.Messaging.Tests
         [TestFixture]
         public class WhenSubscriberForPendingEventIsNoLongerRegistered
         {
+
+            [SetUp]
+            async public void SetUp()
+            {
+                await ClearAllDataFiles();
+            }
+
             [Test]
-            public void MessageIsNotSendToSubscriberOnStart()
+            async public void MessageIsNotSendToSubscriberOnStart()
             {
                 const string singleValue = "0";
 
@@ -287,7 +319,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 bus.UnRegisterAllSubscriptionsFor<TestEventTx>();
 
-                bus.Start();
+                await bus.Start();
 
                 Assert.That(events.ProcessedMessagePayload, Is.EqualTo(singleValue), "Bus did not properly ignore queued event.");
 
@@ -297,8 +329,14 @@ namespace Proteus.Infrastructure.Messaging.Tests
         [TestFixture]
         public class WhenSubscriberForPendingCommandIsNoLongerRegistered
         {
+            [SetUp]
+            async public void SetUp()
+            {
+                await ClearAllDataFiles();
+            }
+
             [Test]
-            public void MessageIsNotSendToSubscriberOnStart()
+            async public void MessageIsNotSendToSubscriberOnStart()
             {
                 const string singleValue = "0";
 
@@ -316,7 +354,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 bus.UnRegisterAllSubscriptionsFor<TestCommandTx>();
 
-                bus.Start();
+                await bus.Start();
 
                 Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(singleValue), "Bus did not properly ignore queued command.");
 
@@ -327,8 +365,14 @@ namespace Proteus.Infrastructure.Messaging.Tests
         [TestFixture]
         public class MyClass
         {
+            [SetUp]
+            async public void SetUp()
+            {
+                await ClearAllDataFiles();
+            }
+
             [Test]
-            public void Test()
+            async public void Test()
             {
                 const string singleValue = "0";
                 string doubleValue = string.Format("{0}{0}", singleValue);
@@ -345,15 +389,15 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 Assume.That(events.ProcessedMessagePayload, Is.EqualTo(singleValue), "Event Subscriber not registered for event as expected.");
 
-                bus.Start();
+                await bus.Start();
 
                 Assume.That(events.ProcessedMessagePayload, Is.EqualTo(doubleValue), "Event Subscriber not registered for event as expected.");
 
-                bus.Stop();
+                await bus.Stop();
 
                 //capture the results of the serialization so that we can pass them back to the bus later
-                var savedCommands = bus.SerializedCommands;
-                var savedEvents = bus.SerializedEvents;
+                //var savedCommands = bus.SerializedCommands;
+                //var savedEvents = bus.SerializedEvents;
 
                 bus = null;
 
@@ -365,12 +409,12 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 //re-register the event subscriber
                 bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
 
-                bus.SerializedCommands = savedCommands;
-                bus.SerializedEvents = savedEvents;
+                //bus.SerializedCommands = savedCommands;
+                //bus.SerializedEvents = savedEvents;
 
                 //calling start should re-hydrate the list of pending (unacknowledged) events
                 // and then process them using the re-registered subscriber
-                bus.Start();
+                await bus.Start();
 
                 //we should now have one more payload element received
                 Assert.That(events.ProcessedMessagePayload, Is.EqualTo(tripleValue), "Event not properly re-hydrated.");
@@ -390,13 +434,13 @@ namespace Proteus.Infrastructure.Messaging.Tests
             public void DefaultValueIsEmptyString()
             {
                 var bus = new TransactionalMessageBus(new RetryPolicy());
-                
+
                 Assert.That(bus.MessageVersion, Is.Not.Null);
                 Assert.That(bus.MessageVersion, Is.Empty);
             }
 
             [Test]
-            public void VersionIsOnlyCalculatedOnce()
+            public void VersionIsCachedAfterInitialCalculationAndNotRecalculated()
             {
                 const string expected = "1";
                 const string notExpected = "2";

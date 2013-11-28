@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
+using PCLStorage;
 using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 using Proteus.Infrastructure.Messaging.Portable.Serializable;
 
@@ -54,70 +56,120 @@ namespace Proteus.Infrastructure.Messaging.Portable
             Serializer = new JsonNetSerializer();
         }
 
-        public bool Start()
+        async public Task Start()
         {
-            LoadPendingMessages();
+            await LoadPendingMessages();
 
             ClearExpiredCommands();
             ProcessPendingCommands();
 
             ClearExpiredEvents();
             ProcessPendingEvents();
-
-            return true;
         }
 
-        public bool Stop()
+        async public Task Stop()
         {
-            SavePendingMessages();
-            return true;
+            await SavePendingMessages();
         }
 
-        private void SavePendingMessages()
+        async private Task SavePendingMessages()
         {
             var queuedCommandStates = _queuedCommands.Select(command => command.EnvelopeState).ToList();
             var queuedEventStates = _queuedEvents.Select(@event => @event.EnvelopeState).ToList();
 
+            var hasCommandsToProcess = queuedCommandStates.Count > 0;
+            var hasEventsToProcess = queuedEventStates.Count > 0;
 
-            var commands = Serializer.SerializeToStream(queuedCommandStates);
-            var events = Serializer.SerializeToStream(queuedEventStates);
+            IFolder folder = null;
 
-            //events.Seek(0, SeekOrigin.Begin);
-            //commands.Seek(0, SeekOrigin.Begin);
+            if (hasCommandsToProcess || hasEventsToProcess)
+            {
+                var rootFolder = FileSystem.Current.LocalStorage;
+                folder = await rootFolder.CreateFolderAsync("Proteus.Messaging.Messages", CreationCollisionOption.OpenIfExists);
+            }
 
-            //using (var fileStream = File.Create("C:\\Path\\To\\File"))
-            //{
-            //    myOtherObject.InputStream.CopyTo(fileStream);
-            //}
+            if (null==folder)
+            {
+                return;
+            }
 
-            SerializedCommands = commands;
-            SerializedEvents = events;
+            if (hasCommandsToProcess)
+            {
+                var commands = Serializer.SerializeToString(queuedCommandStates);
 
+                var commandsDatafile = await folder.CreateFileAsync("Commands.data", CreationCollisionOption.ReplaceExisting);
+                await commandsDatafile.WriteAllTextAsync(commands);
+            }
+
+            if (hasEventsToProcess)
+            {
+                var events = Serializer.SerializeToString(queuedEventStates);
+                var eventsDatafile = await folder.CreateFileAsync("Events.data", CreationCollisionOption.ReplaceExisting);
+                await eventsDatafile.WriteAllTextAsync(events);
+            }
         }
 
-        //TODO: remove this access to internals once dev of serialization infrastructure is complete
-        public Stream SerializedCommands { get; set; }
-        public Stream SerializedEvents { get; set; }
 
-
-        private void LoadPendingMessages()
+        async private Task LoadPendingMessages()
         {
-            if (SerializedCommands != null)
-            {
-                SerializedCommands.Seek(0, SeekOrigin.Begin);
+            IFolder rootFolder = FileSystem.Current.LocalStorage;
+            IFolder folder = null;
 
-                var queuedCommandStates = Serializer.Deserialize<List<EvenvelopeState<IMessageTx>>>(SerializedCommands);
-                _queuedCommands = queuedCommandStates.Select(state => state.GetEnvelope()).ToList();
+            var folders = await rootFolder.GetFoldersAsync();
+
+            foreach (var candidate in folders)
+            {
+                if (candidate.Name == "Proteus.Messaging.Messages")
+                {
+                    folder = candidate;
+                }
             }
 
-            if (SerializedEvents != null)
+            if (null == folder)
             {
-                SerializedEvents.Seek(0, SeekOrigin.Begin);
-
-                var queuedEventStates = Serializer.Deserialize<List<EvenvelopeState<IMessageTx>>>(SerializedEvents);
-                _queuedEvents = queuedEventStates.Select(state => state.GetEnvelope()).ToList();
+                return;
             }
 
+            var hasNoQueuedCommands = _queuedCommands.Count == 0;
+            var hasNoQueuedEvents = _queuedEvents.Count == 0;
+
+            if (hasNoQueuedCommands)
+            {
+                IFile commandsDatafile = null;
+
+                var files = await folder.GetFilesAsync();
+
+                foreach (var file in files.Where(file => file.Name == "Commands.data"))
+                {
+                    commandsDatafile = file;
+                }
+
+                if (commandsDatafile != null)
+                {
+                    var commands = await commandsDatafile.ReadAllTextAsync();
+                    var queuedCommandStates = Serializer.Deserialize<List<EvenvelopeState<IMessageTx>>>(commands);
+                    _queuedCommands = queuedCommandStates.Select(state => state.GetEnvelope()).ToList();
+                }
+            }
+
+            if (hasNoQueuedEvents)
+            {
+                IFile eventsDatafile = null;
+
+                var files = await folder.GetFilesAsync();
+
+                foreach (var file in files.Where(file => file.Name == "Events.data"))
+                {
+                    eventsDatafile = file;
+                }
+
+                if (eventsDatafile != null)
+                {
+                    var events = await eventsDatafile.ReadAllTextAsync();
+                    var queuedEventStates = Serializer.Deserialize<List<EvenvelopeState<IMessageTx>>>(events);
+                    _queuedEvents = queuedEventStates.Select(state => state.GetEnvelope()).ToList();
+                }
+            }
         }
 
         private void ClearExpiredCommands()
