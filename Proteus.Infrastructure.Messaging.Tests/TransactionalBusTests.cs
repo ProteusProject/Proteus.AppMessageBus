@@ -12,11 +12,9 @@ namespace Proteus.Infrastructure.Messaging.Tests
 {
     public class TransactionalBusTests
     {
-        async public static Task ClearAllDataFiles()
+        public static async Task ClearAllDataFiles()
         {
             IFolder rootFolder = FileSystem.Current.LocalStorage;
-
-            Debug.WriteLine(rootFolder.Path);
 
             var folders = await rootFolder.GetFoldersAsync();
 
@@ -24,6 +22,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             {
                 await folder.DeleteAsync();
             }
+
         }
 
         [TestFixture]
@@ -418,7 +417,6 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 //we should now have one more payload element received
                 Assert.That(events.ProcessedMessagePayload, Is.EqualTo(tripleValue), "Event not properly re-hydrated.");
-
             }
         }
 
