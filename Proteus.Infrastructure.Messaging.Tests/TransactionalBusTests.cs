@@ -52,8 +52,8 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [Test]
             async public void CommandAndEventAreRetriedOnNextStart()
             {
-                _bus.SendTx(new TestCommandTx(SingleValue));
-                _bus.PublishTx(new TestEventTx(SingleValue));
+                _bus.SendDurable(new TestCommandTx(SingleValue));
+                _bus.PublishDurable(new TestEventTx(SingleValue));
 
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
                 Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
@@ -67,8 +67,8 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [Test]
             async public void CommandAndEventRetriesRespectRetryPolicyAcrossAdditionalStarts()
             {
-                _bus.SendTx(new TestCommandTx(SingleValue));
-                _bus.PublishTx(new TestEventTx(SingleValue));
+                _bus.SendDurable(new TestCommandTx(SingleValue));
+                _bus.PublishDurable(new TestEventTx(SingleValue));
 
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
                 Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
@@ -113,8 +113,8 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [Test]
             async public void CommandAndEventAreNotRetriedAcrossAdditionalStarts()
             {
-                _bus.SendTx(new TestCommandTx(SingleValue));
-                _bus.PublishTx(new TestEventTx(SingleValue));
+                _bus.SendDurable(new TestCommandTx(SingleValue));
+                _bus.PublishDurable(new TestEventTx(SingleValue));
 
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
                 Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
@@ -155,8 +155,8 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [Test]
             async public void CommandAndEventAreNotRetriedOnNextStart()
             {
-                _bus.SendTx(new TestCommandTx(SingleValue));
-                _bus.PublishTx(new TestEventTx(SingleValue));
+                _bus.SendDurable(new TestCommandTx(SingleValue));
+                _bus.PublishDurable(new TestEventTx(SingleValue));
 
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
                 Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
@@ -196,7 +196,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             async public void UnacknowledgedCommandWithNonExpiredRetryPolicyIsRetriedAcrossAdditionalStarts()
             {
                 var command = new TestCommandTx(SingleValue);
-                _bus.SendTx(command);
+                _bus.SendDurable(command);
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
                 await _bus.Start();
@@ -208,7 +208,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             async public void AcknowledgedCommandWithNonExpiredRetryPolicyIsNotRetriedAcrossAdditionalStarts()
             {
                 var command = new TestCommandTx(SingleValue);
-                _bus.SendTx(command);
+                _bus.SendDurable(command);
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
                 _commands.AcknowledgeLastMessage(_bus);
@@ -247,7 +247,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             async public void UnacknowledgedEventWithNonExpiredRetryPolicyIsRetriedAcrossAdditionalStarts()
             {
                 var @event = new TestEventTx(SingleValue);
-                _bus.PublishTx(@event);
+                _bus.PublishDurable(@event);
                 Assume.That(_eventsThatWillBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
                 await _bus.Start();
@@ -259,7 +259,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             async public void AcknowledgedEventWithNonExpiredRetryPolicyIsNotRetriedAcrossAdditionalStarts()
             {
                 var @event = new TestEventTx(SingleValue);
-                _bus.PublishTx(@event);
+                _bus.PublishDurable(@event);
                 Assume.That(_eventsThatWillBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
                 _eventsThatWillBeAcknowledged.AcknowledgeLastMessage(_bus);
@@ -272,7 +272,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             async public void UnacknowledgedEventIsUnaffectedByAcknowledgingOtherSubscriberAcrossAdditionalStarts()
             {
                 var @event = new TestEventTx(SingleValue);
-                _bus.PublishTx(@event);
+                _bus.PublishDurable(@event);
                 Assume.That(_eventsThatWillNotBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
                 _eventsThatWillBeAcknowledged.AcknowledgeLastMessage(_bus);
@@ -312,7 +312,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 var events = new EventSubscribers();
                 bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
 
-                bus.PublishTx(new TestEventTx(singleValue));
+                bus.PublishDurable(new TestEventTx(singleValue));
 
                 Assume.That(events.ProcessedMessagePayload, Is.EqualTo(singleValue), "Event Subscriber didn't receive the expected message.");
 
@@ -347,7 +347,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 var commands = new CommandSubscribers();
                 bus.RegisterSubscriptionFor<TestCommandTx>(commands.Handle);
 
-                bus.PublishTx(new TestCommandTx(singleValue));
+                bus.PublishDurable(new TestCommandTx(singleValue));
 
                 Assume.That(commands.ProcessedMessagePayload, Is.EqualTo(singleValue), "Command Subscriber didn't receive the expected message.");
 
@@ -384,7 +384,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
 
-                bus.PublishTx(new TestEventTx(singleValue));
+                bus.PublishDurable(new TestEventTx(singleValue));
 
                 Assume.That(events.ProcessedMessagePayload, Is.EqualTo(singleValue), "Event Subscriber not registered for event as expected.");
 

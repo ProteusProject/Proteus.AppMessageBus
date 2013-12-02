@@ -61,14 +61,14 @@ namespace Windows8TestingHarness
         private void IncrementCounterWithAck_OnClick(object sender, RoutedEventArgs e)
         {
             //send the command using default retries
-            App.Bus.SendTx(new IncrementCounterWithAckCommand());
+            App.Bus.SendDurable(new IncrementCounterWithAckCommand());
             this.Frame.Navigate(typeof(CounterDisplayPage));
         }
 
         private void IncrementCounterWithoutAck_OnClick(object sender, RoutedEventArgs e)
         {
             //send the command using default retries
-            App.Bus.SendTx(new IncrementCounterWithoutAckCommand());
+            App.Bus.SendDurable(new IncrementCounterWithoutAckCommand());
             this.Frame.Navigate(typeof(CounterDisplayPage));
             
         }

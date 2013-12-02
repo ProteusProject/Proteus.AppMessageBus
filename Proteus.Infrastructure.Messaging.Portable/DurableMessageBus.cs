@@ -297,32 +297,32 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
             Logger(string.Format("Preparing to Send Command of type {0}, MessageId = {1}", typeof(TCommand).AssemblyQualifiedName, command.Id));
 
-            var txCommand = command as IDurableMessage;
+            var durableCommand = command as IDurableMessage;
 
-            if (null == txCommand)
+            if (null == durableCommand)
                 return command;
 
-            txCommand.AcknowledgementId = Guid.NewGuid();
-            txCommand.Version = MessageVersion;
+            durableCommand.AcknowledgementId = Guid.NewGuid();
+            durableCommand.Version = MessageVersion;
 
-            StoreCommand(txCommand);
+            StoreCommand(durableCommand);
 
-            return (TCommand)txCommand;
+            return (TCommand)durableCommand;
         }
 
         protected override TEvent PrepareEventForPublishing<TEvent>(TEvent @event, int subscriberIndex, List<Action<IMessage>> subscribers)
         {
             Logger(string.Format("Preparing to Publish Event of type {0}, MessageId = {1}, Subscriber Index = {2}", typeof(TEvent).AssemblyQualifiedName, @event.Id, subscriberIndex));
 
-            var txEvent = @event as IDurableMessage;
+            var durableEvent = @event as IDurableMessage;
 
-            if (null == txEvent)
+            if (null == durableEvent)
                 return @event;
 
-            txEvent.AcknowledgementId = Guid.NewGuid();
-            txEvent.Version = MessageVersion;
+            durableEvent.AcknowledgementId = Guid.NewGuid();
+            durableEvent.Version = MessageVersion;
 
-            var clonedEvent = Clone((TEvent) txEvent);
+            var clonedEvent = Clone((TEvent) durableEvent);
             
             StoreEvent((IDurableMessage)clonedEvent, subscriberIndex);
             
@@ -336,27 +336,27 @@ namespace Proteus.Infrastructure.Messaging.Portable
             return Serializer.Deserialize<TSource>(serialized);
         }
 
-        public void SendTx<TCommand>(TCommand command) where TCommand : ICommand, IDurableMessage
+        public void SendDurable<TCommand>(TCommand command) where TCommand : ICommand, IDurableMessage
         {
-            SendTx(command, DefaultCommandRetryPolicy);
+            SendDurable(command, DefaultCommandRetryPolicy);
         }
 
-        public void SendTx<TCommand>(TCommand command, RetryPolicy retryPolicy) where TCommand : ICommand, IDurableMessage
+        public void SendDurable<TCommand>(TCommand command, RetryPolicy retryPolicy) where TCommand : ICommand, IDurableMessage
         {
-            Logger(string.Format("Transactionally sending Command Id = {0}", command.Id));
+            Logger(string.Format("Sending Durable Command, Id = {0}", command.Id));
 
             _activeRetryPolicy = retryPolicy;
             base.Send(command);
         }
 
-        public void PublishTx<TEvent>(TEvent @event) where TEvent : IDurableMessage
+        public void PublishDurable<TEvent>(TEvent @event) where TEvent : IDurableMessage
         {
-            PublishTx(@event, DefaultEventRetryPolicy);
+            PublishDurable(@event, DefaultEventRetryPolicy);
         }
 
-        public void PublishTx<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : IDurableMessage
+        public void PublishDurable<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : IDurableMessage
         {
-            Logger(string.Format("Transactionally publishing Event Id = {0}", @event.Id));
+            Logger(string.Format("Publishing Durable Event, Id = {0}", @event.Id));
 
             _activeRetryPolicy = retryPolicy;
             base.Publish(@event);

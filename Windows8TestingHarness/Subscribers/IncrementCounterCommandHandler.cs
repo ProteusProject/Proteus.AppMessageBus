@@ -11,7 +11,7 @@ namespace Windows8TestingHarness.Subscribers
         public void Handle(IncrementCounterWithAckCommand message)
         {
             //publish the event with some retries and a future expiry
-            App.Bus.PublishTx(new CounterIncrementedWithAckEvent(), new RetryPolicy(2, TimeSpan.FromHours(1)));
+            App.Bus.PublishDurable(new CounterIncrementedWithAckEvent(), new RetryPolicy(2, TimeSpan.FromHours(1)));
 
             //now that event(s) are safely published, acknowledge the command
             App.Bus.Acknowledge(message);
@@ -20,7 +20,7 @@ namespace Windows8TestingHarness.Subscribers
         public void Handle(IncrementCounterWithoutAckCommand message)
         {
             //publish the event with some retries and a future expiry
-            App.Bus.PublishTx(new CounterIncrementedWithoutAckEvent(), new RetryPolicy(2, TimeSpan.FromHours(1)));
+            App.Bus.PublishDurable(new CounterIncrementedWithoutAckEvent(), new RetryPolicy(2, TimeSpan.FromHours(1)));
 
             //now that event(s) are safely published, acknowledge the command
             App.Bus.Acknowledge(message);
