@@ -34,23 +34,23 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Abstractions\Command.cs" />
-    <Compile Include="Abstractions\CommandTx.cs" />
+    <Compile Include="Abstractions\DurableCommand.cs" />
     <Compile Include="Abstractions\Event.cs" />
-    <Compile Include="Abstractions\EventTx.cs" />
+    <Compile Include="Abstractions\DurableEvent.cs" />
     <Compile Include="Abstractions\IAcceptMessageAcknowledgements.cs" />
     <Compile Include="Abstractions\ICommand.cs" />
     <Compile Include="Abstractions\IEvent.cs" />
     <Compile Include="Abstractions\IHandle.cs" />
-    <Compile Include="Abstractions\IHandleTransactional.cs" />
+    <Compile Include="Abstractions\IHandleDurable.cs" />
     <Compile Include="Abstractions\IMessage.cs" />
-    <Compile Include="Abstractions\IMessageTx.cs" />
+    <Compile Include="Abstractions\IDurableMessage.cs" />
     <Compile Include="Abstractions\IPublishEvents.cs" />
-    <Compile Include="Abstractions\IPublishTransactionalEvents.cs" />
+    <Compile Include="Abstractions\IPublishDurableEvents.cs" />
     <Compile Include="Abstractions\ISendCommands.cs" />
-    <Compile Include="Abstractions\ISendTransactionalCommands.cs" />
+    <Compile Include="Abstractions\ISendDurableCommands.cs" />
     <Compile Include="Abstractions\ISerializer.cs" />
-    <Compile Include="Abstractions\IStartable.cs" />
-    <Compile Include="Abstractions\IStoppable.cs" />
+    <Compile Include="Abstractions\IStartableAsync.cs" />
+    <Compile Include="Abstractions\IStoppableAsync.cs" />
     <Compile Include="Abstractions\Message.cs" />
     <Compile Include="DelegateConverter.cs" />
     <Compile Include="DuplicateSubscriberRegisteredException.cs" />
@@ -63,7 +63,7 @@
     <Compile Include="Serializable\EvenvelopeState.cs" />
     <Compile Include="Serializable\RetryPolicyState.cs" />
     <Compile Include="SubscribersResult.cs" />
-    <Compile Include="TransactionalMessageBus.cs" />
+    <Compile Include="DurableMessageBus.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Threading.Tasks">

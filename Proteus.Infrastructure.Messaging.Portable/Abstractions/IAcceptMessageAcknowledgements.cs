@@ -2,6 +2,6 @@
 {
     public interface IAcceptMessageAcknowledgements
     {
-        void Acknowledge<TMessage>(TMessage message) where TMessage : IMessageTx;
+        void Acknowledge<TMessage>(TMessage message) where TMessage : IDurableMessage;
     }
 }

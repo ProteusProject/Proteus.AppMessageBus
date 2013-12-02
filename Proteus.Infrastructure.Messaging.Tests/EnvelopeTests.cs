@@ -11,13 +11,13 @@ namespace Proteus.Infrastructure.Messaging.Tests
         public class WhenEnvelopeHasZeroRetryPolicyAndIsNotExpired
         {
             private RetryPolicy _retryPolicy;
-            private Envelope<IMessageTx> _envelope;
+            private Envelope<IDurableMessage> _envelope;
 
             [SetUp]
             public void SetUp()
             {
                 _retryPolicy = new RetryPolicy(0, DateTimeUtility.PositiveOneHourTimeSpan);
-                _envelope = new Envelope<IMessageTx>(new TransactionalBusTests.TestCommandTx(string.Empty), _retryPolicy, Guid.NewGuid());
+                _envelope = new Envelope<IDurableMessage>(new TransactionalBusTests.TestCommandTx(string.Empty), _retryPolicy, Guid.NewGuid());
             }
 
             [Test]
@@ -41,13 +41,13 @@ namespace Proteus.Infrastructure.Messaging.Tests
         public class WhenEnvelopeHasNonZeroRetryPolicyAndNotYetExpired
         {
             private RetryPolicy _retryPolicy;
-            private Envelope<IMessageTx> _envelope;
+            private Envelope<IDurableMessage> _envelope;
 
             [SetUp]
             public void SetUp()
             {
                 _retryPolicy = new RetryPolicy(3, DateTimeUtility.PositiveOneHourTimeSpan);
-                _envelope = new Envelope<IMessageTx>(new TransactionalBusTests.TestCommandTx(string.Empty), _retryPolicy, Guid.NewGuid());
+                _envelope = new Envelope<IDurableMessage>(new TransactionalBusTests.TestCommandTx(string.Empty), _retryPolicy, Guid.NewGuid());
             }
 
             [Test]
@@ -79,12 +79,12 @@ namespace Proteus.Infrastructure.Messaging.Tests
         [TestFixture]
         public class WhenEnvelopeHasNoRetryPolicy
         {
-            private Envelope<IMessageTx> _envelope;
+            private Envelope<IDurableMessage> _envelope;
 
             [SetUp]
             public void SetUp()
             {
-                _envelope = new Envelope<IMessageTx>(new TransactionalBusTests.TestCommandTx(string.Empty));
+                _envelope = new Envelope<IDurableMessage>(new TransactionalBusTests.TestCommandTx(string.Empty));
             }
 
             [Test]

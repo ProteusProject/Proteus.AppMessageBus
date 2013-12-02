@@ -11,14 +11,14 @@ using Proteus.Infrastructure.Messaging.Portable.Serializable;
 
 namespace Proteus.Infrastructure.Messaging.Portable
 {
-    public class TransactionalMessageBus : MessageBus, IStartable, IStoppable, ISendTransactionalCommands, IPublishTransactionalEvents, IAcceptMessageAcknowledgements
+    public class DurableMessageBus : MessageBus, IStartableAsync, IStoppableAsync, ISendDurableCommands, IPublishDurableEvents, IAcceptMessageAcknowledgements
     {
         private const string MessagesFolder = "Proteus.Messaging.Messages";
         private const string CommandsDatafile = "Commands.data";
         private const string EventsDatafile = "Events.data";
 
-        private List<Envelope<IMessageTx>> _queuedEvents = new List<Envelope<IMessageTx>>();
-        private List<Envelope<IMessageTx>> _queuedCommands = new List<Envelope<IMessageTx>>();
+        private List<Envelope<IDurableMessage>> _queuedEvents = new List<Envelope<IDurableMessage>>();
+        private List<Envelope<IDurableMessage>> _queuedCommands = new List<Envelope<IDurableMessage>>();
         private RetryPolicy _activeRetryPolicy;
         private Lazy<string> _messageVersion = new Lazy<string>(() => string.Empty);
 
@@ -42,17 +42,17 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        public TransactionalMessageBus()
+        public DurableMessageBus()
             : this(new RetryPolicy(), new RetryPolicy())
         {
         }
 
-        public TransactionalMessageBus(RetryPolicy defaultMessageRetryPolicy)
+        public DurableMessageBus(RetryPolicy defaultMessageRetryPolicy)
             : this(defaultMessageRetryPolicy, defaultMessageRetryPolicy)
         {
         }
 
-        public TransactionalMessageBus(RetryPolicy defaultCommandRetryPolicy, RetryPolicy defaultEventRetryPolicy)
+        public DurableMessageBus(RetryPolicy defaultCommandRetryPolicy, RetryPolicy defaultEventRetryPolicy)
         {
             DefaultCommandRetryPolicy = defaultCommandRetryPolicy;
             DefaultEventRetryPolicy = defaultEventRetryPolicy;
@@ -170,7 +170,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 if (commandsDatafile != null)
                 {
                     var commands = await commandsDatafile.ReadAllTextAsync();
-                    var queuedCommandStates = Serializer.Deserialize<List<EvenvelopeState<IMessageTx>>>(commands);
+                    var queuedCommandStates = Serializer.Deserialize<List<EvenvelopeState<IDurableMessage>>>(commands);
                     _queuedCommands = queuedCommandStates.Select(state => state.GetEnvelope()).ToList();
                 }
             }
@@ -189,7 +189,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 if (eventsDatafile != null)
                 {
                     var events = await eventsDatafile.ReadAllTextAsync();
-                    var queuedEventStates = Serializer.Deserialize<List<EvenvelopeState<IMessageTx>>>(events);
+                    var queuedEventStates = Serializer.Deserialize<List<EvenvelopeState<IDurableMessage>>>(events);
                     _queuedEvents = queuedEventStates.Select(state => state.GetEnvelope()).ToList();
                 }
             }
@@ -269,7 +269,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        public void Acknowledge<TMessage>(TMessage message) where TMessage : IMessageTx
+        public void Acknowledge<TMessage>(TMessage message) where TMessage : IDurableMessage
         {
             Logger(string.Format("Acknowledgement received for Message Id = {0} having Acknowledgement Id = {1}", message.Id,
                                  message.AcknowledgementId));
@@ -297,7 +297,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
             Logger(string.Format("Preparing to Send Command of type {0}, MessageId = {1}", typeof(TCommand).AssemblyQualifiedName, command.Id));
 
-            var txCommand = command as IMessageTx;
+            var txCommand = command as IDurableMessage;
 
             if (null == txCommand)
                 return command;
@@ -314,7 +314,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
             Logger(string.Format("Preparing to Publish Event of type {0}, MessageId = {1}, Subscriber Index = {2}", typeof(TEvent).AssemblyQualifiedName, @event.Id, subscriberIndex));
 
-            var txEvent = @event as IMessageTx;
+            var txEvent = @event as IDurableMessage;
 
             if (null == txEvent)
                 return @event;
@@ -324,7 +324,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
             var clonedEvent = Clone((TEvent) txEvent);
             
-            StoreEvent((IMessageTx)clonedEvent, subscriberIndex);
+            StoreEvent((IDurableMessage)clonedEvent, subscriberIndex);
             
             return clonedEvent;
         }
@@ -336,12 +336,12 @@ namespace Proteus.Infrastructure.Messaging.Portable
             return Serializer.Deserialize<TSource>(serialized);
         }
 
-        public void SendTx<TCommand>(TCommand command) where TCommand : ICommand, IMessageTx
+        public void SendTx<TCommand>(TCommand command) where TCommand : ICommand, IDurableMessage
         {
             SendTx(command, DefaultCommandRetryPolicy);
         }
 
-        public void SendTx<TCommand>(TCommand command, RetryPolicy retryPolicy) where TCommand : ICommand, IMessageTx
+        public void SendTx<TCommand>(TCommand command, RetryPolicy retryPolicy) where TCommand : ICommand, IDurableMessage
         {
             Logger(string.Format("Transactionally sending Command Id = {0}", command.Id));
 
@@ -349,12 +349,12 @@ namespace Proteus.Infrastructure.Messaging.Portable
             base.Send(command);
         }
 
-        public void PublishTx<TEvent>(TEvent @event) where TEvent : IMessageTx
+        public void PublishTx<TEvent>(TEvent @event) where TEvent : IDurableMessage
         {
             PublishTx(@event, DefaultEventRetryPolicy);
         }
 
-        public void PublishTx<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : IMessageTx
+        public void PublishTx<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : IDurableMessage
         {
             Logger(string.Format("Transactionally publishing Event Id = {0}", @event.Id));
 
@@ -362,9 +362,9 @@ namespace Proteus.Infrastructure.Messaging.Portable
             base.Publish(@event);
         }
 
-        private void StoreEvent(IMessageTx @event, int index)
+        private void StoreEvent(IDurableMessage @event, int index)
         {
-            var envelope = new Envelope<IMessageTx>(@event, _activeRetryPolicy, @event.AcknowledgementId, index);
+            var envelope = new Envelope<IDurableMessage>(@event, _activeRetryPolicy, @event.AcknowledgementId, index);
 
             if (envelope.ShouldRetry)
             {
@@ -372,9 +372,9 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        private void StoreCommand(IMessageTx command)
+        private void StoreCommand(IDurableMessage command)
         {
-            var envelope = new Envelope<IMessageTx>(command, _activeRetryPolicy, command.AcknowledgementId);
+            var envelope = new Envelope<IDurableMessage>(command, _activeRetryPolicy, command.AcknowledgementId);
 
             if (envelope.ShouldRetry)
             {

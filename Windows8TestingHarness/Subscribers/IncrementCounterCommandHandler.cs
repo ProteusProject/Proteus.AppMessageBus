@@ -6,7 +6,7 @@ using Windows8TestingHarness.Messages;
 namespace Windows8TestingHarness.Subscribers
 {
     public class IncrementCounterCommandHandler 
-        : IHandleTransactional<IncrementCounterWithAckCommand>, IHandleTransactional<IncrementCounterWithoutAckCommand>
+        : IHandleDurable<IncrementCounterWithAckCommand>, IHandleDurable<IncrementCounterWithoutAckCommand>
     {
         public void Handle(IncrementCounterWithAckCommand message)
         {

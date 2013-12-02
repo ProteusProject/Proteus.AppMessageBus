@@ -28,7 +28,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
         [TestFixture]
         public class WhenConfiguredWithNonZeroEventRetryAndCommandRetryAndMessagesHaveNotExpired
         {
-            private TransactionalMessageBus _bus;
+            private DurableMessageBus _bus;
             private CommandSubscribers _commands;
             private EventSubscribers _events;
             private readonly string _doubleValue = String.Format("{0}{0}", SingleValue);
@@ -40,7 +40,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 await ClearAllDataFiles();
 
                 var retryPolicy = new RetryPolicy(1, DateTimeUtility.PositiveOneHourTimeSpan);
-                _bus = new TransactionalMessageBus(retryPolicy);
+                _bus = new DurableMessageBus(retryPolicy);
 
                 _commands = new CommandSubscribers();
                 _events = new EventSubscribers();
@@ -88,7 +88,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
         [TestFixture]
         public class WhenConfiguredWithZeroEventRetryAndZeroCommandRetry
         {
-            private TransactionalMessageBus _bus;
+            private DurableMessageBus _bus;
             private CommandSubscribers _commands;
             private EventSubscribers _events;
             private readonly string _doubleValue = String.Format("{0}{0}", SingleValue);
@@ -102,7 +102,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 var retryPolicy = new RetryPolicy();
                 Assume.That(retryPolicy.Retries, Is.EqualTo(0));
 
-                _bus = new TransactionalMessageBus(retryPolicy);
+                _bus = new DurableMessageBus(retryPolicy);
 
                 _commands = new CommandSubscribers();
                 _events = new EventSubscribers();
@@ -133,7 +133,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
         [TestFixture]
         public class WhenConfiguredWithNonZeroEventRetryAndNonZeroCommandRetryAndMessagesHaveAlreadyExpired
         {
-            private TransactionalMessageBus _bus;
+            private DurableMessageBus _bus;
             private CommandSubscribers _commands;
             private EventSubscribers _events;
             private const string SingleValue = "0";
@@ -144,7 +144,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 await ClearAllDataFiles();
 
                 var retryPolicy = new RetryPolicy(1, DateTimeUtility.NegativeOneHourTimeSpan);
-                _bus = new TransactionalMessageBus(retryPolicy);
+                _bus = new DurableMessageBus(retryPolicy);
 
                 _commands = new CommandSubscribers();
                 _events = new EventSubscribers();
@@ -173,9 +173,9 @@ namespace Proteus.Infrastructure.Messaging.Tests
         [TestFixture]
         public class WhenAcknowledgingCommands
         {
-            private TransactionalMessageBus _bus;
-            private TransactionalCommandSubscribers _commands;
-            private TransactionalEventSubscribers _events;
+            private DurableMessageBus _bus;
+            private DurableCommandSubscribers _commands;
+            private DurableEventSubscribers _events;
             private const string SingleValue = "0";
 
             [SetUp]
@@ -184,10 +184,10 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 await ClearAllDataFiles();
 
                 var retryPolicy = new RetryPolicy(1, DateTimeUtility.PositiveOneHourTimeSpan);
-                _bus = new TransactionalMessageBus(retryPolicy);
+                _bus = new DurableMessageBus(retryPolicy);
 
-                _commands = new TransactionalCommandSubscribers();
-                _events = new TransactionalEventSubscribers();
+                _commands = new DurableCommandSubscribers();
+                _events = new DurableEventSubscribers();
                 _bus.RegisterSubscriptionFor<TestCommandTx>(_commands.Handle);
                 _bus.RegisterSubscriptionFor<TestEventTx>(_events.Handle);
             }
@@ -221,10 +221,10 @@ namespace Proteus.Infrastructure.Messaging.Tests
         [TestFixture]
         public class WhenAcknowledgingEvents
         {
-            private TransactionalMessageBus _bus;
+            private DurableMessageBus _bus;
             private CommandSubscribers _commands;
-            private TransactionalEventSubscribers _eventsThatWillBeAcknowledged;
-            private TransactionalEventSubscribers _eventsThatWillNotBeAcknowledged;
+            private DurableEventSubscribers _eventsThatWillBeAcknowledged;
+            private DurableEventSubscribers _eventsThatWillNotBeAcknowledged;
             private const string SingleValue = "0";
 
             [SetUp]
@@ -233,11 +233,11 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 await ClearAllDataFiles();
 
                 var retryPolicy = new RetryPolicy(1, DateTimeUtility.PositiveOneHourTimeSpan);
-                _bus = new TransactionalMessageBus(retryPolicy);
+                _bus = new DurableMessageBus(retryPolicy);
 
                 _commands = new CommandSubscribers();
-                _eventsThatWillBeAcknowledged = new TransactionalEventSubscribers();
-                _eventsThatWillNotBeAcknowledged = new TransactionalEventSubscribers();
+                _eventsThatWillBeAcknowledged = new DurableEventSubscribers();
+                _eventsThatWillNotBeAcknowledged = new DurableEventSubscribers();
                 _bus.RegisterSubscriptionFor<TestCommandTx>(_commands.Handle);
                 _bus.RegisterSubscriptionFor<TestEventTx>(_eventsThatWillBeAcknowledged.Handle);
                 _bus.RegisterSubscriptionFor<TestEventTx>(_eventsThatWillNotBeAcknowledged.Handle);
@@ -308,7 +308,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 //  so that we'd expect the call to Start() to attemp a retry
                 var retryPolicy = new RetryPolicy(1, DateTimeUtility.PositiveOneHourTimeSpan);
 
-                var bus = new TransactionalMessageBus(retryPolicy);
+                var bus = new DurableMessageBus(retryPolicy);
                 var events = new EventSubscribers();
                 bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
 
@@ -343,7 +343,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 //  so that we'd expect the call to Start() to attemp a retry
                 var retryPolicy = new RetryPolicy(1, DateTimeUtility.PositiveOneHourTimeSpan);
 
-                var bus = new TransactionalMessageBus(retryPolicy);
+                var bus = new DurableMessageBus(retryPolicy);
                 var commands = new CommandSubscribers();
                 bus.RegisterSubscriptionFor<TestCommandTx>(commands.Handle);
 
@@ -378,9 +378,9 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 string tripleValue = string.Format("{0}{0}{0}", singleValue);
 
                 var retryPolicy = new RetryPolicy(10, DateTimeUtility.PositiveOneHourTimeSpan);
-                var bus = new TransactionalMessageBus(retryPolicy);
+                var bus = new DurableMessageBus(retryPolicy);
 
-                var events = new TransactionalEventSubscribers();
+                var events = new DurableEventSubscribers();
 
                 bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
 
@@ -403,7 +403,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 Assume.That(bus, Is.Null);
 
                 //recreate the bus from scratch
-                bus = new TransactionalMessageBus(retryPolicy);
+                bus = new DurableMessageBus(retryPolicy);
 
                 //re-register the event subscriber
                 bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
@@ -431,7 +431,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [Test]
             public void DefaultValueIsEmptyString()
             {
-                var bus = new TransactionalMessageBus(new RetryPolicy());
+                var bus = new DurableMessageBus(new RetryPolicy());
 
                 Assert.That(bus.MessageVersion, Is.Not.Null);
                 Assert.That(bus.MessageVersion, Is.Empty);
@@ -445,7 +445,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 var versionProvider = new VersionProvider { Version = expected };
 
-                var bus = new TransactionalMessageBus(new RetryPolicy())
+                var bus = new DurableMessageBus(new RetryPolicy())
                     {
                         MessageVersionProvider = () => versionProvider.Version
                     };
@@ -462,7 +462,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
         }
 
 
-        public class TransactionalEventSubscribers : TransactionalSubscribers, IHandleTransactional<TestEventTx>
+        public class DurableEventSubscribers : TransactionalSubscribers, IHandleDurable<TestEventTx>
         {
             public string ProcessedMessagePayload { get; private set; }
             public IList<Tuple<Guid, Guid>> ProcessedMessageIds { get; private set; }
@@ -474,7 +474,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 Messages.Add(message);
             }
 
-            public TransactionalEventSubscribers()
+            public DurableEventSubscribers()
             {
                 ProcessedMessageIds = new List<Tuple<Guid, Guid>>();
             }
@@ -482,20 +482,20 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
         public class TransactionalSubscribers
         {
-            public void AcknowledgeLastMessage(TransactionalMessageBus bus)
+            public void AcknowledgeLastMessage(DurableMessageBus bus)
             {
                 bus.Acknowledge(Messages.Last());
             }
 
-            public IList<IMessageTx> Messages { get; private set; }
+            public IList<IDurableMessage> Messages { get; private set; }
 
             public TransactionalSubscribers()
             {
-                Messages = new List<IMessageTx>();
+                Messages = new List<IDurableMessage>();
             }
         }
 
-        public class TransactionalCommandSubscribers : TransactionalSubscribers, IHandleTransactional<TestCommandTx>
+        public class DurableCommandSubscribers : TransactionalSubscribers, IHandleDurable<TestCommandTx>
         {
             public string ProcessedMessagePayload { get; private set; }
             public IList<Tuple<Guid, Guid>> ProcessedMessageIds { get; private set; }
@@ -507,13 +507,13 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 Messages.Add(message);
             }
 
-            public TransactionalCommandSubscribers()
+            public DurableCommandSubscribers()
             {
                 ProcessedMessageIds = new List<Tuple<Guid, Guid>>();
             }
         }
 
-        public class TestEventTx : TestEvent, IMessageTx
+        public class TestEventTx : TestEvent, IDurableMessage
         {
             public TestEventTx(string payload)
                 : base(payload)
@@ -524,7 +524,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
         }
 
 
-        public class TestCommandTx : TestCommand, IMessageTx
+        public class TestCommandTx : TestCommand, IDurableMessage
         {
             public TestCommandTx(string payload)
                 : base(payload)

@@ -2,7 +2,7 @@
 
 namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
 {
-    public interface IMessageTx : IMessage
+    public interface IDurableMessage : IMessage
     {
         Guid AcknowledgementId { get; set; }
     }

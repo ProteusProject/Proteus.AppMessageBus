@@ -2,7 +2,7 @@
 
 namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
 {
-    public class EventTx : Event, IMessageTx
+    public class DurableEvent : Event, IDurableMessage
     {
         public Guid AcknowledgementId { get; set; }
     }

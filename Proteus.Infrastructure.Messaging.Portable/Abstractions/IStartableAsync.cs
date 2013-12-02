@@ -2,7 +2,7 @@
 
 namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
 {
-    public interface IStartable
+    public interface IStartableAsync
     {
         Task Start();
     }

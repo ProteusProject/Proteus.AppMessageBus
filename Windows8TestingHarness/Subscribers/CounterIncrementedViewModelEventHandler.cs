@@ -4,7 +4,7 @@ using Windows8TestingHarness.Messages;
 namespace Windows8TestingHarness.Subscribers
 {
     public class CounterIncrementedViewModelEventHandler
-        : IHandleTransactional<CounterIncrementedWithAckEvent>, IHandleTransactional<CounterIncrementedWithoutAckEvent>
+        : IHandleDurable<CounterIncrementedWithAckEvent>, IHandleDurable<CounterIncrementedWithoutAckEvent>
     {
         public void Handle(CounterIncrementedWithAckEvent message)
         {

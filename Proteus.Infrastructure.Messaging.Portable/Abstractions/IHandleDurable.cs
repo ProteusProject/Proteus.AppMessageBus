@@ -1,6 +1,6 @@
 ﻿namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
 {
-    public interface IHandleTransactional<in TMessage> where TMessage : IMessageTx
+    public interface IHandleDurable<in TMessage> where TMessage : IDurableMessage
     {
         void Handle(TMessage message);
     }

@@ -4,7 +4,7 @@ using Proteus.Infrastructure.Messaging.Portable.Serializable;
 
 namespace Proteus.Infrastructure.Messaging.Portable
 {
-    public class Envelope<TMessage> : IEquatable<Envelope<TMessage>> where TMessage : IMessageTx
+    public class Envelope<TMessage> : IEquatable<Envelope<TMessage>> where TMessage : IDurableMessage
     {
         public int SubscriberIndex { get; private set; }
 

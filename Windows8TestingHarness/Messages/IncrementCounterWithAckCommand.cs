@@ -2,7 +2,7 @@
 
 namespace Windows8TestingHarness.Messages
 {
-    public class IncrementCounterWithAckCommand : CommandTx
+    public class IncrementCounterWithAckCommand : DurableCommand
     {
     }
 }

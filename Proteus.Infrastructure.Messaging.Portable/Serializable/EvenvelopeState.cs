@@ -3,7 +3,7 @@ using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
 namespace Proteus.Infrastructure.Messaging.Portable.Serializable
 {
-    public class EvenvelopeState<TMessage> where TMessage : IMessageTx
+    public class EvenvelopeState<TMessage> where TMessage : IDurableMessage
     {
         public int SubscriberIndex { get; set; }
         public Guid Id { get; set; }

@@ -2,7 +2,7 @@
 
 namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
 {
-    public interface IStoppable
+    public interface IStoppableAsync
     {
         Task Stop();
     }

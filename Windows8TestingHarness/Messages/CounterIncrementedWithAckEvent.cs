@@ -2,7 +2,7 @@
 
 namespace Windows8TestingHarness.Messages
 {
-    public class CounterIncrementedWithAckEvent: EventTx
+    public class CounterIncrementedWithAckEvent: DurableEvent
     {
          
     }
