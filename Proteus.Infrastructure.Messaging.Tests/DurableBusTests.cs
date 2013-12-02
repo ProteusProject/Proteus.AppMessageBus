@@ -10,7 +10,7 @@ using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
 namespace Proteus.Infrastructure.Messaging.Tests
 {
-    public class TransactionalBusTests
+    public class DurableBusTests
     {
         public static async Task ClearAllDataFiles()
         {
@@ -44,16 +44,16 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 _commands = new CommandSubscribers();
                 _events = new EventSubscribers();
-                _bus.RegisterSubscriptionFor<TestCommandTx>(_commands.Handle);
-                _bus.RegisterSubscriptionFor<TestEventTx>(_events.Handle);
+                _bus.RegisterSubscriptionFor<TestDurableCommand>(_commands.Handle);
+                _bus.RegisterSubscriptionFor<TestDurableEvent>(_events.Handle);
 
             }
 
             [Test]
             async public void CommandAndEventAreRetriedOnNextStart()
             {
-                _bus.SendDurable(new TestCommandTx(SingleValue));
-                _bus.PublishDurable(new TestEventTx(SingleValue));
+                _bus.SendDurable(new TestDurableCommand(SingleValue));
+                _bus.PublishDurable(new TestDurableEvent(SingleValue));
 
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
                 Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
@@ -67,8 +67,8 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [Test]
             async public void CommandAndEventRetriesRespectRetryPolicyAcrossAdditionalStarts()
             {
-                _bus.SendDurable(new TestCommandTx(SingleValue));
-                _bus.PublishDurable(new TestEventTx(SingleValue));
+                _bus.SendDurable(new TestDurableCommand(SingleValue));
+                _bus.PublishDurable(new TestDurableEvent(SingleValue));
 
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
                 Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
@@ -106,15 +106,15 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 _commands = new CommandSubscribers();
                 _events = new EventSubscribers();
-                _bus.RegisterSubscriptionFor<TestCommandTx>(_commands.Handle);
-                _bus.RegisterSubscriptionFor<TestEventTx>(_events.Handle);
+                _bus.RegisterSubscriptionFor<TestDurableCommand>(_commands.Handle);
+                _bus.RegisterSubscriptionFor<TestDurableEvent>(_events.Handle);
             }
 
             [Test]
             async public void CommandAndEventAreNotRetriedAcrossAdditionalStarts()
             {
-                _bus.SendDurable(new TestCommandTx(SingleValue));
-                _bus.PublishDurable(new TestEventTx(SingleValue));
+                _bus.SendDurable(new TestDurableCommand(SingleValue));
+                _bus.PublishDurable(new TestDurableEvent(SingleValue));
 
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
                 Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
@@ -148,15 +148,15 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 _commands = new CommandSubscribers();
                 _events = new EventSubscribers();
-                _bus.RegisterSubscriptionFor<TestCommandTx>(_commands.Handle);
-                _bus.RegisterSubscriptionFor<TestEventTx>(_events.Handle);
+                _bus.RegisterSubscriptionFor<TestDurableCommand>(_commands.Handle);
+                _bus.RegisterSubscriptionFor<TestDurableEvent>(_events.Handle);
             }
 
             [Test]
             async public void CommandAndEventAreNotRetriedOnNextStart()
             {
-                _bus.SendDurable(new TestCommandTx(SingleValue));
-                _bus.PublishDurable(new TestEventTx(SingleValue));
+                _bus.SendDurable(new TestDurableCommand(SingleValue));
+                _bus.PublishDurable(new TestDurableEvent(SingleValue));
 
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
                 Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
@@ -188,14 +188,14 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 _commands = new DurableCommandSubscribers();
                 _events = new DurableEventSubscribers();
-                _bus.RegisterSubscriptionFor<TestCommandTx>(_commands.Handle);
-                _bus.RegisterSubscriptionFor<TestEventTx>(_events.Handle);
+                _bus.RegisterSubscriptionFor<TestDurableCommand>(_commands.Handle);
+                _bus.RegisterSubscriptionFor<TestDurableEvent>(_events.Handle);
             }
 
             [Test]
             async public void UnacknowledgedCommandWithNonExpiredRetryPolicyIsRetriedAcrossAdditionalStarts()
             {
-                var command = new TestCommandTx(SingleValue);
+                var command = new TestDurableCommand(SingleValue);
                 _bus.SendDurable(command);
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
@@ -207,7 +207,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [Test]
             async public void AcknowledgedCommandWithNonExpiredRetryPolicyIsNotRetriedAcrossAdditionalStarts()
             {
-                var command = new TestCommandTx(SingleValue);
+                var command = new TestDurableCommand(SingleValue);
                 _bus.SendDurable(command);
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
@@ -238,15 +238,15 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 _commands = new CommandSubscribers();
                 _eventsThatWillBeAcknowledged = new DurableEventSubscribers();
                 _eventsThatWillNotBeAcknowledged = new DurableEventSubscribers();
-                _bus.RegisterSubscriptionFor<TestCommandTx>(_commands.Handle);
-                _bus.RegisterSubscriptionFor<TestEventTx>(_eventsThatWillBeAcknowledged.Handle);
-                _bus.RegisterSubscriptionFor<TestEventTx>(_eventsThatWillNotBeAcknowledged.Handle);
+                _bus.RegisterSubscriptionFor<TestDurableCommand>(_commands.Handle);
+                _bus.RegisterSubscriptionFor<TestDurableEvent>(_eventsThatWillBeAcknowledged.Handle);
+                _bus.RegisterSubscriptionFor<TestDurableEvent>(_eventsThatWillNotBeAcknowledged.Handle);
             }
 
             [Test]
             async public void UnacknowledgedEventWithNonExpiredRetryPolicyIsRetriedAcrossAdditionalStarts()
             {
-                var @event = new TestEventTx(SingleValue);
+                var @event = new TestDurableEvent(SingleValue);
                 _bus.PublishDurable(@event);
                 Assume.That(_eventsThatWillBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
@@ -258,7 +258,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [Test]
             async public void AcknowledgedEventWithNonExpiredRetryPolicyIsNotRetriedAcrossAdditionalStarts()
             {
-                var @event = new TestEventTx(SingleValue);
+                var @event = new TestDurableEvent(SingleValue);
                 _bus.PublishDurable(@event);
                 Assume.That(_eventsThatWillBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
@@ -271,7 +271,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [Test]
             async public void UnacknowledgedEventIsUnaffectedByAcknowledgingOtherSubscriberAcrossAdditionalStarts()
             {
-                var @event = new TestEventTx(SingleValue);
+                var @event = new TestDurableEvent(SingleValue);
                 _bus.PublishDurable(@event);
                 Assume.That(_eventsThatWillNotBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
@@ -310,13 +310,13 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 var bus = new DurableMessageBus(retryPolicy);
                 var events = new EventSubscribers();
-                bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
+                bus.RegisterSubscriptionFor<TestDurableEvent>(events.Handle);
 
-                bus.PublishDurable(new TestEventTx(singleValue));
+                bus.PublishDurable(new TestDurableEvent(singleValue));
 
                 Assume.That(events.ProcessedMessagePayload, Is.EqualTo(singleValue), "Event Subscriber didn't receive the expected message.");
 
-                bus.UnRegisterAllSubscriptionsFor<TestEventTx>();
+                bus.UnRegisterAllSubscriptionsFor<TestDurableEvent>();
 
                 await bus.Start();
 
@@ -345,13 +345,13 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 var bus = new DurableMessageBus(retryPolicy);
                 var commands = new CommandSubscribers();
-                bus.RegisterSubscriptionFor<TestCommandTx>(commands.Handle);
+                bus.RegisterSubscriptionFor<TestDurableCommand>(commands.Handle);
 
-                bus.PublishDurable(new TestCommandTx(singleValue));
+                bus.PublishDurable(new TestDurableCommand(singleValue));
 
                 Assume.That(commands.ProcessedMessagePayload, Is.EqualTo(singleValue), "Command Subscriber didn't receive the expected message.");
 
-                bus.UnRegisterAllSubscriptionsFor<TestCommandTx>();
+                bus.UnRegisterAllSubscriptionsFor<TestDurableCommand>();
 
                 await bus.Start();
 
@@ -382,9 +382,9 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 var events = new DurableEventSubscribers();
 
-                bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
+                bus.RegisterSubscriptionFor<TestDurableEvent>(events.Handle);
 
-                bus.PublishDurable(new TestEventTx(singleValue));
+                bus.PublishDurable(new TestDurableEvent(singleValue));
 
                 Assume.That(events.ProcessedMessagePayload, Is.EqualTo(singleValue), "Event Subscriber not registered for event as expected.");
 
@@ -406,7 +406,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 bus = new DurableMessageBus(retryPolicy);
 
                 //re-register the event subscriber
-                bus.RegisterSubscriptionFor<TestEventTx>(events.Handle);
+                bus.RegisterSubscriptionFor<TestDurableEvent>(events.Handle);
 
                 //bus.SerializedCommands = savedCommands;
                 //bus.SerializedEvents = savedEvents;
@@ -462,12 +462,12 @@ namespace Proteus.Infrastructure.Messaging.Tests
         }
 
 
-        public class DurableEventSubscribers : TransactionalSubscribers, IHandleDurable<TestEventTx>
+        public class DurableEventSubscribers : DurableSubscribers, IHandleDurable<TestDurableEvent>
         {
             public string ProcessedMessagePayload { get; private set; }
             public IList<Tuple<Guid, Guid>> ProcessedMessageIds { get; private set; }
 
-            public void Handle(TestEventTx message)
+            public void Handle(TestDurableEvent message)
             {
                 ProcessedMessagePayload += message.Payload;
                 ProcessedMessageIds.Add(new Tuple<Guid, Guid>(message.Id, message.AcknowledgementId));
@@ -480,7 +480,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
         }
 
-        public class TransactionalSubscribers
+        public class DurableSubscribers
         {
             public void AcknowledgeLastMessage(DurableMessageBus bus)
             {
@@ -489,18 +489,18 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
             public IList<IDurableMessage> Messages { get; private set; }
 
-            public TransactionalSubscribers()
+            public DurableSubscribers()
             {
                 Messages = new List<IDurableMessage>();
             }
         }
 
-        public class DurableCommandSubscribers : TransactionalSubscribers, IHandleDurable<TestCommandTx>
+        public class DurableCommandSubscribers : DurableSubscribers, IHandleDurable<TestDurableCommand>
         {
             public string ProcessedMessagePayload { get; private set; }
             public IList<Tuple<Guid, Guid>> ProcessedMessageIds { get; private set; }
 
-            public void Handle(TestCommandTx message)
+            public void Handle(TestDurableCommand message)
             {
                 ProcessedMessagePayload += message.Payload;
                 ProcessedMessageIds.Add(new Tuple<Guid, Guid>(message.Id, message.AcknowledgementId));
@@ -513,9 +513,9 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
         }
 
-        public class TestEventTx : TestEvent, IDurableMessage
+        public class TestDurableEvent : TestEvent, IDurableMessage
         {
-            public TestEventTx(string payload)
+            public TestDurableEvent(string payload)
                 : base(payload)
             {
             }
@@ -524,9 +524,9 @@ namespace Proteus.Infrastructure.Messaging.Tests
         }
 
 
-        public class TestCommandTx : TestCommand, IDurableMessage
+        public class TestDurableCommand : TestCommand, IDurableMessage
         {
-            public TestCommandTx(string payload)
+            public TestDurableCommand(string payload)
                 : base(payload)
             {
             }

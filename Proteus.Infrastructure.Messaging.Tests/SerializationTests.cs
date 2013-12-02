@@ -16,12 +16,12 @@ namespace Proteus.Infrastructure.Messaging.Tests
         public void EnvelopesAreSerializable()
         {
             var retryPolicy = new RetryPolicy(10, DateTimeUtility.PositiveOneHourTimeSpan);
-            var env = new Envelope<TransactionalBusTests.TestEventTx>(new TransactionalBusTests.TestEventTx("0"),
+            var env = new Envelope<DurableBusTests.TestDurableEvent>(new DurableBusTests.TestDurableEvent("0"),
                                                                       retryPolicy, Guid.NewGuid());
 
             var serializer = new JsonNetSerializer();
             var serialized = serializer.SerializeToStream(env.EnvelopeState);
-            var deserialized = serializer.Deserialize<EvenvelopeState<TransactionalBusTests.TestEventTx>>(serialized);
+            var deserialized = serializer.Deserialize<EvenvelopeState<DurableBusTests.TestDurableEvent>>(serialized);
 
             var envelope = deserialized.GetEnvelope();
 
@@ -31,12 +31,12 @@ namespace Proteus.Infrastructure.Messaging.Tests
         [Test]
         public void TestMessageIsSerializable()
         {
-            var msg = new TransactionalBusTests.TestEventTx("0");
+            var msg = new DurableBusTests.TestDurableEvent("0");
 
             var serializer = new JsonNetSerializer();
 
             var serialized = serializer.SerializeToStream(msg);
-            var deserialized = serializer.Deserialize<TransactionalBusTests.TestEventTx>(serialized);
+            var deserialized = serializer.Deserialize<DurableBusTests.TestDurableEvent>(serialized);
 
             Assert.That(deserialized, Is.Not.Null);
         }

@@ -17,7 +17,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             public void SetUp()
             {
                 _retryPolicy = new RetryPolicy(0, DateTimeUtility.PositiveOneHourTimeSpan);
-                _envelope = new Envelope<IDurableMessage>(new TransactionalBusTests.TestCommandTx(string.Empty), _retryPolicy, Guid.NewGuid());
+                _envelope = new Envelope<IDurableMessage>(new DurableBusTests.TestDurableCommand(string.Empty), _retryPolicy, Guid.NewGuid());
             }
 
             [Test]
@@ -47,7 +47,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             public void SetUp()
             {
                 _retryPolicy = new RetryPolicy(3, DateTimeUtility.PositiveOneHourTimeSpan);
-                _envelope = new Envelope<IDurableMessage>(new TransactionalBusTests.TestCommandTx(string.Empty), _retryPolicy, Guid.NewGuid());
+                _envelope = new Envelope<IDurableMessage>(new DurableBusTests.TestDurableCommand(string.Empty), _retryPolicy, Guid.NewGuid());
             }
 
             [Test]
@@ -84,7 +84,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [SetUp]
             public void SetUp()
             {
-                _envelope = new Envelope<IDurableMessage>(new TransactionalBusTests.TestCommandTx(string.Empty));
+                _envelope = new Envelope<IDurableMessage>(new DurableBusTests.TestDurableCommand(string.Empty));
             }
 
             [Test]
