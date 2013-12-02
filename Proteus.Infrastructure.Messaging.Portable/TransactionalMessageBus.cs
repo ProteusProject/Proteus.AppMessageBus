@@ -13,6 +13,10 @@ namespace Proteus.Infrastructure.Messaging.Portable
 {
     public class TransactionalMessageBus : MessageBus, IStartable, IStoppable, ISendTransactionalCommands, IPublishTransactionalEvents, IAcceptMessageAcknowledgements
     {
+        private const string MessagesFolder = "Proteus.Messaging.Messages";
+        private const string CommandsDatafile = "Commands.data";
+        private const string EventsDatafile = "Events.data";
+
         private List<Envelope<IMessageTx>> _queuedEvents = new List<Envelope<IMessageTx>>();
         private List<Envelope<IMessageTx>> _queuedCommands = new List<Envelope<IMessageTx>>();
         private RetryPolicy _activeRetryPolicy;
@@ -74,18 +78,19 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         async private Task SavePendingMessages()
         {
-            var queuedCommandStates = _queuedCommands.Select(command => command.EnvelopeState).ToList();
-            var queuedEventStates = _queuedEvents.Select(@event => @event.EnvelopeState).ToList();
+            var queuedCommandStates = _queuedCommands.Select(cmdEnvelope => cmdEnvelope.EnvelopeState).ToList();
+            var queuedEventStates = _queuedEvents.Select(evtEnvelope => evtEnvelope.EnvelopeState).ToList();
 
-            var hasCommandsToProcess = queuedCommandStates.Count > 0;
-            var hasEventsToProcess = queuedEventStates.Count > 0;
+            var hasQueuedCommands = queuedCommandStates.Count > 0;
+            var hasQueuedEvents = queuedEventStates.Count > 0;
 
             IFolder folder = null;
 
-            if (hasCommandsToProcess || hasEventsToProcess)
+            //if either are present, create the folder if necessary
+            if (hasQueuedCommands || hasQueuedEvents)
             {
                 var rootFolder = FileSystem.Current.LocalStorage;
-                folder = await rootFolder.CreateFolderAsync("Proteus.Messaging.Messages", CreationCollisionOption.OpenIfExists);
+                folder = await rootFolder.CreateFolderAsync(MessagesFolder, CreationCollisionOption.OpenIfExists);
             }
 
             if (null==folder)
@@ -93,19 +98,37 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 return;
             }
 
-            if (hasCommandsToProcess)
+            //process any commands or remove the stale data file if it exists
+            if (hasQueuedCommands)
             {
                 var commands = Serializer.SerializeToString(queuedCommandStates);
 
-                var commandsDatafile = await folder.CreateFileAsync("Commands.data", CreationCollisionOption.ReplaceExisting);
+                var commandsDatafile = await folder.CreateFileAsync(CommandsDatafile, CreationCollisionOption.ReplaceExisting);
                 await commandsDatafile.WriteAllTextAsync(commands);
             }
+            else
+            {
+                var files = await folder.GetFilesAsync();
+                foreach (var file in files.Where(file => file.Name == CommandsDatafile))
+                {
+                    await file.DeleteAsync();
+                }
+            }
 
-            if (hasEventsToProcess)
+            //process any events or remove the stale data file if it exists
+            if (hasQueuedEvents)
             {
                 var events = Serializer.SerializeToString(queuedEventStates);
-                var eventsDatafile = await folder.CreateFileAsync("Events.data", CreationCollisionOption.ReplaceExisting);
+                var eventsDatafile = await folder.CreateFileAsync(EventsDatafile, CreationCollisionOption.ReplaceExisting);
                 await eventsDatafile.WriteAllTextAsync(events);
+            }
+            else
+            {
+                var files = await folder.GetFilesAsync();
+                foreach (var file in files.Where(file => file.Name == EventsDatafile))
+                {
+                    await file.DeleteAsync();
+                }
             }
         }
 
@@ -119,7 +142,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
             foreach (var candidate in folders)
             {
-                if (candidate.Name == "Proteus.Messaging.Messages")
+                if (candidate.Name == MessagesFolder)
                 {
                     folder = candidate;
                 }
@@ -139,7 +162,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
                 var files = await folder.GetFilesAsync();
 
-                foreach (var file in files.Where(file => file.Name == "Commands.data"))
+                foreach (var file in files.Where(file => file.Name == CommandsDatafile))
                 {
                     commandsDatafile = file;
                 }
@@ -158,7 +181,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
                 var files = await folder.GetFilesAsync();
 
-                foreach (var file in files.Where(file => file.Name == "Events.data"))
+                foreach (var file in files.Where(file => file.Name == EventsDatafile))
                 {
                     eventsDatafile = file;
                 }
@@ -272,8 +295,19 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         protected override TCommand PrepareCommandForSending<TCommand>(TCommand command, Action<IMessage> subscribers)
         {
-            command.Version = MessageVersion;
-            return command;
+            Logger(string.Format("Preparing to Send Command of type {0}, MessageId = {1}", typeof(TCommand).AssemblyQualifiedName, command.Id));
+
+            var txCommand = command as IMessageTx;
+
+            if (null == txCommand)
+                return command;
+
+            txCommand.AcknowledgementId = Guid.NewGuid();
+            txCommand.Version = MessageVersion;
+
+            StoreCommand(txCommand);
+
+            return (TCommand)txCommand;
         }
 
         protected override TEvent PrepareEventForPublishing<TEvent>(TEvent @event, int subscriberIndex, List<Action<IMessage>> subscribers)
@@ -288,7 +322,11 @@ namespace Proteus.Infrastructure.Messaging.Portable
             txEvent.AcknowledgementId = Guid.NewGuid();
             txEvent.Version = MessageVersion;
 
-            return Clone((TEvent)txEvent);
+            var clonedEvent = Clone((TEvent) txEvent);
+            
+            StoreEvent((IMessageTx)clonedEvent, subscriberIndex);
+            
+            return clonedEvent;
         }
 
 
@@ -307,8 +345,8 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
             Logger(string.Format("Transactionally sending Command Id = {0}", command.Id));
 
+            _activeRetryPolicy = retryPolicy;
             base.Send(command);
-            StoreCommand(command, retryPolicy);
         }
 
         public void PublishTx<TEvent>(TEvent @event) where TEvent : IMessageTx
@@ -324,16 +362,6 @@ namespace Proteus.Infrastructure.Messaging.Portable
             base.Publish(@event);
         }
 
-        protected override void OnAfterPublishEvent(IMessage @event, int index, List<Action<IMessage>> subscribers)
-        {
-            var txEvent = @event as IMessageTx;
-
-            if (null == txEvent)
-                return;
-
-            StoreEvent(txEvent, index);
-        }
-
         private void StoreEvent(IMessageTx @event, int index)
         {
             var envelope = new Envelope<IMessageTx>(@event, _activeRetryPolicy, @event.AcknowledgementId, index);
@@ -344,9 +372,9 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        private void StoreCommand(IMessageTx command, RetryPolicy retryPolicy)
+        private void StoreCommand(IMessageTx command)
         {
-            var envelope = new Envelope<IMessageTx>(command, retryPolicy, Guid.NewGuid());
+            var envelope = new Envelope<IMessageTx>(command, _activeRetryPolicy, command.AcknowledgementId);
 
             if (envelope.ShouldRetry)
             {

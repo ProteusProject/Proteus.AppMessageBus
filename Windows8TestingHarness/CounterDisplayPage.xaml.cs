@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Proteus.Infrastructure.Messaging.Portable;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -13,7 +12,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Windows8TestingHarness.Common;
-using Windows8TestingHarness.Messages;
+using Windows8TestingHarness.Subscribers;
 
 // The Basic Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234237
 
@@ -22,9 +21,9 @@ namespace Windows8TestingHarness
     /// <summary>
     /// A basic page that provides characteristics common to most applications.
     /// </summary>
-    public sealed partial class EditPage : Windows8TestingHarness.Common.LayoutAwarePage
+    public sealed partial class CounterDisplayPage : Windows8TestingHarness.Common.LayoutAwarePage
     {
-        public EditPage()
+        public CounterDisplayPage()
         {
             this.InitializeComponent();
         }
@@ -40,6 +39,10 @@ namespace Windows8TestingHarness
         /// session.  This will be null the first time a page is visited.</param>
         protected override void LoadState(Object navigationParameter, Dictionary<String, Object> pageState)
         {
+            var viewModel = App.GetViewModelFor<CounterDisplayPage>() as CounterDisplayPageViewModel;
+
+            this.DefaultViewModel["AcknowledgedCounter"] = null != viewModel ? viewModel.AcknowledgedCounter : 0;
+            this.DefaultViewModel["UnacknowledgedCounter"] = null != viewModel ? viewModel.UnacknowledgedCounter : 0;
         }
 
         /// <summary>
@@ -50,27 +53,6 @@ namespace Windows8TestingHarness
         /// <param name="pageState">An empty dictionary to be populated with serializable state.</param>
         protected override void SaveState(Dictionary<String, Object> pageState)
         {
-        }
-
-        private void SaveNames_OnClick(object sender, RoutedEventArgs e)
-        {
-            App.Bus.Send(new ChangeNameCommand(Firstname.Text, Lastname.Text));
-            this.Frame.Navigate(typeof(DisplayPage));
-        }
-
-        private void IncrementCounterWithAck_OnClick(object sender, RoutedEventArgs e)
-        {
-            //send the command using default retries
-            App.Bus.SendTx(new IncrementCounterWithAckCommand());
-            this.Frame.Navigate(typeof(CounterDisplayPage));
-        }
-
-        private void IncrementCounterWithoutAck_OnClick(object sender, RoutedEventArgs e)
-        {
-            //send the command using default retries
-            App.Bus.SendTx(new IncrementCounterWithoutAckCommand());
-            this.Frame.Navigate(typeof(CounterDisplayPage));
-            
         }
     }
 }

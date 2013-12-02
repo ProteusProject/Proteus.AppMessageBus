@@ -44,7 +44,14 @@ namespace Windows8TestingHarness
         private void RegisterMessageBusSubscribers()
         {
             Bus.RegisterSubscriptionFor<ChangeNameCommand>(new ChangeNameCommandHandler().Handle);
-            Bus.RegisterSubscriptionFor<NameChangedEvent>(new NameChangedEventHandler().Handle);
+            Bus.RegisterSubscriptionFor<NameChangedEvent>(new NameChangedEventViewModelHandler().Handle);
+            Bus.RegisterSubscriptionFor<NameChangedEvent>(new NameChangedEventPersistenceHandler().Handle);
+            
+            Bus.RegisterSubscriptionFor<IncrementCounterWithAckCommand>(new IncrementCounterCommandHandler().Handle);
+            Bus.RegisterSubscriptionFor<IncrementCounterWithoutAckCommand>(new IncrementCounterCommandHandler().Handle);
+            
+            Bus.RegisterSubscriptionFor<CounterIncrementedWithAckEvent>(new CounterIncrementedViewModelEventHandler().Handle);
+            Bus.RegisterSubscriptionFor<CounterIncrementedWithoutAckEvent>(new CounterIncrementedViewModelEventHandler().Handle);
         }
 
         /// <summary>
@@ -53,9 +60,12 @@ namespace Windows8TestingHarness
         /// search results, and so forth.
         /// </summary>
         /// <param name="args">Details about the launch request and process.</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs args)
+        protected override async void OnLaunched(LaunchActivatedEventArgs args)
         {
-            Frame rootFrame = Window.Current.Content as Frame;
+            //added to ensure that the local storage path is identified so it can be observed
+            System.Diagnostics.Debug.WriteLine("*** LocalStorage path is: {0}",Windows.Storage.ApplicationData.Current.LocalFolder.Path);
+            
+            var rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
             // just ensure that the window is active
@@ -68,6 +78,8 @@ namespace Windows8TestingHarness
                 {
                     //TODO: Load state from previously suspended application
                 }
+
+                await Bus.Start();
 
                 // Place the frame in the current Window
                 Window.Current.Content = rootFrame;
@@ -94,10 +106,13 @@ namespace Windows8TestingHarness
         /// </summary>
         /// <param name="sender">The source of the suspend request.</param>
         /// <param name="e">Details about the suspend request.</param>
-        private void OnSuspending(object sender, SuspendingEventArgs e)
+        private async void OnSuspending(object sender, SuspendingEventArgs e)
         {
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
+
+            await Bus.Stop();
+
             deferral.Complete();
         }
 

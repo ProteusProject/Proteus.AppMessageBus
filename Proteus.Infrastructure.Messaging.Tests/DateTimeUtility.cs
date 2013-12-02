@@ -6,12 +6,12 @@ namespace Proteus.Infrastructure.Messaging.Tests
     {
         public static TimeSpan PositiveOneHourTimeSpan
         {
-            get { return new TimeSpan(1, 0, 0); }
+            get { return TimeSpan.FromHours(1); }
         }
 
         public static TimeSpan NegativeOneHourTimeSpan
         {
-            get { return new TimeSpan(-1, 0, 0); }
+            get { return TimeSpan.FromHours(-1); }
         }
     }
 }

@@ -7,10 +7,11 @@ namespace Windows8TestingHarness.Subscribers
     {
         public void Handle(ChangeNameCommand message)
         {
-            //TODO: actually change the backing data in persistence (or other work!)
-
-            //once its actually completed, let anyone who cares know that this has happened
-            App.Bus.Publish(new NameChangedEvent(message.NewFirstname, message.NewLastname));
+            if (message.IsValidToHandle)
+            {
+                //once its actually completed, let anyone who cares know that this has happened
+                App.Bus.Publish(new NameChangedEvent(message.NewFirstname, message.NewLastname));    
+            }
         }
     }
 }

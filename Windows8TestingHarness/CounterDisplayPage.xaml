@@ -1,6 +1,6 @@
 ﻿<common:LayoutAwarePage
     x:Name="pageRoot"
-    x:Class="Windows8TestingHarness.EditPage"
+    x:Class="Windows8TestingHarness.CounterDisplayPage"
     DataContext="{Binding DefaultViewModel, RelativeSource={RelativeSource Self}}"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -11,7 +11,6 @@
     mc:Ignorable="d">
 
     <Page.Resources>
-
 
     </Page.Resources>
 
@@ -26,52 +25,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid>
-            <Grid.Row>1</Grid.Row>
-
-            <Grid.RowDefinitions>
-                <RowDefinition Height="100"/>
-                <RowDefinition Height="100"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <Grid  Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="First Name" Style="{StaticResource GroupHeaderTextStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 30 0"/>
-                <TextBox Grid.Column="1" x:Name="Firstname" Width="200" Height="20" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-            </Grid>
-
-            <Grid  Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="Last Name" Style="{StaticResource GroupHeaderTextStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 30 0"/>
-                <TextBox Grid.Column="1" x:Name="Lastname" Width="200" Height="20" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-            </Grid>
-
-            <Grid  Grid.Row="2">
-                <Grid HorizontalAlignment="Center">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" x:Name="SaveNames" Content="Save Names" HorizontalAlignment="Center" VerticalAlignment="Top"
-                            Click="SaveNames_OnClick" />
-                    <Button Grid.Column="1" x:Name="IncrementWithAck" Content="Increment w/ ACK" HorizontalAlignment="Center"
-                            VerticalAlignment="Top" Click="IncrementCounterWithAck_OnClick" />
-                    <Button Grid.Column="2" x:Name="IncrementWithoutAck" Content="Increment w/out ACK" HorizontalAlignment="Center"
-                            VerticalAlignment="Top" Click="IncrementCounterWithoutAck_OnClick" />
-                    </Grid>
-            </Grid>
-
-
-        </Grid>
-
         <!-- Back button and page title -->
         <Grid>
             <Grid.ColumnDefinitions>
@@ -80,6 +33,24 @@
             </Grid.ColumnDefinitions>
             <Button x:Name="backButton" Click="GoBack" IsEnabled="{Binding Frame.CanGoBack, ElementName=pageRoot}" Style="{StaticResource BackButtonStyle}"/>
             <TextBlock x:Name="pageTitle" Grid.Column="1" Text="{StaticResource AppName}" Style="{StaticResource PageHeaderTextStyle}"/>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Grid.Row="0" Text="Acknowledged Counter:" Style="{StaticResource HeaderTextStyle}"/>
+            <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding Path=AcknowledgedCounter}" Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Column="0" Grid.Row="1" Text="UnAcknowledged Counter:" Style="{StaticResource HeaderTextStyle}"/>
+            <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding Path=UnacknowledgedCounter}" Style="{StaticResource HeaderTextStyle}"/>
         </Grid>
 
         <VisualStateManager.VisualStateGroups>
@@ -111,5 +82,5 @@
                 </VisualState>
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
-    </Grid>
+</Grid>
 </common:LayoutAwarePage>

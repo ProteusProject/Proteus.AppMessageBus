@@ -3,7 +3,7 @@ using Windows8TestingHarness.Messages;
 
 namespace Windows8TestingHarness.Subscribers
 {
-    public class NameChangedEventHandler : IHandle<NameChangedEvent>
+    public class NameChangedEventViewModelHandler : IHandle<NameChangedEvent>
     {
         public void Handle(NameChangedEvent message)
         {
