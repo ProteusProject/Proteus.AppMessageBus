@@ -45,6 +45,7 @@
     <Compile Include="Abstractions\IHandleDurable.cs" />
     <Compile Include="Abstractions\IMessage.cs" />
     <Compile Include="Abstractions\IDurableMessage.cs" />
+    <Compile Include="Abstractions\IMessageSerializer.cs" />
     <Compile Include="Abstractions\IMesssagePersistence.cs" />
     <Compile Include="Abstractions\IPublishEvents.cs" />
     <Compile Include="Abstractions\IPublishDurableEvents.cs" />

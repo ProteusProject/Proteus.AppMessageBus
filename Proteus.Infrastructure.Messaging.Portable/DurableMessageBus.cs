@@ -19,7 +19,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         protected RetryPolicy DefaultEventRetryPolicy { get; private set; }
         protected RetryPolicy DefaultCommandRetryPolicy { get; private set; }
-        public ISerializer Serializer { get; set; }
+        public IMessageSerializer Serializer { get; set; }
         public MesssagePersistence MessagePersister { get; set; }
 
         public string MessageVersion
@@ -84,8 +84,12 @@ namespace Proteus.Infrastructure.Messaging.Portable
             //process any commands or remove the stale data file if it exists
             if (hasQueuedCommands)
             {
-                var commands = Serializer.SerializeToString(queuedCommandStates);
-                await MessagePersister.SaveCommands(commands);
+                string commands;
+
+                if (Serializer.TrySerializeToString(queuedCommandStates, out commands))
+                {
+                    await MessagePersister.SaveCommands(commands);
+                }
             }
             else
             {
@@ -95,9 +99,12 @@ namespace Proteus.Infrastructure.Messaging.Portable
             //process any events or remove the stale data file if it exists
             if (hasQueuedEvents)
             {
-                var events = Serializer.SerializeToString(queuedEventStates);
-                await MessagePersister.SaveEvents(events);
+                string events;
 
+                if (Serializer.TrySerializeToString(queuedEventStates, out events))
+                {
+                    await MessagePersister.SaveEvents(events);
+                }
             }
             else
             {
@@ -116,8 +123,13 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 if (await MessagePersister.CheckForCommands())
                 {
                     var commands = await MessagePersister.LoadCommands();
-                    var queuedCommandStates = Serializer.Deserialize<List<EvenvelopeState<IDurableMessage>>>(commands);
-                    _queuedCommands = queuedCommandStates.Select(state => state.GetEnvelope()).ToList();
+
+                    List<EvenvelopeState<IDurableMessage>> queuedCommandStates;
+
+                    if (Serializer.TryDeserialize(commands, out queuedCommandStates))
+                    {
+                        _queuedCommands = queuedCommandStates.Select(state => state.GetEnvelope()).ToList();
+                    }
                 }
             }
 
@@ -126,8 +138,13 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 if (await MessagePersister.CheckForEvents())
                 {
                     var events = await MessagePersister.LoadEvents();
-                    var queuedEventStates = Serializer.Deserialize<List<EvenvelopeState<IDurableMessage>>>(events);
-                    _queuedEvents = queuedEventStates.Select(state => state.GetEnvelope()).ToList();
+                    
+                    List<EvenvelopeState<IDurableMessage>> queuedEventStates;
+
+                    if(Serializer.TryDeserialize<List<EvenvelopeState<IDurableMessage>>>(events, out queuedEventStates))
+                    {
+                        _queuedEvents = queuedEventStates.Select(state => state.GetEnvelope()).ToList();
+                    }
                 }
             }
         }

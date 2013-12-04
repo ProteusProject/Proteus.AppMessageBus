@@ -6,7 +6,7 @@ using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
 namespace Proteus.Infrastructure.Messaging.Portable
 {
-    public class JsonNetSerializer : ISerializer, ISafeSerializer
+    public class JsonNetSerializer : IMessageSerializer
     {
         private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto };
 
