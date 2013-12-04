@@ -48,6 +48,7 @@
     <Compile Include="Abstractions\IMesssagePersistence.cs" />
     <Compile Include="Abstractions\IPublishEvents.cs" />
     <Compile Include="Abstractions\IPublishDurableEvents.cs" />
+    <Compile Include="Abstractions\ISafeSerializer.cs" />
     <Compile Include="Abstractions\ISendCommands.cs" />
     <Compile Include="Abstractions\ISendDurableCommands.cs" />
     <Compile Include="Abstractions\ISerializer.cs" />
