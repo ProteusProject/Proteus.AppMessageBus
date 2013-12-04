@@ -14,15 +14,8 @@ namespace Proteus.Infrastructure.Messaging.Tests
     {
         public static async Task ClearAllDataFiles()
         {
-            IFolder rootFolder = FileSystem.Current.LocalStorage;
-
-            var folders = await rootFolder.GetFoldersAsync();
-
-            foreach (var folder in folders.Where(element => element.Name == "Proteus.Messaging.Messages"))
-            {
-                await folder.DeleteAsync();
-            }
-
+            var fileProvider = new FileSystemProvider();
+            await fileProvider.DeleteFolderAsync(FileSystem.Current.LocalStorage, "Proteus.Messaging.Messages");
         }
 
         [TestFixture]

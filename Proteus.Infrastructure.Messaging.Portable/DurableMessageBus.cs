@@ -25,6 +25,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
         protected RetryPolicy DefaultEventRetryPolicy { get; private set; }
         protected RetryPolicy DefaultCommandRetryPolicy { get; private set; }
         public ISerializer Serializer { get; set; }
+        public FileSystemProvider FileSystemProvider { get; set; }
 
         public string MessageVersion
         {
@@ -58,6 +59,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             DefaultEventRetryPolicy = defaultEventRetryPolicy;
 
             Serializer = new JsonNetSerializer();
+            FileSystemProvider = new FileSystemProvider();
         }
 
         async public Task Start()
@@ -89,11 +91,10 @@ namespace Proteus.Infrastructure.Messaging.Portable
             //if either are present, create the folder if necessary
             if (hasQueuedCommands || hasQueuedEvents)
             {
-                var rootFolder = FileSystem.Current.LocalStorage;
-                folder = await rootFolder.CreateFolderAsync(MessagesFolder, CreationCollisionOption.OpenIfExists);
+                folder = await FileSystemProvider.CreateFolderAsync(FileSystem.Current.LocalStorage, MessagesFolder, CreationCollisionOption.OpenIfExists);
             }
 
-            if (null==folder)
+            if (null == folder)
             {
                 return;
             }
@@ -103,50 +104,31 @@ namespace Proteus.Infrastructure.Messaging.Portable
             {
                 var commands = Serializer.SerializeToString(queuedCommandStates);
 
-                var commandsDatafile = await folder.CreateFileAsync(CommandsDatafile, CreationCollisionOption.ReplaceExisting);
-                await commandsDatafile.WriteAllTextAsync(commands);
+                var commandsDatafile = await FileSystemProvider.CreateFileAsync(folder, CommandsDatafile, CreationCollisionOption.ReplaceExisting);
+                await FileSystemProvider.WriteAllTextAsync(commandsDatafile, commands);
             }
             else
             {
-                var files = await folder.GetFilesAsync();
-                foreach (var file in files.Where(file => file.Name == CommandsDatafile))
-                {
-                    await file.DeleteAsync();
-                }
+                await FileSystemProvider.DeleteFileAsync(folder, CommandsDatafile);
             }
 
             //process any events or remove the stale data file if it exists
             if (hasQueuedEvents)
             {
                 var events = Serializer.SerializeToString(queuedEventStates);
-                var eventsDatafile = await folder.CreateFileAsync(EventsDatafile, CreationCollisionOption.ReplaceExisting);
-                await eventsDatafile.WriteAllTextAsync(events);
+                var eventsDatafile = await FileSystemProvider.CreateFileAsync(folder, EventsDatafile, CreationCollisionOption.ReplaceExisting);
+                await FileSystemProvider.WriteAllTextAsync(eventsDatafile, events);
             }
             else
             {
-                var files = await folder.GetFilesAsync();
-                foreach (var file in files.Where(file => file.Name == EventsDatafile))
-                {
-                    await file.DeleteAsync();
-                }
+                await FileSystemProvider.DeleteFileAsync(folder, EventsDatafile);
             }
         }
 
 
         async private Task LoadPendingMessages()
         {
-            IFolder rootFolder = FileSystem.Current.LocalStorage;
-            IFolder folder = null;
-
-            var folders = await rootFolder.GetFoldersAsync();
-
-            foreach (var candidate in folders)
-            {
-                if (candidate.Name == MessagesFolder)
-                {
-                    folder = candidate;
-                }
-            }
+            var folder = await FileSystemProvider.GetFolderAsync(FileSystem.Current.LocalStorage, MessagesFolder);
 
             if (null == folder)
             {
@@ -158,18 +140,11 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
             if (hasNoQueuedCommands)
             {
-                IFile commandsDatafile = null;
-
-                var files = await folder.GetFilesAsync();
-
-                foreach (var file in files.Where(file => file.Name == CommandsDatafile))
-                {
-                    commandsDatafile = file;
-                }
+                var commandsDatafile = await FileSystemProvider.GetFileAsync(folder, CommandsDatafile);
 
                 if (commandsDatafile != null)
                 {
-                    var commands = await commandsDatafile.ReadAllTextAsync();
+                    var commands = await FileSystemProvider.ReadAllTextAsync(commandsDatafile);
                     var queuedCommandStates = Serializer.Deserialize<List<EvenvelopeState<IDurableMessage>>>(commands);
                     _queuedCommands = queuedCommandStates.Select(state => state.GetEnvelope()).ToList();
                 }
@@ -177,18 +152,11 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
             if (hasNoQueuedEvents)
             {
-                IFile eventsDatafile = null;
-
-                var files = await folder.GetFilesAsync();
-
-                foreach (var file in files.Where(file => file.Name == EventsDatafile))
-                {
-                    eventsDatafile = file;
-                }
+                var eventsDatafile = await FileSystemProvider.GetFileAsync(folder, EventsDatafile);
 
                 if (eventsDatafile != null)
                 {
-                    var events = await eventsDatafile.ReadAllTextAsync();
+                    var events = await FileSystemProvider.ReadAllTextAsync(eventsDatafile);
                     var queuedEventStates = Serializer.Deserialize<List<EvenvelopeState<IDurableMessage>>>(events);
                     _queuedEvents = queuedEventStates.Select(state => state.GetEnvelope()).ToList();
                 }
@@ -322,10 +290,10 @@ namespace Proteus.Infrastructure.Messaging.Portable
             durableEvent.AcknowledgementId = Guid.NewGuid();
             durableEvent.Version = MessageVersion;
 
-            var clonedEvent = Clone((TEvent) durableEvent);
-            
+            var clonedEvent = Clone((TEvent)durableEvent);
+
             StoreEvent((IDurableMessage)clonedEvent, subscriberIndex);
-            
+
             return clonedEvent;
         }
 

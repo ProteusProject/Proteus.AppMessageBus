@@ -40,6 +40,7 @@
     <Compile Include="Abstractions\IAcceptMessageAcknowledgements.cs" />
     <Compile Include="Abstractions\ICommand.cs" />
     <Compile Include="Abstractions\IEvent.cs" />
+    <Compile Include="Abstractions\IFileSystemProvider.cs" />
     <Compile Include="Abstractions\IHandle.cs" />
     <Compile Include="Abstractions\IHandleDurable.cs" />
     <Compile Include="Abstractions\IMessage.cs" />
@@ -55,6 +56,7 @@
     <Compile Include="DelegateConverter.cs" />
     <Compile Include="DuplicateSubscriberRegisteredException.cs" />
     <Compile Include="Envelope.cs" />
+    <Compile Include="FileSystemProvider.cs" />
     <Compile Include="JsonNetSerializer.cs" />
     <Compile Include="MessageBus.cs" />
     <Compile Include="NoSubscriberRegisteredException.cs" />
