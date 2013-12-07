@@ -62,6 +62,7 @@
     <Compile Include="RetryPolicyTests.cs" />
     <Compile Include="SerializationTests.cs" />
     <Compile Include="DurableBusTests.cs" />
+    <Compile Include="SerializerResultTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
