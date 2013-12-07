@@ -33,59 +33,51 @@ namespace Proteus.Infrastructure.Messaging.Portable
             return JsonConvert.DeserializeObject<TTarget>(serialized, _serializerSettings);
         }
 
-        public bool TrySerializeToStream<TSource>(TSource source, out Stream serialized)
+        public SerializerResult<Stream> TrySerializeToStream<TSource>(TSource source)
         {
             try
             {
-                serialized = SerializeToStream(source);
-                return true;
+                return new SerializerResult<Stream>(SerializeToStream(source), true);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                serialized = null;
-                return false;
+                return new SerializerResult<Stream>(null, false, ex);
             }
         }
 
-        public bool TrySerializeToString<TSource>(TSource source, out string serialized)
+        public SerializerResult<string> TrySerializeToString<TSource>(TSource source)
         {
             try
             {
-                serialized = SerializeToString(source);
-                return true;
+                return new SerializerResult<string>(SerializeToString(source), true);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                serialized = null;
-                return false;
+                return new SerializerResult<string>(null, false, ex);
             }
         }
 
-        public bool TryDeserialize<TTarget>(Stream serialized, out TTarget obj)
+        public SerializerResult<TTarget> TryDeserialize<TTarget>(Stream serialized)
         {
             try
             {
-                obj = Deserialize<TTarget>(serialized);
-                return true;
+                return new SerializerResult<TTarget>(Deserialize<TTarget>(serialized), true);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                obj = default(TTarget);
-                return false;
+                return new SerializerResult<TTarget>(default(TTarget), false, ex);
             }
         }
 
-        public bool TryDeserialize<TTarget>(string serialized, out TTarget obj)
+        public SerializerResult<TTarget> TryDeserialize<TTarget>(string serialized)
         {
             try
             {
-                obj = Deserialize<TTarget>(serialized);
-                return true;
+                return new SerializerResult<TTarget>(Deserialize<TTarget>(serialized), true);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                obj = default(TTarget);
-                return false;
+                return new SerializerResult<TTarget>(default(TTarget), false, ex);
             }
         }
     }

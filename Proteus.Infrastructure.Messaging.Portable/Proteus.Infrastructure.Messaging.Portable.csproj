@@ -56,6 +56,7 @@
     <Compile Include="Abstractions\IStartableAsync.cs" />
     <Compile Include="Abstractions\IStoppableAsync.cs" />
     <Compile Include="Abstractions\Message.cs" />
+    <Compile Include="Abstractions\SerializerResult.cs" />
     <Compile Include="DelegateConverter.cs" />
     <Compile Include="DuplicateSubscriberRegisteredException.cs" />
     <Compile Include="Envelope.cs" />

@@ -4,9 +4,9 @@ namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
 {
     public interface ISafeSerializer
     {
-        bool TrySerializeToStream<TSource>(TSource source, out Stream serialized);
-        bool TrySerializeToString<TSource>(TSource source, out string serialized);
-        bool TryDeserialize<TTarget>(Stream serialized, out TTarget obj);
-        bool TryDeserialize<TTarget>(string serialized, out TTarget obj); 
+        SerializerResult<Stream> TrySerializeToStream<TSource>(TSource source);
+        SerializerResult<string> TrySerializeToString<TSource>(TSource source);
+        SerializerResult<TTarget> TryDeserialize<TTarget>(Stream serialized);
+        SerializerResult<TTarget> TryDeserialize<TTarget>(string serialized); 
     }
 }
