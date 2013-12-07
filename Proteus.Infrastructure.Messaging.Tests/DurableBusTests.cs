@@ -371,6 +371,11 @@ namespace Proteus.Infrastructure.Messaging.Tests
             {
                 await ClearAllDataFiles();
 
+                
+            }
+
+            private async Task SendUnacknowlegedCommandAndEventThenDisposeDurableBus()
+            {
                 _doubleValue = string.Format("{0}{0}", SingleValue);
                 _tripleValue = string.Format("{0}{0}{0}", SingleValue);
 
@@ -386,13 +391,17 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 _bus.SendDurable(new TestDurableCommand(SingleValue));
                 _bus.PublishDurable(new TestDurableEvent(SingleValue));
 
-                Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue), "Command Subscriber not registered for command as expected.");
-                Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue), "Event Subscriber not registered for event as expected.");
+                Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue),
+                            "Command Subscriber not registered for command as expected.");
+                Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue),
+                            "Event Subscriber not registered for event as expected.");
 
                 await _bus.Start();
 
-                Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(_doubleValue), "Command Subscriber not registered for command as expected.");
-                Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(_doubleValue), "Event Subscriber not registered for event as expected.");
+                Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(_doubleValue),
+                            "Command Subscriber not registered for command as expected.");
+                Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(_doubleValue),
+                            "Event Subscriber not registered for event as expected.");
 
                 await _bus.Stop();
 
@@ -404,6 +413,8 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [Test]
             async public void CanRepublishDurableEventsOnNextStart()
             {
+                await SendUnacknowlegedCommandAndEventThenDisposeDurableBus();
+
                 //recreate the bus from scratch
                 _bus = new DurableMessageBus(_retryPolicy);
 
@@ -421,10 +432,12 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [Test]
             async public void CanRepublishDurableCommandsOnNextStart()
             {
+                await SendUnacknowlegedCommandAndEventThenDisposeDurableBus();
+
                 //recreate the bus from scratch
                 _bus = new DurableMessageBus(_retryPolicy);
 
-                //re-register the event subscriber
+                //re-register the command subscriber
                 _bus.RegisterSubscriptionFor<TestDurableCommand>(_commands.Handle);
 
                 //calling start should re-hydrate the list of pending (unacknowledged) events
