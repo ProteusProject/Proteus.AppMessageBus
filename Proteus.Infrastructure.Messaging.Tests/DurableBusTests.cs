@@ -356,62 +356,85 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
 
         [TestFixture]
-        public class MyClass
+        public class WhenStartingTheBusWithPersistedUnacknowledgedCommandsAndEvents
         {
+            private string _doubleValue;
+            private string _tripleValue;
+            private DurableMessageBus _bus;
+            private RetryPolicy _retryPolicy;
+            private DurableEventSubscribers _events;
+            private DurableCommandSubscribers _commands;
+            private const string SingleValue = "0";
+
             [SetUp]
             async public void SetUp()
             {
                 await ClearAllDataFiles();
+
+                _doubleValue = string.Format("{0}{0}", SingleValue);
+                _tripleValue = string.Format("{0}{0}{0}", SingleValue);
+
+                _retryPolicy = new RetryPolicy(10, DateTimeUtility.PositiveOneHourTimeSpan);
+                _bus = new DurableMessageBus(_retryPolicy);
+
+                _commands = new DurableCommandSubscribers();
+                _events = new DurableEventSubscribers();
+
+                _bus.RegisterSubscriptionFor<TestDurableCommand>(_commands.Handle);
+                _bus.RegisterSubscriptionFor<TestDurableEvent>(_events.Handle);
+
+                _bus.SendDurable(new TestDurableCommand(SingleValue));
+                _bus.PublishDurable(new TestDurableEvent(SingleValue));
+
+                Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue), "Command Subscriber not registered for command as expected.");
+                Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue), "Event Subscriber not registered for event as expected.");
+
+                await _bus.Start();
+
+                Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(_doubleValue), "Command Subscriber not registered for command as expected.");
+                Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(_doubleValue), "Event Subscriber not registered for event as expected.");
+
+                await _bus.Stop();
+
+                _bus = null;
+
+                Assume.That(_bus, Is.Null);
             }
 
             [Test]
-            async public void Test()
+            async public void CanRepublishDurableEventsOnNextStart()
             {
-                const string singleValue = "0";
-                string doubleValue = string.Format("{0}{0}", singleValue);
-                string tripleValue = string.Format("{0}{0}{0}", singleValue);
-
-                var retryPolicy = new RetryPolicy(10, DateTimeUtility.PositiveOneHourTimeSpan);
-                var bus = new DurableMessageBus(retryPolicy);
-
-                var events = new DurableEventSubscribers();
-
-                bus.RegisterSubscriptionFor<TestDurableEvent>(events.Handle);
-
-                bus.PublishDurable(new TestDurableEvent(singleValue));
-
-                Assume.That(events.ProcessedMessagePayload, Is.EqualTo(singleValue), "Event Subscriber not registered for event as expected.");
-
-                await bus.Start();
-
-                Assume.That(events.ProcessedMessagePayload, Is.EqualTo(doubleValue), "Event Subscriber not registered for event as expected.");
-
-                await bus.Stop();
-
-                //capture the results of the serialization so that we can pass them back to the bus later
-                //var savedCommands = bus.SerializedCommands;
-                //var savedEvents = bus.SerializedEvents;
-
-                bus = null;
-
-                Assume.That(bus, Is.Null);
-
                 //recreate the bus from scratch
-                bus = new DurableMessageBus(retryPolicy);
+                _bus = new DurableMessageBus(_retryPolicy);
 
                 //re-register the event subscriber
-                bus.RegisterSubscriptionFor<TestDurableEvent>(events.Handle);
-
-                //bus.SerializedCommands = savedCommands;
-                //bus.SerializedEvents = savedEvents;
+                _bus.RegisterSubscriptionFor<TestDurableEvent>(_events.Handle);
 
                 //calling start should re-hydrate the list of pending (unacknowledged) events
                 // and then process them using the re-registered subscriber
-                await bus.Start();
+                await _bus.Start();
 
                 //we should now have one more payload element received
-                Assert.That(events.ProcessedMessagePayload, Is.EqualTo(tripleValue), "Event not properly re-hydrated.");
+                Assert.That(_events.ProcessedMessagePayload, Is.EqualTo(_tripleValue), "Event not properly re-hydrated.");
             }
+
+            [Test]
+            async public void CanRepublishDurableCommandsOnNextStart()
+            {
+                //recreate the bus from scratch
+                _bus = new DurableMessageBus(_retryPolicy);
+
+                //re-register the event subscriber
+                _bus.RegisterSubscriptionFor<TestDurableCommand>(_commands.Handle);
+
+                //calling start should re-hydrate the list of pending (unacknowledged) events
+                // and then process them using the re-registered subscriber
+                await _bus.Start();
+
+                //we should now have one more payload element received
+                Assert.That(_commands.ProcessedMessagePayload, Is.EqualTo(_tripleValue), "Command not properly re-hydrated.");
+            }
+
         }
 
         [TestFixture]
