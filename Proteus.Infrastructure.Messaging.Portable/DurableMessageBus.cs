@@ -10,7 +10,7 @@ using Proteus.Infrastructure.Messaging.Portable.Serializable;
 
 namespace Proteus.Infrastructure.Messaging.Portable
 {
-    public class DurableMessageBus : MessageBus, IStartableAsync, IStoppableAsync, ISendDurableCommands, IPublishDurableEvents, IAcceptMessageAcknowledgements
+    public class DurableMessageBus : MessageBus, IStartableAsync, IStoppableAsync, ISendDurableCommands, IPublishDurableEvents, IAcknowledgeMessages
     {
         private List<Envelope<IDurableMessage>> _queuedEvents = new List<Envelope<IDurableMessage>>();
         private List<Envelope<IDurableMessage>> _queuedCommands = new List<Envelope<IDurableMessage>>();
@@ -302,7 +302,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         private TSource Clone<TSource>(TSource source)
         {
-            var serialized = Serializer.SerializeToStream(source);
+            var serialized = Serializer.SerializeToString(source);
             return Serializer.Deserialize<TSource>(serialized);
         }
 

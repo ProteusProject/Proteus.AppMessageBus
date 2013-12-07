@@ -5,7 +5,7 @@ using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
 namespace Proteus.Infrastructure.Messaging.Portable
 {
-    public class FileSystemProvider : IFileSystemProvider
+    public class FileSystemProvider : IFileSystemProviderAsync
     {
         public async Task<IFolder> GetFolderAsync(IFolder parentFolder, string folderName)
         {

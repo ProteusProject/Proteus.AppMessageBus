@@ -3,7 +3,7 @@ using PCLStorage;
 
 namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
 {
-    public interface IFileSystemProvider
+    public interface IFileSystemProviderAsync
     {
         Task<IFolder> GetFolderAsync(IFolder parentFolder, string folderName);
         Task<IFile> GetFileAsync(IFolder parentFolder, string fileName);

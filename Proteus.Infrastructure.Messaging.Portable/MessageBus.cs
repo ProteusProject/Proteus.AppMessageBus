@@ -5,7 +5,7 @@ using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
 namespace Proteus.Infrastructure.Messaging.Portable
 {
-    public class MessageBus : ISendCommands, IPublishEvents
+    public class MessageBus : ISendCommands, IPublishEvents, IRegisterMessageSubscriptions
     {
         protected readonly Dictionary<Type, List<Action<IMessage>>> Routes = new Dictionary<Type, List<Action<IMessage>>>();
 

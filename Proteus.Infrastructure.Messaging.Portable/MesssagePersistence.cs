@@ -4,13 +4,13 @@ using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
 namespace Proteus.Infrastructure.Messaging.Portable
 {
-    public class MesssagePersistence : IMesssagePersistence
+    public class MesssagePersistence : IMesssagePersistenceAsync
     {
         private const string MessagesFolder = "Proteus.Messaging.Messages";
         private const string CommandsDatafile = "Commands.data";
         private const string EventsDatafile = "Events.data";
 
-        public IFileSystemProvider FileSystemProvider { get; set; }
+        public IFileSystemProviderAsync FileSystemProvider { get; set; }
 
         public MesssagePersistence()
         {
