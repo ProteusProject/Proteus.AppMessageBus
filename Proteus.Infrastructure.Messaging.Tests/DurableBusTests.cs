@@ -341,7 +341,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 var commands = new CommandSubscribers();
                 bus.RegisterSubscriptionFor<TestDurableCommand>(commands.Handle);
 
-                bus.PublishDurable(new TestDurableCommand(singleValue));
+                bus.SendDurable(new TestDurableCommand(singleValue));
 
                 Assume.That(commands.ProcessedMessagePayload, Is.EqualTo(singleValue), "Command Subscriber didn't receive the expected message.");
 
