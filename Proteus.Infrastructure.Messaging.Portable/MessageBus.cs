@@ -39,7 +39,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        public virtual void Send<TCommand>(TCommand command) where TCommand : IMessage
+        public virtual void Send<TCommand>(TCommand command) where TCommand : ICommand
         {
             Logger(string.Format("Sending Command of type {0}, MessageId = {1}", typeof(TCommand).AssemblyQualifiedName, command.Id));
 
@@ -66,7 +66,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        public virtual void Publish<TEvent>(TEvent @event) where TEvent : IMessage
+        public virtual void Publish<TEvent>(TEvent @event) where TEvent : IEvent
         {
             var subscriberResult = GetSubscribersFor(@event);
 

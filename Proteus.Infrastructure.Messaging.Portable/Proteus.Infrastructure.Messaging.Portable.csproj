@@ -39,6 +39,8 @@
     <Compile Include="Abstractions\DurableEvent.cs" />
     <Compile Include="Abstractions\IAcknowledgeMessages.cs" />
     <Compile Include="Abstractions\ICommand.cs" />
+    <Compile Include="Abstractions\IDurableCommand.cs" />
+    <Compile Include="Abstractions\IDurableEvent.cs" />
     <Compile Include="Abstractions\IEvent.cs" />
     <Compile Include="Abstractions\IFileSystemProviderAsync.cs" />
     <Compile Include="Abstractions\IHandle.cs" />

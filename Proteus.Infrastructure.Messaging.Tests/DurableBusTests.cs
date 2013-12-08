@@ -543,7 +543,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
         }
 
-        public class TestDurableEvent : TestEvent, IDurableMessage
+        public class TestDurableEvent : TestEvent, IDurableEvent
         {
             public TestDurableEvent(string payload)
                 : base(payload)
@@ -554,7 +554,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
         }
 
 
-        public class TestDurableCommand : TestCommand, IDurableMessage
+        public class TestDurableCommand : TestCommand, IDurableCommand
         {
             public TestDurableCommand(string payload)
                 : base(payload)

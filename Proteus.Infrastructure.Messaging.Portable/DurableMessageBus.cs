@@ -306,12 +306,12 @@ namespace Proteus.Infrastructure.Messaging.Portable
             return Serializer.Deserialize<TSource>(serialized);
         }
 
-        public void SendDurable<TCommand>(TCommand command) where TCommand : ICommand, IDurableMessage
+        public void SendDurable<TCommand>(TCommand command) where TCommand : IDurableCommand
         {
             SendDurable(command, DefaultCommandRetryPolicy);
         }
 
-        public void SendDurable<TCommand>(TCommand command, RetryPolicy retryPolicy) where TCommand : ICommand, IDurableMessage
+        public void SendDurable<TCommand>(TCommand command, RetryPolicy retryPolicy) where TCommand : IDurableCommand
         {
             Logger(string.Format("Sending Durable Command, Id = {0}", command.Id));
 
@@ -319,12 +319,12 @@ namespace Proteus.Infrastructure.Messaging.Portable
             base.Send(command);
         }
 
-        public void PublishDurable<TEvent>(TEvent @event) where TEvent : IDurableMessage
+        public void PublishDurable<TEvent>(TEvent @event) where TEvent : IDurableEvent
         {
             PublishDurable(@event, DefaultEventRetryPolicy);
         }
 
-        public void PublishDurable<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : IDurableMessage
+        public void PublishDurable<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : IDurableEvent
         {
             Logger(string.Format("Publishing Durable Event, Id = {0}", @event.Id));
 
