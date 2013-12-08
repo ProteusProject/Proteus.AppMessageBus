@@ -371,10 +371,10 @@ namespace Proteus.Infrastructure.Messaging.Tests
             {
                 await ClearAllDataFiles();
 
-                
+
             }
 
-            private async Task SendUnacknowlegedCommandAndEventThenDisposeDurableBus()
+            private async Task SendUnacknowlegedCommandAndEventTwiceThenDisposeDurableBus()
             {
                 _doubleValue = string.Format("{0}{0}", SingleValue);
                 _tripleValue = string.Format("{0}{0}{0}", SingleValue);
@@ -413,7 +413,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [Test]
             async public void CanRepublishDurableEventsOnNextStart()
             {
-                await SendUnacknowlegedCommandAndEventThenDisposeDurableBus();
+                await SendUnacknowlegedCommandAndEventTwiceThenDisposeDurableBus();
 
                 //recreate the bus from scratch
                 _bus = new DurableMessageBus(_retryPolicy);
@@ -432,7 +432,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             [Test]
             async public void CanRepublishDurableCommandsOnNextStart()
             {
-                await SendUnacknowlegedCommandAndEventThenDisposeDurableBus();
+                await SendUnacknowlegedCommandAndEventTwiceThenDisposeDurableBus();
 
                 //recreate the bus from scratch
                 _bus = new DurableMessageBus(_retryPolicy);
@@ -440,7 +440,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 //re-register the command subscriber
                 _bus.RegisterSubscriptionFor<TestDurableCommand>(_commands.Handle);
 
-                //calling start should re-hydrate the list of pending (unacknowledged) events
+                //calling start should re-hydrate the list of pending (unacknowledged) commands
                 // and then process them using the re-registered subscriber
                 await _bus.Start();
 
@@ -448,6 +448,43 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 Assert.That(_commands.ProcessedMessagePayload, Is.EqualTo(_tripleValue), "Command not properly re-hydrated.");
             }
 
+            [Test]
+            async public void DurableCommandsWithoutMatchingVersionAreDiscaredOnBusStart()
+            {
+                await SendUnacknowlegedCommandAndEventTwiceThenDisposeDurableBus();
+
+                //recreate the bus from scratch, set the version to be something *other* than the default empty string
+                _bus = new DurableMessageBus(_retryPolicy) { MessageVersionProvider = () => "not-the-default" };
+
+                //re-register the command subscriber
+                _bus.RegisterSubscriptionFor<TestDurableCommand>(_commands.Handle);
+
+                //calling start should re-hydrate the list of pending (unacknowledged) commands
+                // and then process them using the re-registered subscriber
+                await _bus.Start();
+
+                //becasue the version of the command doesn't match, we should still only have original two payload elements received
+                Assert.That(_commands.ProcessedMessagePayload, Is.EqualTo(_doubleValue), "Command with wrong version not properly ignored.");
+            }
+
+            [Test]
+            async public void DurableEventsWithoutMatchingVersionAreDiscaredOnBusStart()
+            {
+                await SendUnacknowlegedCommandAndEventTwiceThenDisposeDurableBus();
+
+                //recreate the bus from scratch, set the version to be something *other* than the default empty string
+                _bus = new DurableMessageBus(_retryPolicy) { MessageVersionProvider = () => "not-the-default" };
+
+                //re-register the event subscriber
+                _bus.RegisterSubscriptionFor<TestDurableEvent>(_events.Handle);
+
+                //calling start should re-hydrate the list of pending (unacknowledged) events
+                // and then process them using the re-registered subscriber
+                await _bus.Start();
+
+                //becasue the version of the command doesn't match, we should still only have original two payload elements received
+                Assert.That(_events.ProcessedMessagePayload, Is.EqualTo(_doubleValue), "Event with wrong version not properly ignored.");
+            }
         }
 
         [TestFixture]
@@ -482,13 +519,15 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
                 Assume.That(bus.MessageVersion, Is.EqualTo(expected), "MessageVersionProvider delegate not wired up properly.");
 
-                //this changes the value returned by the delegate, should it improperly be invoked a second time
+                //this changes the value thta would be returned by the delegate, should it improperly be invoked a second time
                 versionProvider.Version = notExpected;
 
                 //since the delegate should NOT be invoked a second time, we expect the original value to be retained
                 Assert.That(bus.MessageVersion, Is.EqualTo(expected));
 
             }
+
+
         }
 
 

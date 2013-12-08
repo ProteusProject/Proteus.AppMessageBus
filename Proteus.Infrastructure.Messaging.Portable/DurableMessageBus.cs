@@ -85,7 +85,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             if (hasQueuedCommands)
             {
                 var serialized = Serializer.TrySerializeToString(queuedCommandStates);
-                
+
                 if (serialized.HasValue)
                 {
                     await MessagePersister.SaveCommands(serialized.Value);
@@ -104,7 +104,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             if (hasQueuedEvents)
             {
                 var serialized = Serializer.TrySerializeToString(queuedEventStates);
-                
+
                 if (serialized.HasValue)
                 {
                     await MessagePersister.SaveEvents(serialized.Value);
@@ -133,7 +133,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
                     var commands = await MessagePersister.LoadCommands();
 
                     var deserialized = Serializer.TryDeserialize<List<EvenvelopeState<IDurableMessage>>>(commands);
-                    
+
                     if (deserialized.HasValue)
                     {
                         _queuedCommands = deserialized.Value.Select(state => state.GetEnvelope()).ToList();
@@ -153,7 +153,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
                     var deserialized = Serializer.TryDeserialize<List<EvenvelopeState<IDurableMessage>>>(events);
 
-                    if(deserialized.HasValue)
+                    if (deserialized.HasValue)
                     {
                         _queuedEvents = deserialized.Value.Select(state => state.GetEnvelope()).ToList();
                     }
@@ -167,12 +167,12 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         private void ClearExpiredCommands()
         {
-            _queuedCommands.RemoveAll(env => !env.ShouldRetry && !env.MessageMatchesVersion(MessageVersion));
+            _queuedCommands.RemoveAll(env => !env.ShouldRetry || !env.MessageMatchesVersion(MessageVersion));
         }
 
         private void ClearExpiredEvents()
         {
-            _queuedEvents.RemoveAll(env => !env.ShouldRetry && !env.MessageMatchesVersion(MessageVersion));
+            _queuedEvents.RemoveAll(env => !env.ShouldRetry || !env.MessageMatchesVersion(MessageVersion));
         }
 
         private void ProcessPendingCommands()
