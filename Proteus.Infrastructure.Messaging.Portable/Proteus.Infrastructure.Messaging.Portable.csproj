@@ -93,6 +93,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Abstractions\Abstraction_Relationships.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
