@@ -26,12 +26,16 @@ namespace WindowsPhone8TestingHarness
 
         private void IncrementCounterWithAck_OnClick(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            //send the command using default retries
+            App.Bus.SendDurable(new IncrementCounterWithAckCommand());
+            NavigationService.Navigate(new Uri("/CounterDisplayPage.xaml", UriKind.Relative));
         }
 
         private void IncrementCounterWithoutAck_OnClick(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            //send the command using default retries
+            App.Bus.SendDurable(new IncrementCounterWithoutAckCommand());
+            NavigationService.Navigate(new Uri("/CounterDisplayPage.xaml", UriKind.Relative));
         }
     }
 }
