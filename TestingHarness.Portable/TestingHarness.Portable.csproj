@@ -36,6 +36,7 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Abstractions\IManageViewModels.cs" />
     <Compile Include="Messages\ChangeNameCommand.cs" />
     <Compile Include="Messages\CounterIncrementedWithAckEvent.cs" />
     <Compile Include="Messages\CounterIncrementedWithoutAckEvent.cs" />

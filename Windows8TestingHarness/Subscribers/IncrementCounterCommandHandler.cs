@@ -8,22 +8,30 @@ namespace Windows8TestingHarness.Subscribers
     public class IncrementCounterCommandHandler 
         : IHandleDurable<IncrementCounterWithAckCommand>, IHandleDurable<IncrementCounterWithoutAckCommand>
     {
+
+        private readonly DurableMessageBus _bus;
+
+        public IncrementCounterCommandHandler(DurableMessageBus bus)
+        {
+            _bus = bus;
+        }
+
         public void Handle(IncrementCounterWithAckCommand message)
         {
             //publish the event with some retries and a future expiry
-            App.Bus.PublishDurable(new CounterIncrementedWithAckEvent(), new RetryPolicy(2, TimeSpan.FromHours(1)));
+            _bus.PublishDurable(new CounterIncrementedWithAckEvent(), new RetryPolicy(2, TimeSpan.FromHours(1)));
 
             //now that event(s) are safely published, acknowledge the command
-            App.Bus.Acknowledge(message);
+            _bus.Acknowledge(message);
         }
 
         public void Handle(IncrementCounterWithoutAckCommand message)
         {
             //publish the event with some retries and a future expiry
-            App.Bus.PublishDurable(new CounterIncrementedWithoutAckEvent(), new RetryPolicy(2, TimeSpan.FromHours(1)));
+            _bus.PublishDurable(new CounterIncrementedWithoutAckEvent(), new RetryPolicy(2, TimeSpan.FromHours(1)));
 
             //now that event(s) are safely published, acknowledge the command
-            App.Bus.Acknowledge(message);
+            _bus.Acknowledge(message);
         }
     }
 }

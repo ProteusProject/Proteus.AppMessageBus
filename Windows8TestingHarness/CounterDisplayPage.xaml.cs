@@ -41,7 +41,7 @@ namespace Windows8TestingHarness
         /// session.  This will be null the first time a page is visited.</param>
         protected override void LoadState(Object navigationParameter, Dictionary<String, Object> pageState)
         {
-            var viewModel = App.GetViewModelFor<CounterDisplayPage>() as CounterDisplayPageViewModel;
+            var viewModel = App.ViewModelManager.GetViewModelFor<CounterDisplayPage>() as CounterDisplayPageViewModel;
 
             this.DefaultViewModel["AcknowledgedCounter"] = null != viewModel ? viewModel.AcknowledgedCounter : 0;
             this.DefaultViewModel["UnacknowledgedCounter"] = null != viewModel ? viewModel.UnacknowledgedCounter : 0;

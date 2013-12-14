@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Proteus.Infrastructure.Messaging.Portable;
+using TestingHarness.Portable.Abstractions;
 using TestingHarness.Portable.Messages;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
@@ -24,7 +25,7 @@ namespace Windows8TestingHarness
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
     /// </summary>
-    sealed partial class App : Application
+    sealed partial class App : Application, IManageViewModels
     {
         public static DurableMessageBus Bus { get; private set; }
 
@@ -36,14 +37,15 @@ namespace Windows8TestingHarness
         {
             Bus = new DurableMessageBus();
 
-            var registrar = new SubscriberRegistrar(Bus);
+            var registrar = new SubscriberRegistrar(Bus, this);
             registrar.RegisterMessageBusSubscribers();
+            ViewModelManager = this;
 
             this.InitializeComponent();
             this.Suspending += OnSuspending;
         }
 
-        
+        public static IManageViewModels ViewModelManager { get; private set; }
 
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
@@ -107,26 +109,26 @@ namespace Windows8TestingHarness
             deferral.Complete();
         }
 
-        private static readonly Dictionary<Type, object> ViewModels = new Dictionary<Type, object>();
+        private readonly Dictionary<Type, object> _viewModels = new Dictionary<Type, object>();
 
-        public static void SetViewModelFor<TPage>(object model) where TPage : Page
+        public void SetViewModelFor<TPage>(object model)
         {
-            if (ViewModels.ContainsKey(typeof(TPage)))
+            if (_viewModels.ContainsKey(typeof(TPage)))
             {
-                ViewModels[typeof(TPage)] = model;
+                _viewModels[typeof(TPage)] = model;
             }
             else
             {
-                ViewModels.Add(typeof(TPage), model);
+                _viewModels.Add(typeof(TPage), model);
             }
 
 
         }
 
-        public static object GetViewModelFor<TPage>() where TPage : Page
+        public object GetViewModelFor<TPage>()
         {
             object value;
-            ViewModels.TryGetValue(typeof(TPage), out value);
+            _viewModels.TryGetValue(typeof(TPage), out value);
             return value;
         }
     }

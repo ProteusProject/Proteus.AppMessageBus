@@ -1,5 +1,7 @@
-﻿using Proteus.Infrastructure.Messaging.Portable.Abstractions;
+﻿using Proteus.Infrastructure.Messaging.Portable;
+using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 using TestingHarness.Portable;
+using TestingHarness.Portable.Abstractions;
 using TestingHarness.Portable.Messages;
 using TestingHarness.Portable.ViewModels;
 
@@ -8,25 +10,35 @@ namespace Windows8TestingHarness.Subscribers
     public class CounterIncrementedViewModelEventHandler
         : IHandleDurable<CounterIncrementedWithAckEvent>, IHandleDurable<CounterIncrementedWithoutAckEvent>
     {
+
+        private readonly DurableMessageBus _bus;
+        private readonly IManageViewModels _modelManager;
+
+        public CounterIncrementedViewModelEventHandler(DurableMessageBus bus, IManageViewModels modelManager)
+        {
+            _bus = bus;
+            _modelManager = modelManager;
+        }
+
         public void Handle(CounterIncrementedWithAckEvent message)
         {
-            var viewModel = App.GetViewModelFor<CounterDisplayPage>() as CounterDisplayPageViewModel;
+            var viewModel = _modelManager.GetViewModelFor<CounterDisplayPage>() as CounterDisplayPageViewModel;
 
-            if (null==viewModel)
+            if (null == viewModel)
             {
                 viewModel = new CounterDisplayPageViewModel();
             }
 
             viewModel.AcknowledgedCounter++;
 
-            App.SetViewModelFor<CounterDisplayPage>(viewModel);
+            _modelManager.SetViewModelFor<CounterDisplayPage>(viewModel);
 
-            App.Bus.Acknowledge(message);
+            _bus.Acknowledge(message);
         }
 
         public void Handle(CounterIncrementedWithoutAckEvent message)
         {
-            var viewModel = App.GetViewModelFor<CounterDisplayPage>() as CounterDisplayPageViewModel;
+            var viewModel = _modelManager.GetViewModelFor<CounterDisplayPage>() as CounterDisplayPageViewModel;
 
             if (null == viewModel)
             {
@@ -35,12 +47,12 @@ namespace Windows8TestingHarness.Subscribers
 
             viewModel.UnacknowledgedCounter++;
 
-            App.SetViewModelFor<CounterDisplayPage>(viewModel);
+            _modelManager.SetViewModelFor<CounterDisplayPage>(viewModel);
 
-            //intentionally do NOT acknowledge the message
-            //App.Bus.Acknowledge(message);
+            //intentionally do NOT acknowledge the message...that's the whole pt of this handler :)
+            //_bus.Acknowledge(message);
         }
     }
 
-    
+
 }

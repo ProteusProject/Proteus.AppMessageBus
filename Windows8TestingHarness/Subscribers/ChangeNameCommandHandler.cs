@@ -5,12 +5,19 @@ namespace Windows8TestingHarness.Subscribers
 {
     public class ChangeNameCommandHandler : IHandle<ChangeNameCommand>
     {
+        private readonly IPublishEvents _bus;
+
+        public ChangeNameCommandHandler(IPublishEvents bus)
+        {
+            _bus = bus;
+        }
+
         public void Handle(ChangeNameCommand message)
         {
             if (message.IsValidToHandle)
             {
                 //once its actually completed, let anyone who cares know that this has happened
-                App.Bus.Publish(new NameChangedEvent(message.NewFirstname, message.NewLastname));    
+                _bus.Publish(new NameChangedEvent(message.NewFirstname, message.NewLastname));    
             }
         }
     }
