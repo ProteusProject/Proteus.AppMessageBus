@@ -105,6 +105,10 @@
       <Project>{9ce08989-240c-4f66-b523-5bef6e2f6bf6}</Project>
       <Name>Proteus.Infrastructure.Messaging.Portable</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TestingHarness.Portable\TestingHarness.Portable.csproj">
+      <Project>{1521d831-215e-4c5e-b69c-a488ab80c038}</Project>
+      <Name>TestingHarness.Portable</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.xaml.cs">

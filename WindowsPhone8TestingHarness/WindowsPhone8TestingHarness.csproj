@@ -161,6 +161,16 @@
       <LastGenOutput>AppResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Proteus.Infrastructure.Messaging.Portable\Proteus.Infrastructure.Messaging.Portable.csproj">
+      <Project>{9CE08989-240C-4F66-B523-5BEF6E2F6BF6}</Project>
+      <Name>Proteus.Infrastructure.Messaging.Portable</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TestingHarness.Portable\TestingHarness.Portable.csproj">
+      <Project>{1521D831-215E-4C5E-B69C-A488AB80C038}</Project>
+      <Name>TestingHarness.Portable</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).$(TargetFrameworkVersion).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
