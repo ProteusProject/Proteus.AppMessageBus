@@ -50,6 +50,7 @@
     <Compile Include="Subscribers\NameChangedEventPersistenceHandler.cs" />
     <Compile Include="Subscribers\NameChangedEventViewModelHandler.cs" />
     <Compile Include="Subscribers\SubscriberRegistrar.cs" />
+    <Compile Include="ViewModelManager.cs" />
     <Compile Include="ViewModels\CounterDisplayPageViewModel.cs" />
     <Compile Include="ViewModels\DisplayPageViewModel.cs" />
   </ItemGroup>

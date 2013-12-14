@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Proteus.Infrastructure.Messaging.Portable;
+using TestingHarness.Portable;
 using TestingHarness.Portable.Abstractions;
 using TestingHarness.Portable.Messages;
 using TestingHarness.Portable.Subscribers;
@@ -25,9 +26,10 @@ namespace Windows8TestingHarness
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
     /// </summary>
-    sealed partial class App : Application, IManageViewModels
+    sealed partial class App : Application
     {
         public static DurableMessageBus Bus { get; private set; }
+        public static IManageViewModels ViewModelManager { get; private set; }
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -37,15 +39,14 @@ namespace Windows8TestingHarness
         {
             Bus = new DurableMessageBus();
 
-            var registrar = new SubscriberRegistrar(Bus, this);
+            ViewModelManager = new ViewModelManager();
+
+            var registrar = new SubscriberRegistrar(Bus, ViewModelManager);
             registrar.RegisterMessageBusSubscribers();
-            ViewModelManager = this;
 
             this.InitializeComponent();
             this.Suspending += OnSuspending;
         }
-
-        public static IManageViewModels ViewModelManager { get; private set; }
 
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
@@ -109,35 +110,6 @@ namespace Windows8TestingHarness
             deferral.Complete();
         }
 
-        private readonly Dictionary<Type, object> _viewModels = new Dictionary<Type, object>();
-
-        public void StoreViewModel<TModel>(TModel model)
-        {
-            if (_viewModels.ContainsKey(typeof(TModel)))
-            {
-                _viewModels[typeof(TModel)] = model;
-            }
-            else
-            {
-                _viewModels.Add(typeof(TModel), model);
-            }
-
-
-        }
-
-        public TModel RetrieveViewModel<TModel>()
-        {
-            object value;
-            _viewModels.TryGetValue(typeof(TModel), out value);
-
-            try
-            {
-                return (TModel)value;
-            }
-            catch (Exception)
-            {
-                return default(TModel);
-            }
-        }
+        
     }
 }
