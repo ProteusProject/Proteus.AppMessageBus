@@ -1,4 +1,4 @@
-﻿namespace Windows8TestingHarness
+namespace TestingHarness.Portable
 {
     public class DisplayPageViewModel
     {

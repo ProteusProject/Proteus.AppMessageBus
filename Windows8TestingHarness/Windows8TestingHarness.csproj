@@ -123,11 +123,9 @@
     <Compile Include="CounterDisplayPage.xaml.cs">
       <DependentUpon>CounterDisplayPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="CounterDisplayPageViewModel.cs" />
     <Compile Include="DisplayPage.xaml.cs">
       <DependentUpon>DisplayPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DisplayPageViewModel.cs" />
     <Compile Include="EditPage.xaml.cs">
       <DependentUpon>EditPage.xaml</DependentUpon>
     </Compile>

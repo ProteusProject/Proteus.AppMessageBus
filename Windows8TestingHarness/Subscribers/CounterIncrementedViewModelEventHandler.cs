@@ -1,4 +1,5 @@
 ﻿using Proteus.Infrastructure.Messaging.Portable.Abstractions;
+using TestingHarness.Portable;
 using Windows8TestingHarness.Messages;
 
 namespace Windows8TestingHarness.Subscribers
