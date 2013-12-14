@@ -1,4 +1,4 @@
-namespace TestingHarness.Portable
+namespace TestingHarness.Portable.ViewModels
 {
     public class DisplayPageViewModel
     {
