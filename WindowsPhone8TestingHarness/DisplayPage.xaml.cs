@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Navigation;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
+using TestingHarness.Portable.ViewModels;
 
 namespace WindowsPhone8TestingHarness
 {
@@ -15,6 +16,14 @@ namespace WindowsPhone8TestingHarness
         public DisplayPage()
         {
             InitializeComponent();
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            var nameValues = App.ViewModelManager.RetrieveViewModel<DisplayPageViewModel>() ??
+                             new DisplayPageViewModel("Unknown", "Unknown");
+
+            DataContext = nameValues;
         }
     }
 }

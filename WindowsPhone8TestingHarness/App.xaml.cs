@@ -6,6 +6,10 @@ using System.Windows.Markup;
 using System.Windows.Navigation;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
+using Proteus.Infrastructure.Messaging.Portable;
+using TestingHarness.Portable;
+using TestingHarness.Portable.Abstractions;
+using TestingHarness.Portable.Subscribers;
 using WindowsPhone8TestingHarness.Resources;
 
 namespace WindowsPhone8TestingHarness
@@ -17,6 +21,9 @@ namespace WindowsPhone8TestingHarness
         /// </summary>
         /// <returns>The root frame of the Phone Application.</returns>
         public static PhoneApplicationFrame RootFrame { get; private set; }
+
+        public static DurableMessageBus Bus { get; private set; }
+        public static IManageViewModels ViewModelManager { get; private set; }
 
         /// <summary>
         /// Constructor for the Application object.
@@ -54,6 +61,13 @@ namespace WindowsPhone8TestingHarness
                 // and consume battery power when the user is not using the phone.
                 PhoneApplicationService.Current.UserIdleDetectionMode = IdleDetectionMode.Disabled;
             }
+
+            Bus = new DurableMessageBus();
+
+            ViewModelManager = new ViewModelManager();
+
+            var registrar = new SubscriberRegistrar(Bus, ViewModelManager);
+            registrar.RegisterMessageBusSubscribers();
 
         }
 
