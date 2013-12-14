@@ -130,12 +130,6 @@
       <DependentUpon>EditPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Subscribers\ChangeNameCommandHandler.cs" />
-    <Compile Include="Subscribers\CounterIncrementedViewModelEventHandler.cs" />
-    <Compile Include="Subscribers\IncrementCounterCommandHandler.cs" />
-    <Compile Include="Subscribers\NameChangedEventPersistenceHandler.cs" />
-    <Compile Include="Subscribers\NameChangedEventViewModelHandler.cs" />
-    <Compile Include="Subscribers\SubscriberRegistrar.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">

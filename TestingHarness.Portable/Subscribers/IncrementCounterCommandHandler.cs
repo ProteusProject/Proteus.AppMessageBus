@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using Proteus.Infrastructure.Messaging.Portable;
 using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 using TestingHarness.Portable.Messages;
 
-namespace Windows8TestingHarness.Subscribers
+namespace TestingHarness.Portable.Subscribers
 {
     public class IncrementCounterCommandHandler 
         : IHandleDurable<IncrementCounterWithAckCommand>, IHandleDurable<IncrementCounterWithoutAckCommand>

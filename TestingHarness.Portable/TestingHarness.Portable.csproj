@@ -44,6 +44,12 @@
     <Compile Include="Messages\IncrementCounterWithoutAckCommand.cs" />
     <Compile Include="Messages\NameChangedEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Subscribers\ChangeNameCommandHandler.cs" />
+    <Compile Include="Subscribers\CounterIncrementedViewModelEventHandler.cs" />
+    <Compile Include="Subscribers\IncrementCounterCommandHandler.cs" />
+    <Compile Include="Subscribers\NameChangedEventPersistenceHandler.cs" />
+    <Compile Include="Subscribers\NameChangedEventViewModelHandler.cs" />
+    <Compile Include="Subscribers\SubscriberRegistrar.cs" />
     <Compile Include="ViewModels\CounterDisplayPageViewModel.cs" />
     <Compile Include="ViewModels\DisplayPageViewModel.cs" />
   </ItemGroup>

@@ -14,7 +14,6 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Windows8TestingHarness.Common;
-using Windows8TestingHarness.Subscribers;
 
 // The Basic Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234237
 
@@ -41,7 +40,7 @@ namespace Windows8TestingHarness
         /// session.  This will be null the first time a page is visited.</param>
         protected override void LoadState(Object navigationParameter, Dictionary<String, Object> pageState)
         {
-            var viewModel = App.ViewModelManager.GetViewModelFor<CounterDisplayPage>() as CounterDisplayPageViewModel;
+            var viewModel = App.ViewModelManager.RetrieveViewModel<CounterDisplayPageViewModel>();
 
             this.DefaultViewModel["AcknowledgedCounter"] = null != viewModel ? viewModel.AcknowledgedCounter : 0;
             this.DefaultViewModel["UnacknowledgedCounter"] = null != viewModel ? viewModel.UnacknowledgedCounter : 0;

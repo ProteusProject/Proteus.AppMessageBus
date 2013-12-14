@@ -1,10 +1,9 @@
-﻿using Proteus.Infrastructure.Messaging.Portable.Abstractions;
-using TestingHarness.Portable;
+using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 using TestingHarness.Portable.Abstractions;
 using TestingHarness.Portable.Messages;
 using TestingHarness.Portable.ViewModels;
 
-namespace Windows8TestingHarness.Subscribers
+namespace TestingHarness.Portable.Subscribers
 {
     public class NameChangedEventViewModelHandler : IHandle<NameChangedEvent>
     {
@@ -17,7 +16,7 @@ namespace Windows8TestingHarness.Subscribers
 
         public void Handle(NameChangedEvent message)
         {
-            _modelManager.SetViewModelFor<DisplayPage>(new DisplayPageViewModel(message.Firstname, message.Lastname));
+            _modelManager.StoreViewModel(new DisplayPageViewModel(message.Firstname, message.Lastname));
         }
     }
 }

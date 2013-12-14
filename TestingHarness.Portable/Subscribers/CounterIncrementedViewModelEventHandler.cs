@@ -1,11 +1,10 @@
-﻿using Proteus.Infrastructure.Messaging.Portable;
+using Proteus.Infrastructure.Messaging.Portable;
 using Proteus.Infrastructure.Messaging.Portable.Abstractions;
-using TestingHarness.Portable;
 using TestingHarness.Portable.Abstractions;
 using TestingHarness.Portable.Messages;
 using TestingHarness.Portable.ViewModels;
 
-namespace Windows8TestingHarness.Subscribers
+namespace TestingHarness.Portable.Subscribers
 {
     public class CounterIncrementedViewModelEventHandler
         : IHandleDurable<CounterIncrementedWithAckEvent>, IHandleDurable<CounterIncrementedWithoutAckEvent>
@@ -22,7 +21,7 @@ namespace Windows8TestingHarness.Subscribers
 
         public void Handle(CounterIncrementedWithAckEvent message)
         {
-            var viewModel = _modelManager.GetViewModelFor<CounterDisplayPage>() as CounterDisplayPageViewModel;
+            var viewModel = _modelManager.RetrieveViewModel<CounterDisplayPageViewModel>();
 
             if (null == viewModel)
             {
@@ -31,14 +30,14 @@ namespace Windows8TestingHarness.Subscribers
 
             viewModel.AcknowledgedCounter++;
 
-            _modelManager.SetViewModelFor<CounterDisplayPage>(viewModel);
+            _modelManager.StoreViewModel(viewModel);
 
             _bus.Acknowledge(message);
         }
 
         public void Handle(CounterIncrementedWithoutAckEvent message)
         {
-            var viewModel = _modelManager.GetViewModelFor<CounterDisplayPage>() as CounterDisplayPageViewModel;
+            var viewModel = _modelManager.RetrieveViewModel<CounterDisplayPageViewModel>();
 
             if (null == viewModel)
             {
@@ -47,7 +46,7 @@ namespace Windows8TestingHarness.Subscribers
 
             viewModel.UnacknowledgedCounter++;
 
-            _modelManager.SetViewModelFor<CounterDisplayPage>(viewModel);
+            _modelManager.StoreViewModel(viewModel);
 
             //intentionally do NOT acknowledge the message...that's the whole pt of this handler :)
             //_bus.Acknowledge(message);

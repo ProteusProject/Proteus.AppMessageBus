@@ -2,7 +2,7 @@
 {
     public interface IManageViewModels
     {
-        void SetViewModelFor<TPage>(object model);
-        object GetViewModelFor<TPage>();
+        void StoreViewModel<TModel>(TModel model);
+        TModel RetrieveViewModel<TModel>();
     }
 }

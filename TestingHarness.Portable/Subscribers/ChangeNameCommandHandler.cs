@@ -1,7 +1,7 @@
-﻿using Proteus.Infrastructure.Messaging.Portable.Abstractions;
+using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 using TestingHarness.Portable.Messages;
 
-namespace Windows8TestingHarness.Subscribers
+namespace TestingHarness.Portable.Subscribers
 {
     public class ChangeNameCommandHandler : IHandle<ChangeNameCommand>
     {

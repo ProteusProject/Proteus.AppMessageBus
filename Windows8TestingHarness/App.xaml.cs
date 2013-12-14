@@ -5,6 +5,7 @@ using System.Linq;
 using Proteus.Infrastructure.Messaging.Portable;
 using TestingHarness.Portable.Abstractions;
 using TestingHarness.Portable.Messages;
+using TestingHarness.Portable.Subscribers;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
@@ -16,7 +17,6 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-using Windows8TestingHarness.Subscribers;
 
 // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234227
 
@@ -56,8 +56,8 @@ namespace Windows8TestingHarness
         protected override async void OnLaunched(LaunchActivatedEventArgs args)
         {
             //added to ensure that the local storage path is identified so it can be observed
-            System.Diagnostics.Debug.WriteLine("*** LocalStorage path is: {0}",Windows.Storage.ApplicationData.Current.LocalFolder.Path);
-            
+            System.Diagnostics.Debug.WriteLine("*** LocalStorage path is: {0}", Windows.Storage.ApplicationData.Current.LocalFolder.Path);
+
             var rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
@@ -111,25 +111,33 @@ namespace Windows8TestingHarness
 
         private readonly Dictionary<Type, object> _viewModels = new Dictionary<Type, object>();
 
-        public void SetViewModelFor<TPage>(object model)
+        public void StoreViewModel<TModel>(TModel model)
         {
-            if (_viewModels.ContainsKey(typeof(TPage)))
+            if (_viewModels.ContainsKey(typeof(TModel)))
             {
-                _viewModels[typeof(TPage)] = model;
+                _viewModels[typeof(TModel)] = model;
             }
             else
             {
-                _viewModels.Add(typeof(TPage), model);
+                _viewModels.Add(typeof(TModel), model);
             }
 
 
         }
 
-        public object GetViewModelFor<TPage>()
+        public TModel RetrieveViewModel<TModel>()
         {
             object value;
-            _viewModels.TryGetValue(typeof(TPage), out value);
-            return value;
+            _viewModels.TryGetValue(typeof(TModel), out value);
+
+            try
+            {
+                return (TModel)value;
+            }
+            catch (Exception)
+            {
+                return default(TModel);
+            }
         }
     }
 }

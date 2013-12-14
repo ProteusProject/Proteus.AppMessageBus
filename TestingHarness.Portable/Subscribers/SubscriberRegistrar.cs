@@ -1,9 +1,8 @@
-﻿using Proteus.Infrastructure.Messaging.Portable;
-using Proteus.Infrastructure.Messaging.Portable.Abstractions;
+using Proteus.Infrastructure.Messaging.Portable;
 using TestingHarness.Portable.Abstractions;
 using TestingHarness.Portable.Messages;
 
-namespace Windows8TestingHarness.Subscribers
+namespace TestingHarness.Portable.Subscribers
 {
     public class SubscriberRegistrar
     {
