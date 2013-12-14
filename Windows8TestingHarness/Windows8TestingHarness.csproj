@@ -135,6 +135,7 @@
     <Compile Include="Subscribers\IncrementCounterCommandHandler.cs" />
     <Compile Include="Subscribers\NameChangedEventPersistenceHandler.cs" />
     <Compile Include="Subscribers\NameChangedEventViewModelHandler.cs" />
+    <Compile Include="Subscribers\SubscriberRegistrar.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -185,6 +186,9 @@
     <Reference Include="PCLStorage.Abstractions">
       <HintPath>..\packages\PCLStorage.0.2.1-pre\lib\win8\PCLStorage.Abstractions.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Messages\" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '11.0' ">
     <VisualStudioVersion>11.0</VisualStudioVersion>

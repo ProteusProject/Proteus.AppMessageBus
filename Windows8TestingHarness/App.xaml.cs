@@ -35,24 +35,15 @@ namespace Windows8TestingHarness
         public App()
         {
             Bus = new DurableMessageBus();
-            RegisterMessageBusSubscribers();
+
+            var registrar = new SubscriberRegistrar(Bus);
+            registrar.RegisterMessageBusSubscribers();
 
             this.InitializeComponent();
             this.Suspending += OnSuspending;
         }
 
-        private void RegisterMessageBusSubscribers()
-        {
-            Bus.RegisterSubscriptionFor<ChangeNameCommand>(new ChangeNameCommandHandler().Handle);
-            Bus.RegisterSubscriptionFor<NameChangedEvent>(new NameChangedEventViewModelHandler().Handle);
-            Bus.RegisterSubscriptionFor<NameChangedEvent>(new NameChangedEventPersistenceHandler().Handle);
-            
-            Bus.RegisterSubscriptionFor<IncrementCounterWithAckCommand>(new IncrementCounterCommandHandler().Handle);
-            Bus.RegisterSubscriptionFor<IncrementCounterWithoutAckCommand>(new IncrementCounterCommandHandler().Handle);
-            
-            Bus.RegisterSubscriptionFor<CounterIncrementedWithAckEvent>(new CounterIncrementedViewModelEventHandler().Handle);
-            Bus.RegisterSubscriptionFor<CounterIncrementedWithoutAckEvent>(new CounterIncrementedViewModelEventHandler().Handle);
-        }
+        
 
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
