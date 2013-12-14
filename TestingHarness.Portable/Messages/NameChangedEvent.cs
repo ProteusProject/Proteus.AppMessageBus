@@ -1,6 +1,6 @@
-﻿using Proteus.Infrastructure.Messaging.Portable.Abstractions;
+using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
-namespace Windows8TestingHarness.Messages
+namespace TestingHarness.Portable.Messages
 {
     public class NameChangedEvent : Event
     {

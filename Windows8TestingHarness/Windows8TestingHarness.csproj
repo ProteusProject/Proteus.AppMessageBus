@@ -129,12 +129,6 @@
     <Compile Include="EditPage.xaml.cs">
       <DependentUpon>EditPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Messages\ChangeNameCommand.cs" />
-    <Compile Include="Messages\CounterIncrementedWithAckEvent.cs" />
-    <Compile Include="Messages\CounterIncrementedWithoutAckEvent.cs" />
-    <Compile Include="Messages\IncrementCounterWithAckCommand.cs" />
-    <Compile Include="Messages\IncrementCounterWithoutAckCommand.cs" />
-    <Compile Include="Messages\NameChangedEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Subscribers\ChangeNameCommandHandler.cs" />
     <Compile Include="Subscribers\CounterIncrementedViewModelEventHandler.cs" />

@@ -1,7 +1,7 @@
 ﻿using System;
 using Proteus.Infrastructure.Messaging.Portable;
 using Proteus.Infrastructure.Messaging.Portable.Abstractions;
-using Windows8TestingHarness.Messages;
+using TestingHarness.Portable.Messages;
 
 namespace Windows8TestingHarness.Subscribers
 {
