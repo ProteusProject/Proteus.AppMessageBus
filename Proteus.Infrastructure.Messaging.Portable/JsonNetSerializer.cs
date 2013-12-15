@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Text;
 using Newtonsoft.Json;
 using Proteus.Infrastructure.Messaging.Portable.Abstractions;
@@ -61,7 +62,11 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
             try
             {
-                return new SerializerResult<TTarget>(Deserialize<TTarget>(serialized), true);
+                var deserialized = Deserialize<TTarget>(serialized);
+
+                return ReferenceEquals(deserialized, null) ?
+                    new SerializerResult<TTarget>(default(TTarget), false, new SerializationException("Deserialize Result is NULL.")) 
+                    : new SerializerResult<TTarget>(deserialized, true);
             }
             catch (Exception ex)
             {
@@ -73,7 +78,10 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
             try
             {
-                return new SerializerResult<TTarget>(Deserialize<TTarget>(serialized), true);
+                var deserialized = Deserialize<TTarget>(serialized);
+                return ReferenceEquals(deserialized, null) ?
+                    new SerializerResult<TTarget>(default(TTarget), false, new SerializationException("Deserialize Result is NULL."))
+                    : new SerializerResult<TTarget>(deserialized, true);
             }
             catch (Exception ex)
             {

@@ -58,6 +58,7 @@
     <Compile Include="BusTests.cs" />
     <Compile Include="DateTimeUtility.cs" />
     <Compile Include="EnvelopeTests.cs" />
+    <Compile Include="JsonNetSerializerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RetryPolicyTests.cs" />
     <Compile Include="SerializationTests.cs" />
