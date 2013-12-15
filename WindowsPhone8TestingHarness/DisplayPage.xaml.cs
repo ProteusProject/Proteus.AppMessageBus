@@ -20,7 +20,7 @@ namespace WindowsPhone8TestingHarness
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            var nameValues = App.ViewModelManager.RetrieveViewModel<DisplayPageViewModel>() ??
+            var nameValues = App.ViewModels.Get<DisplayPageViewModel>() ??
                              new DisplayPageViewModel("Unknown", "Unknown");
 
             DataContext = nameValues;

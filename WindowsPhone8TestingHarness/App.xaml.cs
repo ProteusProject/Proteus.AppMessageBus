@@ -23,7 +23,7 @@ namespace WindowsPhone8TestingHarness
         public static PhoneApplicationFrame RootFrame { get; private set; }
 
         public static DurableMessageBus Bus { get; private set; }
-        public static IManageViewModels ViewModelManager { get; private set; }
+        public static IManageViewModels ViewModels { get; private set; }
 
         /// <summary>
         /// Constructor for the Application object.
@@ -64,9 +64,9 @@ namespace WindowsPhone8TestingHarness
 
             Bus = new DurableMessageBus();
 
-            ViewModelManager = new ViewModelManager();
+            ViewModels = new ViewModelManager();
 
-            var registrar = new SubscriberRegistrar(Bus, ViewModelManager);
+            var registrar = new SubscriberRegistrar(Bus, ViewModels);
             registrar.RegisterMessageBusSubscribers();
 
         }

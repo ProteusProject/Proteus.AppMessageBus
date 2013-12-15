@@ -2,7 +2,7 @@
 {
     public interface IManageViewModels
     {
-        void StoreViewModel<TModel>(TModel model);
-        TModel RetrieveViewModel<TModel>();
+        void Put<TModel>(TModel model);
+        TModel Get<TModel>();
     }
 }

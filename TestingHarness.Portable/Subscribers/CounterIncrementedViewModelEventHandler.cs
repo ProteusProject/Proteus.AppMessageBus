@@ -21,7 +21,7 @@ namespace TestingHarness.Portable.Subscribers
 
         public void Handle(CounterIncrementedWithAckEvent message)
         {
-            var viewModel = _modelManager.RetrieveViewModel<CounterDisplayPageViewModel>();
+            var viewModel = _modelManager.Get<CounterDisplayPageViewModel>();
 
             if (null == viewModel)
             {
@@ -30,14 +30,14 @@ namespace TestingHarness.Portable.Subscribers
 
             viewModel.AcknowledgedCounter++;
 
-            _modelManager.StoreViewModel(viewModel);
+            _modelManager.Put(viewModel);
 
             _bus.Acknowledge(message);
         }
 
         public void Handle(CounterIncrementedWithoutAckEvent message)
         {
-            var viewModel = _modelManager.RetrieveViewModel<CounterDisplayPageViewModel>();
+            var viewModel = _modelManager.Get<CounterDisplayPageViewModel>();
 
             if (null == viewModel)
             {
@@ -46,7 +46,7 @@ namespace TestingHarness.Portable.Subscribers
 
             viewModel.UnacknowledgedCounter++;
 
-            _modelManager.StoreViewModel(viewModel);
+            _modelManager.Put(viewModel);
 
             //intentionally do NOT acknowledge the message...that's the whole pt of this handler :)
             //_bus.Acknowledge(message);

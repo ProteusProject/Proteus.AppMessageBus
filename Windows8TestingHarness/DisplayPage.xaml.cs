@@ -40,7 +40,7 @@ namespace Windows8TestingHarness
         /// session.  This will be null the first time a page is visited.</param>
         protected override void LoadState(Object navigationParameter, Dictionary<String, Object> pageState)
         {
-            var nameValues = App.ViewModelManager.RetrieveViewModel<DisplayPageViewModel>();
+            var nameValues = App.ViewModels.Get<DisplayPageViewModel>();
 
             this.DefaultViewModel["Firstname"] = null != nameValues ? nameValues.Firstname : "Unknown";
             this.DefaultViewModel["Lastname"] = null != nameValues ? nameValues.Lastname : "Unknown";

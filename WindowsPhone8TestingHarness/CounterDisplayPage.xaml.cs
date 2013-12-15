@@ -20,8 +20,8 @@ namespace WindowsPhone8TestingHarness
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            var viewModel = App.ViewModelManager.RetrieveViewModel<CounterDisplayPageViewModel>() ??
-                            new CounterDisplayPageViewModel {AcknowledgedCounter = 0, UnacknowledgedCounter = 0};
+            var viewModel = App.ViewModels.Get<CounterDisplayPageViewModel>() ??
+                            new CounterDisplayPageViewModel { AcknowledgedCounter = 0, UnacknowledgedCounter = 0 };
 
             DataContext = viewModel;
             //base.OnNavigatedTo(e);

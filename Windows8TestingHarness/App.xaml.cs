@@ -29,7 +29,7 @@ namespace Windows8TestingHarness
     sealed partial class App : Application
     {
         public static DurableMessageBus Bus { get; private set; }
-        public static IManageViewModels ViewModelManager { get; private set; }
+        public static IManageViewModels ViewModels { get; private set; }
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -39,9 +39,9 @@ namespace Windows8TestingHarness
         {
             Bus = new DurableMessageBus();
 
-            ViewModelManager = new ViewModelManager();
+            ViewModels = new ViewModelManager();
 
-            var registrar = new SubscriberRegistrar(Bus, ViewModelManager);
+            var registrar = new SubscriberRegistrar(Bus, ViewModels);
             registrar.RegisterMessageBusSubscribers();
 
             this.InitializeComponent();

@@ -8,7 +8,7 @@ namespace TestingHarness.Portable
     {
         private readonly Dictionary<Type, object> _viewModels = new Dictionary<Type, object>();
 
-        public void StoreViewModel<TModel>(TModel model)
+        public void Put<TModel>(TModel model)
         {
             if (_viewModels.ContainsKey(typeof(TModel)))
             {
@@ -20,7 +20,7 @@ namespace TestingHarness.Portable
             }
         }
 
-        public TModel RetrieveViewModel<TModel>()
+        public TModel Get<TModel>()
         {
             object value;
             _viewModels.TryGetValue(typeof(TModel), out value);

@@ -16,7 +16,7 @@ namespace TestingHarness.Portable.Subscribers
 
         public void Handle(NameChangedEvent message)
         {
-            _modelManager.StoreViewModel(new DisplayPageViewModel(message.Firstname, message.Lastname));
+            _modelManager.Put(new DisplayPageViewModel(message.Firstname, message.Lastname));
         }
     }
 }
