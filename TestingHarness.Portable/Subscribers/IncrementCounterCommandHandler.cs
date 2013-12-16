@@ -19,7 +19,7 @@ namespace TestingHarness.Portable.Subscribers
         public void Handle(IncrementCounterWithAckCommand message)
         {
             //publish the event with some retries and a future expiry
-            _bus.PublishDurable(new CounterIncrementedWithAckEvent(), new RetryPolicy(2, TimeSpan.FromHours(1)));
+            _bus.PublishDurable(new CounterIncrementedWithAckEvent(), new RetryPolicy(3, TimeSpan.FromHours(1)));
 
             //now that event(s) are safely published, acknowledge the command
             _bus.Acknowledge(message);
@@ -28,7 +28,7 @@ namespace TestingHarness.Portable.Subscribers
         public void Handle(IncrementCounterWithoutAckCommand message)
         {
             //publish the event with some retries and a future expiry
-            _bus.PublishDurable(new CounterIncrementedWithoutAckEvent(), new RetryPolicy(2, TimeSpan.FromHours(1)));
+            _bus.PublishDurable(new CounterIncrementedWithoutAckEvent(), new RetryPolicy(3, TimeSpan.FromHours(1)));
 
             //now that event(s) are safely published, acknowledge the command
             _bus.Acknowledge(message);

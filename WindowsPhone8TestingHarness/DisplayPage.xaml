@@ -26,17 +26,10 @@
             <TextBlock Text="Display Page" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
         </StackPanel>
 
-        <Grid Grid.Row="1" Margin="12,0,12,0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="100"/>
-                <RowDefinition Height="100"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <TextBlock Grid.Row="0"  Text="{Binding Path=Firstname}" HorizontalAlignment="Center"/>
-            <TextBlock Grid.Row="1" Text="{Binding Path=Lastname}" HorizontalAlignment="Center" />
-
-        </Grid>
+        <StackPanel Grid.Row="1" Margin="12,0,12,0">
+            <TextBlock Text="{Binding Path=Firstname}" HorizontalAlignment="Center" Margin="10"/>
+            <TextBlock Text="{Binding Path=Lastname}" HorizontalAlignment="Center" Margin="10" />
+        </StackPanel>
 
         <!--ContentPanel - place additional content here-->
         <!--<Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">-->

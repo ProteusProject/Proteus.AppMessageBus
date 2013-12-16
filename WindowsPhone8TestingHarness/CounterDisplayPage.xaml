@@ -26,28 +26,23 @@
             <TextBlock Text="Counter Page" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
         </StackPanel>
 
-        <Grid Grid.Row="1" Margin="12,0,12,0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="100"/>
-                <RowDefinition Height="100"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="1" Margin="12,0,12,0" Orientation="Vertical">
 
-            <TextBlock Grid.Column="0" Grid.Row="0" Text="Acknowledged Count:" />
-            <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding Path=AcknowledgedCounter}"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Acknowledged Count:" Margin="10" />
+                <TextBlock Text="{Binding Path=AcknowledgedCounter}" Margin="10" />
+            </StackPanel>
 
-            <TextBlock Grid.Column="0" Grid.Row="1" Text="UnAcknowledged Count:" />
-            <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding Path=UnacknowledgedCounter}" />
-        </Grid>
-        
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="UnAcknowledged Count:" Margin="10" />
+                <TextBlock Text="{Binding Path=UnacknowledgedCounter}" Margin="10" />
+            </StackPanel>
+            
+        </StackPanel>
         <!--ContentPanel - place additional content here-->
         <!--<Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">-->
 
-        
+
     </Grid>
 
 </phone:PhoneApplicationPage>

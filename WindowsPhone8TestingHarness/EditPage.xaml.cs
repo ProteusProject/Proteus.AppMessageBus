@@ -37,5 +37,10 @@ namespace WindowsPhone8TestingHarness
             App.Bus.SendDurable(new IncrementCounterWithoutAckCommand());
             NavigationService.Navigate(new Uri("/CounterDisplayPage.xaml", UriKind.Relative));
         }
+
+        private void NavigateToCounterDisplay_OnClick(object sender, RoutedEventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/CounterDisplayPage.xaml", UriKind.Relative));
+        }
     }
 }
