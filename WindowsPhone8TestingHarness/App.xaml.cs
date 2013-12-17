@@ -69,34 +69,32 @@ namespace WindowsPhone8TestingHarness
             var registrar = new SubscriberRegistrar(Bus, ViewModels);
             registrar.RegisterMessageBusSubscribers();
 
+            Bus.Start();
+
         }
 
         // Code to execute when the application is launching (eg, from Start)
         // This code will not execute when the application is reactivated
-        private async void Application_Launching(object sender, LaunchingEventArgs e)
+        private void Application_Launching(object sender, LaunchingEventArgs e)
         {
-            await Bus.Start();
         }
 
         // Code to execute when the application is activated (brought to foreground)
         // This code will not execute when the application is first launched
-        private async void Application_Activated(object sender, ActivatedEventArgs e)
+        private void Application_Activated(object sender, ActivatedEventArgs e)
         {
-            await Bus.Start();
         }
 
         // Code to execute when the application is deactivated (sent to background)
         // This code will not execute when the application is closing
-        private async void Application_Deactivated(object sender, DeactivatedEventArgs e)
+        private void Application_Deactivated(object sender, DeactivatedEventArgs e)
         {
-            await Bus.Stop();
         }
 
         // Code to execute when the application is closing (eg, user hit Back)
         // This code will not execute when the application is deactivated
-        private async void Application_Closing(object sender, ClosingEventArgs e)
+        private void Application_Closing(object sender, ClosingEventArgs e)
         {
-            await Bus.Stop();
         }
 
         // Code to execute if a navigation fails

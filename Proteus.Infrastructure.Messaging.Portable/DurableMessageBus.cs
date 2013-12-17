@@ -16,6 +16,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
         private List<Envelope<IDurableMessage>> _queuedCommands = new List<Envelope<IDurableMessage>>();
         private RetryPolicy _activeRetryPolicy;
         private Lazy<string> _messageVersion = new Lazy<string>(() => string.Empty);
+        private bool _intermediateMessagePersistence = true;
 
         protected RetryPolicy DefaultEventRetryPolicy { get; private set; }
         protected RetryPolicy DefaultCommandRetryPolicy { get; private set; }
@@ -66,6 +67,11 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
             ClearExpiredEvents();
             ProcessPendingEvents();
+
+            if (_intermediateMessagePersistence)
+            {
+                await SavePendingMessages();
+            }
         }
 
         async public Task Stop()
@@ -239,7 +245,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        public void Acknowledge<TMessage>(TMessage message) where TMessage : IDurableMessage
+        public async Task Acknowledge<TMessage>(TMessage message) where TMessage : IDurableMessage
         {
             Logger(string.Format("Acknowledgement received for Message Id = {0} having Acknowledgement Id = {1}", message.Id,
                                  message.AcknowledgementId));
@@ -259,6 +265,11 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
                 var acknowledgementId = message.AcknowledgementId;
                 _queuedEvents.RemoveAll(env => env.Message.AcknowledgementId == acknowledgementId);
+            }
+
+            if (_intermediateMessagePersistence)
+            {
+                await SavePendingMessages();
             }
         }
 
@@ -306,30 +317,40 @@ namespace Proteus.Infrastructure.Messaging.Portable
             return Serializer.Deserialize<TSource>(serialized);
         }
 
-        public void SendDurable<TCommand>(TCommand command) where TCommand : IDurableCommand
+        public async Task SendDurable<TCommand>(TCommand command) where TCommand : IDurableCommand
         {
-            SendDurable(command, DefaultCommandRetryPolicy);
+            await SendDurable(command, DefaultCommandRetryPolicy);
         }
 
-        public void SendDurable<TCommand>(TCommand command, RetryPolicy retryPolicy) where TCommand : IDurableCommand
+        public async Task SendDurable<TCommand>(TCommand command, RetryPolicy retryPolicy) where TCommand : IDurableCommand
         {
             Logger(string.Format("Sending Durable Command, Id = {0}", command.Id));
 
             _activeRetryPolicy = retryPolicy;
             base.Send(command);
+
+            if (_intermediateMessagePersistence)
+            {
+                await SavePendingMessages();
+            }
         }
 
-        public void PublishDurable<TEvent>(TEvent @event) where TEvent : IDurableEvent
+        public async Task PublishDurable<TEvent>(TEvent @event) where TEvent : IDurableEvent
         {
-            PublishDurable(@event, DefaultEventRetryPolicy);
+            await PublishDurable(@event, DefaultEventRetryPolicy);
         }
 
-        public void PublishDurable<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : IDurableEvent
+        public async Task PublishDurable<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : IDurableEvent
         {
             Logger(string.Format("Publishing Durable Event, Id = {0}", @event.Id));
 
             _activeRetryPolicy = retryPolicy;
             base.Publish(@event);
+
+            if (_intermediateMessagePersistence)
+            {
+                await SavePendingMessages();
+            }
         }
 
         private void StoreEvent(IDurableMessage @event, int index)

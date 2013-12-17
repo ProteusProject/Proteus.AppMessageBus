@@ -1,7 +1,9 @@
-﻿namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
+﻿using System.Threading.Tasks;
+
+namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
 {
     public interface IAcknowledgeMessages
     {
-        void Acknowledge<TMessage>(TMessage message) where TMessage : IDurableMessage;
+        Task Acknowledge<TMessage>(TMessage message) where TMessage : IDurableMessage;
     }
 }
