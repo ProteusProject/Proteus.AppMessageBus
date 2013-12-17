@@ -32,7 +32,7 @@ namespace TestingHarness.Portable.Subscribers
 
             _modelManager.Put(viewModel);
 
-            _bus.Acknowledge(message);
+            _bus.Acknowledge(message).RunSynchronously();
         }
 
         public void Handle(CounterIncrementedWithoutAckEvent message)
