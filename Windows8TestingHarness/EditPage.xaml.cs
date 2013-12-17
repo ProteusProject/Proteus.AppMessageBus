@@ -72,5 +72,10 @@ namespace Windows8TestingHarness
             this.Frame.Navigate(typeof(CounterDisplayPage));
             
         }
+
+        private void NavigateToCounterDisplay_OnClick(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(CounterDisplayPage));
+        }
     }
 }

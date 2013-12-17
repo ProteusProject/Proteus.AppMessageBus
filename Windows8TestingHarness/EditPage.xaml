@@ -26,7 +26,33 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid>
+        <StackPanel Grid.Row="1" Orientation="Vertical">
+            <Grid HorizontalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="First Name" Style="{StaticResource GroupHeaderTextStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 30 0"/>
+                <TextBox Grid.Column="1" x:Name="Firstname" Width="300" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            </Grid>
+
+            <Grid HorizontalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Last Name" Style="{StaticResource GroupHeaderTextStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 30 0"/>
+                <TextBox Grid.Column="1" x:Name="Lastname" Width="300" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            </Grid>
+
+            <Button x:Name="SaveNames" Content="Save Names" HorizontalAlignment="Center" Margin="10" Click="SaveNames_OnClick" />
+            <Button x:Name="IncrementWithAck" Content="Increment w/ ACK" HorizontalAlignment="Center" Margin="10" Click="IncrementCounterWithAck_OnClick" />
+            <Button x:Name="IncrementWithoutAck" Content="Increment w/out ACK" HorizontalAlignment="Center" Margin="10" Click="IncrementCounterWithoutAck_OnClick" />
+            <Button x:Name="NavigateToCounterDisplay" Content="Show Counter Display" HorizontalAlignment="Center" Margin="10" Click="NavigateToCounterDisplay_OnClick" />
+
+        </StackPanel>
+        
+        <!--<Grid>
             <Grid.Row>1</Grid.Row>
 
             <Grid.RowDefinitions>
@@ -70,7 +96,7 @@
             </Grid>
 
 
-        </Grid>
+        </Grid>-->
 
         <!-- Back button and page title -->
         <Grid>

@@ -35,7 +35,21 @@
             <TextBlock x:Name="pageTitle" Grid.Column="1" Text="{StaticResource AppName}" Style="{StaticResource PageHeaderTextStyle}"/>
         </Grid>
 
-        <Grid Grid.Row="1">
+        <StackPanel Grid.Row="1" Margin="12,0,12,0" Orientation="Vertical">
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Acknowledged Count:" Style="{StaticResource HeaderTextStyle}" Margin="10" />
+                <TextBlock Text="{Binding Path=AcknowledgedCounter}" Style="{StaticResource HeaderTextStyle}" Margin="10" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="UnAcknowledged Count:" Style="{StaticResource HeaderTextStyle}" Margin="10" />
+                <TextBlock Text="{Binding Path=UnacknowledgedCounter}" Style="{StaticResource HeaderTextStyle}" Margin="10" />
+            </StackPanel>
+
+        </StackPanel>
+
+        <!--<Grid Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="100"/>
                 <RowDefinition Height="100"/>
@@ -51,7 +65,7 @@
 
             <TextBlock Grid.Column="0" Grid.Row="1" Text="UnAcknowledged Counter:" Style="{StaticResource HeaderTextStyle}"/>
             <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding Path=UnacknowledgedCounter}" Style="{StaticResource HeaderTextStyle}"/>
-        </Grid>
+        </Grid>-->
 
         <VisualStateManager.VisualStateGroups>
 
