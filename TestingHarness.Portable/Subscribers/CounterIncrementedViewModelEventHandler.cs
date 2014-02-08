@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Proteus.Infrastructure.Messaging.Portable;
 using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 using TestingHarness.Portable.Abstractions;
@@ -19,7 +20,7 @@ namespace TestingHarness.Portable.Subscribers
             _modelManager = modelManager;
         }
 
-        public void Handle(CounterIncrementedWithAckEvent message)
+        public async void Handle(CounterIncrementedWithAckEvent message)
         {
             var viewModel = _modelManager.Get<CounterDisplayPageViewModel>();
 
@@ -32,7 +33,7 @@ namespace TestingHarness.Portable.Subscribers
 
             _modelManager.Put(viewModel);
 
-            _bus.Acknowledge(message).RunSynchronously();
+            await _bus.Acknowledge(message);
         }
 
         public void Handle(CounterIncrementedWithoutAckEvent message)

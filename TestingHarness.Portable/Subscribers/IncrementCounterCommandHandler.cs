@@ -16,22 +16,22 @@ namespace TestingHarness.Portable.Subscribers
             _bus = bus;
         }
 
-        public void Handle(IncrementCounterWithAckCommand message)
+        public async void Handle(IncrementCounterWithAckCommand message)
         {
             //publish the event with some retries and a future expiry
-            _bus.PublishDurable(new CounterIncrementedWithAckEvent(), new RetryPolicy(3, TimeSpan.FromHours(1))).RunSynchronously();
+            await _bus.PublishDurable(new CounterIncrementedWithAckEvent(), new RetryPolicy(3, TimeSpan.FromHours(1)));
 
             //now that event(s) are safely published, acknowledge the command
-            _bus.Acknowledge(message).RunSynchronously();
+            await _bus.Acknowledge(message);
         }
 
-        public void Handle(IncrementCounterWithoutAckCommand message)
+        public async void Handle(IncrementCounterWithoutAckCommand message)
         {
             //publish the event with some retries and a future expiry
-            _bus.PublishDurable(new CounterIncrementedWithoutAckEvent(), new RetryPolicy(3, TimeSpan.FromHours(1))).RunSynchronously();
+            await _bus.PublishDurable(new CounterIncrementedWithoutAckEvent(), new RetryPolicy(3, TimeSpan.FromHours(1)));
 
             //now that event(s) are safely published, acknowledge the command
-            _bus.Acknowledge(message).RunSynchronously();
+            await _bus.Acknowledge(message);
         }
     }
 }

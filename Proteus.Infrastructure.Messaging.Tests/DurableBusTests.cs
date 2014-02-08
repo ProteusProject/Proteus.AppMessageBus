@@ -62,10 +62,10 @@ namespace Proteus.Infrastructure.Messaging.Tests
             public async void CommandAndEventRetriesRespectRetryPolicyAcrossAdditionalStarts()
             {
                 await _bus.SendDurable(new TestDurableCommand(SingleValue));
-                //await _bus.PublishDurable(new TestDurableEvent(SingleValue));
+                await _bus.PublishDurable(new TestDurableEvent(SingleValue));
 
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
-                //Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
+                Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
                 //despite multiple calls to Start(), messages are only retried ONCE as per the retry policy setting
                 for (int i = 0; i < 10; i++)
@@ -73,9 +73,8 @@ namespace Proteus.Infrastructure.Messaging.Tests
                     await _bus.Start();
                 }
 
-                //TODO: explore failure
                 Assert.That(_commands.ProcessedMessagePayload, Is.EqualTo(_doubleValue));
-                //Assert.That(_events.ProcessedMessagePayload, Is.EqualTo(_doubleValue));
+                Assert.That(_events.ProcessedMessagePayload, Is.EqualTo(_doubleValue));
             }
 
         }
@@ -278,8 +277,6 @@ namespace Proteus.Infrastructure.Messaging.Tests
                 }
 
                 Assert.That(_eventsThatWillBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(SingleValue));
-
-                //TODO: explore failure
                 Assert.That(_eventsThatWillNotBeAcknowledged.ProcessedMessagePayload, Is.EqualTo(string.Format("{0}{0}", SingleValue)));
             }
 

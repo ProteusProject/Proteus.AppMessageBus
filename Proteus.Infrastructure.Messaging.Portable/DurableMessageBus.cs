@@ -16,7 +16,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
         private List<Envelope<IDurableMessage>> _queuedCommands = new List<Envelope<IDurableMessage>>();
         private RetryPolicy _activeRetryPolicy;
         private Lazy<string> _messageVersion = new Lazy<string>(() => string.Empty);
-        private bool _intermediateMessagePersistence = true;
+        private const bool UseIntermediateMessagePersistence = true;
 
         protected RetryPolicy DefaultEventRetryPolicy { get; private set; }
         protected RetryPolicy DefaultCommandRetryPolicy { get; private set; }
@@ -63,12 +63,12 @@ namespace Proteus.Infrastructure.Messaging.Portable
             await LoadPendingMessages();
 
             ClearExpiredCommands();
-            ProcessPendingCommands();
+            await ProcessPendingCommands();
 
             ClearExpiredEvents();
-            ProcessPendingEvents();
+            await ProcessPendingEvents();
 
-            if (_intermediateMessagePersistence)
+            if (UseIntermediateMessagePersistence)
             {
                 await SavePendingMessages();
             }
@@ -181,7 +181,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             _queuedEvents.RemoveAll(env => !env.ShouldRetry || !env.MessageMatchesVersion(MessageVersion));
         }
 
-        private void ProcessPendingCommands()
+        private async Task ProcessPendingCommands()
         {
             foreach (var envelope in _queuedCommands.Where(envelope => envelope.ShouldRetry).ToList())
             {
@@ -191,12 +191,17 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 //  so won't be around for further processing
                 if (!subscribersResult.HasSubscribers || subscribersResult.Subscribers.Count < envelope.SubscriberIndex)
                 {
-                    _queuedEvents.Remove(envelope);
+                    //TODO: write failing test for this!
+                    //_queuedEvents.Remove(envelope);
+                    _queuedCommands.Remove(envelope);
                     continue;
                 }
 
                 var subscriber = subscribersResult.Subscribers[envelope.SubscriberIndex];
-                subscriber(envelope.Message);
+
+                var envelope1 = envelope;
+                //await Task.Run(()=> subscriber(envelope1.Message));
+                subscriber(envelope1.Message);
 
                 envelope.HasBeenRetried();
 
@@ -207,7 +212,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        private void ProcessPendingEvents()
+        private async Task ProcessPendingEvents()
         {
 
             Logger("Processing Pending Events...");
@@ -233,7 +238,9 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 Logger(string.Format("Republishing Pending Event Id = {0} from Envelope Id = {1} to Subscriber Index = {2}", envelope.Message.Id, envelope.Id, envelope.SubscriberIndex));
 
                 var subscriber = subscribersResult.Subscribers[envelope.SubscriberIndex];
-                subscriber(envelope.Message);
+                var envelope1 = envelope;
+                //await Task.Run(() => subscriber(envelope1.Message));
+                subscriber(envelope1.Message);
 
                 envelope.HasBeenRetried();
 
@@ -267,7 +274,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 _queuedEvents.RemoveAll(env => env.Message.AcknowledgementId == acknowledgementId);
             }
 
-            if (_intermediateMessagePersistence)
+            if (UseIntermediateMessagePersistence)
             {
                 await SavePendingMessages();
             }
@@ -329,7 +336,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             _activeRetryPolicy = retryPolicy;
             base.Send(command);
 
-            if (_intermediateMessagePersistence)
+            if (UseIntermediateMessagePersistence)
             {
                 await SavePendingMessages();
             }
@@ -347,7 +354,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             _activeRetryPolicy = retryPolicy;
             base.Publish(@event);
 
-            if (_intermediateMessagePersistence)
+            if (UseIntermediateMessagePersistence)
             {
                 await SavePendingMessages();
             }

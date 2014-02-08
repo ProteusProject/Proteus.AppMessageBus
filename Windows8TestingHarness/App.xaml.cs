@@ -11,6 +11,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -48,13 +49,26 @@ namespace Windows8TestingHarness
             this.Suspending += OnSuspending;
         }
 
+        private void CurrentOnVisibilityChanged(object sender, VisibilityChangedEventArgs visibilityChangedEventArgs)
+        {
+            if (visibilityChangedEventArgs.Visible)
+            {
+                //no point in awaiting this, its in an event handler :)
+                Bus.Start();
+            }
+            else
+            {
+                Bus.Stop();
+            }
+        }
+
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
         /// will be used when the application is launched to open a specific file, to display
         /// search results, and so forth.
         /// </summary>
         /// <param name="args">Details about the launch request and process.</param>
-        protected override async void OnLaunched(LaunchActivatedEventArgs args)
+        protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
             //added to ensure that the local storage path is identified so it can be observed
             System.Diagnostics.Debug.WriteLine("*** LocalStorage path is: {0}", Windows.Storage.ApplicationData.Current.LocalFolder.Path);
@@ -73,7 +87,7 @@ namespace Windows8TestingHarness
                     //TODO: Load state from previously suspended application
                 }
 
-                await Bus.Start();
+                //await Bus.Start();
 
                 // Place the frame in the current Window
                 Window.Current.Content = rootFrame;
@@ -89,6 +103,10 @@ namespace Windows8TestingHarness
                     throw new Exception("Failed to create initial page");
                 }
             }
+
+            Window.Current.VisibilityChanged += CurrentOnVisibilityChanged;
+
+
             // Ensure the current window is active
             Window.Current.Activate();
         }
@@ -109,6 +127,7 @@ namespace Windows8TestingHarness
             deferral.Complete();
         }
 
+        
         
     }
 }
