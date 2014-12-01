@@ -61,6 +61,7 @@
     <Compile Include="Abstractions\Message.cs" />
     <Compile Include="Abstractions\SerializerResult.cs" />
     <Compile Include="DelegateConverter.cs" />
+    <Compile Include="DelegateExtensionMethods.cs" />
     <Compile Include="DuplicateSubscriberRegisteredException.cs" />
     <Compile Include="Envelope.cs" />
     <Compile Include="FileSystemProvider.cs" />

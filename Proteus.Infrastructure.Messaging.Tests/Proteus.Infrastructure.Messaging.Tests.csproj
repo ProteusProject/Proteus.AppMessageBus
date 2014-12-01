@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncDelegatesTests.cs" />
     <Compile Include="BusTests.cs" />
     <Compile Include="DateTimeUtility.cs" />
     <Compile Include="EnvelopeTests.cs" />
