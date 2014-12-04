@@ -81,7 +81,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 }
                 else
                 {
-                    //TODO: LOG EXCEPTION HERE
+                    Logger(string.Format("Unable to Serialize Commands: {0}", serialized.Exception));
                 }
             }
             else
@@ -100,7 +100,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 }
                 else
                 {
-                    //TODO: LOG EXCEPTION HERE
+                    Logger(string.Format("Unable to Serialize Events: {0}", serialized.Exception));
                 }
             }
             else
@@ -129,7 +129,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
                     }
                     else
                     {
-                        //TODO: LOG EXCEPTION
+                        Logger(string.Format("Unable to Deserialize Commands: {0}", deserialized.Exception));
                     }
                 }
             }
@@ -148,7 +148,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
                     }
                     else
                     {
-                        //TODO: LOG EXCEPTION
+                        Logger(string.Format("Unable to Deserialize Events: {0}", deserialized.Exception));
                     }
                 }
             }
