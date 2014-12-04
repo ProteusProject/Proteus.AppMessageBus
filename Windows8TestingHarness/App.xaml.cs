@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Proteus.Infrastructure.Messaging.Portable;
 using TestingHarness.Portable;
 using TestingHarness.Portable.Abstractions;
@@ -38,7 +40,8 @@ namespace Windows8TestingHarness
         /// </summary>
         public App()
         {
-            Bus = new DurableMessageBus();
+            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+            Bus = new DurableMessageBus() { Logger = text => Debug.WriteLine(text) };
 
             ViewModels = new ViewModelManager();
 
@@ -47,6 +50,11 @@ namespace Windows8TestingHarness
 
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+        }
+
+        void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+        {
+            Debug.WriteLine("***Unobserved Task Exception: {0} ***", e.Exception);
         }
 
         private void CurrentOnVisibilityChanged(object sender, VisibilityChangedEventArgs visibilityChangedEventArgs)
@@ -127,7 +135,7 @@ namespace Windows8TestingHarness
             deferral.Complete();
         }
 
-        
-        
+
+
     }
 }
