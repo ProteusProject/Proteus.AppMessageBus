@@ -8,12 +8,29 @@ namespace Proteus.Infrastructure.Messaging.Portable
     public class MessageBus : ISendCommands, IPublishEvents, IRegisterMessageSubscriptions
     {
         protected readonly Dictionary<Type, List<Action<IMessage>>> Routes = new Dictionary<Type, List<Action<IMessage>>>();
+        protected Lazy<string> _messageVersion = new Lazy<string>(() => string.Empty);
 
         public Action<string> Logger { get; set; }
 
+        public string MessageVersion
+        {
+            get
+            {
+                return _messageVersion.Value;
+            }
+        }
+
+        public Func<string> MessageVersionProvider
+        {
+            set
+            {
+                _messageVersion = new Lazy<string>(value);
+            }
+        }
+
         public virtual void RegisterSubscriptionFor<TMessage>(Action<TMessage> handler) where TMessage : IMessage
         {
-            Logger(string.Format("Registering Subscriber for Messages of type {0}", typeof(TMessage).AssemblyQualifiedName));
+            Logger(string.Format("Registering Subscriber for Messages of type {0}", typeof(TMessage).Name));
 
             List<Action<IMessage>> subscribers;
             if (!Routes.TryGetValue(typeof(TMessage), out subscribers))
@@ -31,7 +48,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public virtual void UnRegisterAllSubscriptionsFor<TMessage>() where TMessage : IMessage
         {
-            Logger(string.Format("Unregistering all Subscribers for Messages of type {0}", typeof(TMessage).AssemblyQualifiedName));
+            Logger(string.Format("Unregistering all Subscribers for Messages of type {0}", typeof(TMessage).Name));
 
             if (HasSubscriptionFor<TMessage>())
             {
@@ -41,7 +58,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public virtual void Send<TCommand>(TCommand command) where TCommand : ICommand
         {
-            Logger(string.Format("Sending Command of type {0}, MessageId = {1}", typeof(TCommand).AssemblyQualifiedName, command.Id));
+            Logger(string.Format("Sending Command of type {0}, MessageId = {1}", typeof(TCommand).Name, command.Id));
 
             const string reminderMessage = "Each Command must have exacty one subscriber registered.";
 
@@ -82,7 +99,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
                 if (!ShouldPublishEvent(preparedEvent, index, subscribers)) continue;
 
-                Logger(string.Format("Publishing Event of type {0}, MessageId = {1}, Subscriber Index = {2}", typeof(TEvent).AssemblyQualifiedName, @event.Id, index));
+                Logger(string.Format("Publishing Event of type {0}, MessageId = {1}, Subscriber Index = {2}", typeof(TEvent).Name, @event.Id, index));
 
                 var subscriber = subscribers[index];
                 subscriber(preparedEvent);
@@ -113,13 +130,13 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         protected virtual TCommand PrepareCommandForSending<TCommand>(TCommand command, Action<IMessage> subscribers) where TCommand :IMessage
         {
-            //effectively a no-op unless overridden in derived class
+            command.Version = MessageVersion;
             return command;
         }
 
         protected virtual TEvent PrepareEventForPublishing<TEvent>(TEvent @event, int subscriberIndex, List<Action<IMessage>> subscribers) where TEvent : IMessage
         {
-            //effectively a no-op unless overridden in derived class
+            @event.Version = MessageVersion;
             return @event;
         }
 

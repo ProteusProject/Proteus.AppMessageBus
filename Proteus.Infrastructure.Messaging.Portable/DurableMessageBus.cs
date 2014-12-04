@@ -15,29 +15,12 @@ namespace Proteus.Infrastructure.Messaging.Portable
         private List<Envelope<IDurableMessage>> _queuedEvents = new List<Envelope<IDurableMessage>>();
         private List<Envelope<IDurableMessage>> _queuedCommands = new List<Envelope<IDurableMessage>>();
         private RetryPolicy _activeRetryPolicy;
-        private Lazy<string> _messageVersion = new Lazy<string>(() => string.Empty);
         private const bool UseIntermediateMessagePersistence = true;
 
         protected RetryPolicy DefaultEventRetryPolicy { get; private set; }
         protected RetryPolicy DefaultCommandRetryPolicy { get; private set; }
         public IMessageSerializer Serializer { get; set; }
         public MesssagePersistence MessagePersister { get; set; }
-
-        public string MessageVersion
-        {
-            get
-            {
-                return _messageVersion.Value;
-            }
-        }
-
-        public Func<string> MessageVersionProvider
-        {
-            set
-            {
-                _messageVersion = new Lazy<string>(value);
-            }
-        }
 
         public DurableMessageBus()
             : this(new RetryPolicy(), new RetryPolicy())
@@ -254,21 +237,21 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public async Task Acknowledge<TMessage>(TMessage message) where TMessage : IDurableMessage
         {
-            Logger(string.Format("Acknowledgement received for Message Id = {0} having Acknowledgement Id = {1}", message.Id,
+            Logger(string.Format("Acknowledgement received for Message of type {0} Id = {1} having Acknowledgement Id = {2}", typeof(TMessage).Name, message.Id,
                                  message.AcknowledgementId));
 
             if (message is ICommand)
             {
-                Logger(string.Format("Acknowledging Command Id = {0} having Acknowledgement Id = {1}",
-                                     message.Id, message.AcknowledgementId));
+                Logger(string.Format("Acknowledging Command of type {0} Id = {1} having Acknowledgement Id = {2}",
+                                     typeof(TMessage).Name, message.Id, message.AcknowledgementId));
 
                 _queuedCommands.RemoveAll(env => env.Message.AcknowledgementId == message.AcknowledgementId);
             }
 
             if (message is IEvent)
             {
-                Logger(string.Format("Acknowledging Event Id = {0} having Acknowledgement Id = {1}",
-                                     message.Id, message.AcknowledgementId));
+                Logger(string.Format("Acknowledging Event of type {0} Id = {1} having Acknowledgement Id = {2}",
+                                     typeof(TMessage).Name, message.Id, message.AcknowledgementId));
 
                 var acknowledgementId = message.AcknowledgementId;
                 _queuedEvents.RemoveAll(env => env.Message.AcknowledgementId == acknowledgementId);
@@ -283,7 +266,9 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         protected override TCommand PrepareCommandForSending<TCommand>(TCommand command, Action<IMessage> subscribers)
         {
-            Logger(string.Format("Preparing to Send Command of type {0}, MessageId = {1}", typeof(TCommand).AssemblyQualifiedName, command.Id));
+            Logger(string.Format("Preparing to Send Command of type {0}, MessageId = {1}", typeof(TCommand).Name, command.Id));
+
+            command = base.PrepareCommandForSending(command, subscribers);
 
             var durableCommand = command as IDurableMessage;
 
@@ -291,7 +276,6 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 return command;
 
             durableCommand.AcknowledgementId = Guid.NewGuid();
-            durableCommand.Version = MessageVersion;
 
             StoreCommand(durableCommand);
 
@@ -300,7 +284,9 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         protected override TEvent PrepareEventForPublishing<TEvent>(TEvent @event, int subscriberIndex, List<Action<IMessage>> subscribers)
         {
-            Logger(string.Format("Preparing to Publish Event of type {0}, MessageId = {1}, Subscriber Index = {2}", typeof(TEvent).AssemblyQualifiedName, @event.Id, subscriberIndex));
+            Logger(string.Format("Preparing to Publish Event of type {0}, MessageId = {1}, Subscriber Index = {2}", typeof(TEvent).Name, @event.Id, subscriberIndex));
+
+            @event = base.PrepareEventForPublishing(@event, subscriberIndex, subscribers);
 
             var durableEvent = @event as IDurableMessage;
 
@@ -308,7 +294,6 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 return @event;
 
             durableEvent.AcknowledgementId = Guid.NewGuid();
-            durableEvent.Version = MessageVersion;
 
             var clonedEvent = Clone((TEvent)durableEvent);
 
@@ -331,7 +316,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public async Task SendDurable<TCommand>(TCommand command, RetryPolicy retryPolicy) where TCommand : IDurableCommand
         {
-            Logger(string.Format("Sending Durable Command, Id = {0}", command.Id));
+            Logger(string.Format("Sending Durable Command of type {0}, Id = {1}", typeof(TCommand).Name, command.Id));
 
             _activeRetryPolicy = retryPolicy;
             base.Send(command);
@@ -349,7 +334,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public async Task PublishDurable<TEvent>(TEvent @event, RetryPolicy retryPolicy) where TEvent : IDurableEvent
         {
-            Logger(string.Format("Publishing Durable Event, Id = {0}", @event.Id));
+            Logger(string.Format("Publishing Durable Event of type {0}, Id = {1}", typeof(TEvent).Name, @event.Id));
 
             _activeRetryPolicy = retryPolicy;
             base.Publish(@event);
