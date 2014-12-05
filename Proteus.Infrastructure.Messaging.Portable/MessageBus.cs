@@ -131,9 +131,9 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
                 var subscriber = subscribers[0];
 
-                OnBeforeSendCommand(command, subscriber.Handler);
+                OnBeforeSendCommand(command, subscriber);
 
-                command = PrepareCommandForSending(command, subscriber.Handler);
+                command = PrepareCommandForSending(command, subscriber);
 
                 if (!ShouldSendCommand(command, subscriber.Handler)) return;
 
@@ -146,7 +146,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
                     subscriber.Handler(command);
                 }
 
-                OnAfterSendCommand(command, subscriber.Handler);
+                OnAfterSendCommand(command, subscriber);
             }
             else
             {
@@ -162,58 +162,57 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
             var subscribers = subscriberResult.Subscribers;
 
-            for (var index = 0; index < subscribers.Count; index++)
+            foreach (var subscriber in subscribers)
             {
-                OnBeforePublishEvent(@event, index, subscribers);
+                OnBeforePublishEvent(@event, subscriber.Key, subscribers);
 
-                var preparedEvent = PrepareEventForPublishing(@event, index, subscribers);
+                var preparedEvent = PrepareEventForPublishing(@event, subscriber.Key, subscribers);
 
-                if (!ShouldPublishEvent(preparedEvent, index, subscribers)) continue;
+                if (!ShouldPublishEvent(preparedEvent, subscriber.Key, subscribers)) continue;
 
-                Logger(string.Format("Publishing Event of type {0}, MessageId = {1}, Subscriber Index = {2}", typeof(TEvent).Name, @event.Id, index));
+                Logger(string.Format("Publishing Event of type {0}, MessageId = {1}, Subscriber Key = {2}", typeof(TEvent).Name, @event.Id, subscriber.Key));
 
-                var subscriber = subscribers[index];
-
-                if (subscriber.CanBeAwaited())
+                if (subscriber.Handler.CanBeAwaited())
                 {
-                    await Task.Run(() => subscriber(preparedEvent));
+                    var subscriber1 = subscriber;
+                    await Task.Run(() => subscriber1.Handler(preparedEvent));
                 }
                 else
                 {
-                    subscriber(preparedEvent);
+                    subscriber.Handler(preparedEvent);
                 }
 
-                OnAfterPublishEvent(preparedEvent, index, subscribers);
+                OnAfterPublishEvent(preparedEvent, subscriber.Key, subscribers);
             }
         }
 
-        protected virtual void OnBeforeSendCommand(IMessage command, Action<IMessage> subscriber)
+        protected virtual void OnBeforeSendCommand(IMessage command, MessageSubscriber subscriber)
         {
             //no-op
         }
 
-        protected virtual void OnAfterSendCommand(IMessage command, Action<IMessage> subscriber)
+        protected virtual void OnAfterSendCommand(IMessage command, MessageSubscriber subscriber)
         {
             //no-op
         }
 
-        protected virtual void OnBeforePublishEvent(IMessage @event, int subscriberIndex, List<Action<IMessage>> subscribers)
+        protected virtual void OnBeforePublishEvent(IMessage @event, string subscriberKey, IList<MessageSubscriber> subscribers)
         {
             //no-op
         }
 
-        protected virtual void OnAfterPublishEvent(IMessage @event, int subscriberIndex, List<Action<IMessage>> subscribers)
+        protected virtual void OnAfterPublishEvent(IMessage @event, string subscriberKey, IList<MessageSubscriber> subscribers)
         {
             //no-op
         }
 
-        protected virtual TCommand PrepareCommandForSending<TCommand>(TCommand command, Action<IMessage> subscribers) where TCommand : IMessage
+        protected virtual TCommand PrepareCommandForSending<TCommand>(TCommand command, MessageSubscriber subscriber) where TCommand : IMessage
         {
             command.Version = MessageVersion;
             return command;
         }
 
-        protected virtual TEvent PrepareEventForPublishing<TEvent>(TEvent @event, int subscriberIndex, List<Action<IMessage>> subscribers) where TEvent : IMessage
+        protected virtual TEvent PrepareEventForPublishing<TEvent>(TEvent @event, string subscriberKey, IList<MessageSubscriber> subscribers) where TEvent : IMessage
         {
             @event.Version = MessageVersion;
             return @event;
@@ -231,7 +230,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 actions = subscribers.Select(s => s.Handler).ToList();
             }
 
-            return new SubscribersResult(typeof(TMessage), hasSubscribers, actions);
+            return new SubscribersResult(typeof(TMessage), hasSubscribers, subscribers);
         }
 
         protected virtual bool ShouldSendCommand(IMessage command, Action<IMessage> subscriber)
@@ -240,7 +239,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             return true;
         }
 
-        protected virtual bool ShouldPublishEvent(IMessage @event, int subscriberIndex, List<Action<IMessage>> subscribers)
+        protected virtual bool ShouldPublishEvent(IMessage @event, string subscriberKey, IList<MessageSubscriber> subscribers)
         {
             //effectively a no-op unless overridden in derived class
             return true;

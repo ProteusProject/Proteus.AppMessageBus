@@ -5,7 +5,7 @@ namespace Proteus.Infrastructure.Messaging.Portable.Serializable
 {
     public class EvenvelopeState<TMessage> where TMessage : IDurableMessage
     {
-        public int SubscriberIndex { get; set; }
+        public string SubscriberKey { get; set; }
         public Guid Id { get; set; }
         public int RetriesRemaining { get; set; }
         public TMessage Message { get; set; }

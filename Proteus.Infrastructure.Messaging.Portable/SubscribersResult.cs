@@ -8,9 +8,9 @@ namespace Proteus.Infrastructure.Messaging.Portable
     {
         public Type MessageType { get; private set; }
         public bool HasSubscribers { get; private set; }
-        public List<Action<IMessage>> Subscribers { get; private set; }
+        public IList<MessageSubscriber> Subscribers { get; private set; }
 
-        public SubscribersResult(Type messageType, bool hasSubscribers, List<Action<IMessage>> subscribers)
+        public SubscribersResult(Type messageType, bool hasSubscribers, IList<MessageSubscriber> subscribers)
         {
             MessageType = messageType;
             HasSubscribers = hasSubscribers;

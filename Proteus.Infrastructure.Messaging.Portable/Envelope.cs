@@ -6,7 +6,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 {
     public class Envelope<TMessage> : IEquatable<Envelope<TMessage>> where TMessage : IDurableMessage
     {
-        public int SubscriberIndex { get; private set; }
+        public string SubscriberKey { get; private set; }
 
         public bool Equals(Envelope<TMessage> other)
         {
@@ -86,10 +86,10 @@ namespace Proteus.Infrastructure.Messaging.Portable
         {
         }
 
-        public Envelope(TMessage message, RetryPolicy retryPolicy, Guid acknowledgementId, int subscriberIndex = 0)
+        public Envelope(TMessage message, RetryPolicy retryPolicy, Guid acknowledgementId, string subscriberKey = "")
         {
             AcknowledgementId = acknowledgementId;
-            SubscriberIndex = subscriberIndex;
+            SubscriberKey = subscriberKey;
             Message = message;
             RetryPolicy = retryPolicy;
             _retriesRemaining = retryPolicy.Retries;
@@ -97,7 +97,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public Envelope(EvenvelopeState<TMessage> state)
         {
-            SubscriberIndex = state.SubscriberIndex;
+            SubscriberKey = state.SubscriberKey;
             _id = state.Id;
             _retriesRemaining = state.RetriesRemaining;
             _message = state.Message;
@@ -129,7 +129,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
                         Message = Message,
                         RetriesRemaining = _retriesRemaining,
                         RetryPolicyState = RetryPolicy.RetryPolicyState,
-                        SubscriberIndex = SubscriberIndex
+                        SubscriberKey = SubscriberKey
                     };
             }
         }

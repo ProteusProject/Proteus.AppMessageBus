@@ -172,7 +172,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
                 //if there are no longer any subscribers to the message, we need to remove it from the queue
                 //  so won't be around for further processing
-                if (!subscribersResult.HasSubscribers || subscribersResult.Subscribers.Count < envelope.SubscriberIndex)
+                if (!subscribersResult.HasSubscribers)
                 {
                     //TODO: write failing test for this!
                     //_queuedEvents.Remove(envelope);
@@ -180,17 +180,18 @@ namespace Proteus.Infrastructure.Messaging.Portable
                     continue;
                 }
 
-                var subscriber = subscribersResult.Subscribers[envelope.SubscriberIndex];
+                //there should be only one, so we can take the first...
+                var subscriber = subscribersResult.Subscribers.First();
 
                 var envelope1 = envelope;
 
-                if (subscriber.CanBeAwaited())
+                if (subscriber.Handler.CanBeAwaited())
                 {
-                    await Task.Run(() => subscriber(envelope1.Message));
+                    await Task.Run(() => subscriber.Handler(envelope1.Message));
                 }
                 else
                 {
-                    subscriber(envelope1.Message);
+                    subscriber.Handler(envelope1.Message);
                 }
 
                 envelope.HasBeenRetried();
@@ -217,7 +218,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
                 //if there are no longer any subscribers to the message, we need to remove it from the queue
                 //  so won't be around for further processing
-                if (!subscribersResult.HasSubscribers || subscribersResult.Subscribers.Count <= envelope.SubscriberIndex)
+                if (!subscribersResult.HasSubscribers)
                 {
                     Logger(string.Format("No Subscribers found for Envelope Id = {0}.  Removing from Pending Events.", envelope.Id));
 
@@ -225,18 +226,18 @@ namespace Proteus.Infrastructure.Messaging.Portable
                     continue;
                 }
 
-                Logger(string.Format("Republishing Pending Event Id = {0} from Envelope Id = {1} to Subscriber Index = {2}", envelope.Message.Id, envelope.Id, envelope.SubscriberIndex));
+                Logger(string.Format("Republishing Pending Event Id = {0} from Envelope Id = {1} to Subscriber Index = {2}", envelope.Message.Id, envelope.Id, envelope.SubscriberKey));
 
-                var subscriber = subscribersResult.Subscribers[envelope.SubscriberIndex];
+                var subscriber = subscribersResult.Subscribers.Single(subscr=>subscr.Key== envelope.SubscriberKey);
                 var envelope1 = envelope;
 
-                if (subscriber.CanBeAwaited())
+                if (subscriber.Handler.CanBeAwaited())
                 {
-                    await Task.Run(() => subscriber(envelope1.Message));
+                    await Task.Run(() => subscriber.Handler(envelope1.Message));
                 }
                 else
                 {
-                    subscriber(envelope1.Message);
+                    subscriber.Handler(envelope1.Message);
                 }
 
 
@@ -279,11 +280,11 @@ namespace Proteus.Infrastructure.Messaging.Portable
         }
 
 
-        protected override TCommand PrepareCommandForSending<TCommand>(TCommand command, Action<IMessage> subscribers)
+        protected override TCommand PrepareCommandForSending<TCommand>(TCommand command, MessageSubscriber subscriber)
         {
             Logger(string.Format("Preparing to Send Command of type {0}, MessageId = {1}", typeof(TCommand).Name, command.Id));
 
-            command = base.PrepareCommandForSending(command, subscribers);
+            command = base.PrepareCommandForSending(command, subscriber);
 
             var durableCommand = command as IDurableMessage;
 
@@ -297,11 +298,11 @@ namespace Proteus.Infrastructure.Messaging.Portable
             return (TCommand)durableCommand;
         }
 
-        protected override TEvent PrepareEventForPublishing<TEvent>(TEvent @event, int subscriberIndex, List<Action<IMessage>> subscribers)
+        protected override TEvent PrepareEventForPublishing<TEvent>(TEvent @event, string subscriberKey, IList<MessageSubscriber> subscribers)
         {
-            Logger(string.Format("Preparing to Publish Event of type {0}, MessageId = {1}, Subscriber Index = {2}", typeof(TEvent).Name, @event.Id, subscriberIndex));
+            Logger(string.Format("Preparing to Publish Event of type {0}, MessageId = {1}, Subscriber Index = {2}", typeof(TEvent).Name, @event.Id, subscriberKey));
 
-            @event = base.PrepareEventForPublishing(@event, subscriberIndex, subscribers);
+            @event = base.PrepareEventForPublishing(@event, subscriberKey, subscribers);
 
             var durableEvent = @event as IDurableMessage;
 
@@ -312,7 +313,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
             var clonedEvent = Clone((TEvent)durableEvent);
 
-            StoreEvent((IDurableMessage)clonedEvent, subscriberIndex);
+            StoreEvent((IDurableMessage)clonedEvent, subscriberKey);
 
             return clonedEvent;
         }
@@ -360,9 +361,9 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        private void StoreEvent(IDurableMessage @event, int index)
+        private void StoreEvent(IDurableMessage @event, string subscriberKey)
         {
-            var envelope = new Envelope<IDurableMessage>(@event, _activeRetryPolicy, @event.AcknowledgementId, index);
+            var envelope = new Envelope<IDurableMessage>(@event, _activeRetryPolicy, @event.AcknowledgementId, subscriberKey);
 
             if (envelope.ShouldRetry)
             {
