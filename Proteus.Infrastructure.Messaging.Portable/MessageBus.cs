@@ -68,22 +68,24 @@ namespace Proteus.Infrastructure.Messaging.Portable
             {
                 if (subscribers.Count != 1) throw new DuplicateSubscriberRegisteredException(string.Format("There are {0} handlers registered for Commands of type {1}.  {2}", subscribers.Count, typeof(TCommand), reminderMessage));
 
-                OnBeforeSendCommand(command, subscribers[0]);
+                var subscriber = subscribers[0];
 
-                command = PrepareCommandForSending(command, subscribers[0]);
+                OnBeforeSendCommand(command, subscriber);
 
-                if (!ShouldSendCommand(command, subscribers[0])) return;
+                command = PrepareCommandForSending(command, subscriber);
 
-                if (subscribers[0].CanBeAwaited())
+                if (!ShouldSendCommand(command, subscriber)) return;
+
+                if (subscriber.CanBeAwaited())
                 {
-                    await Task.Run(() => subscribers[0](command));
+                    await Task.Run(() => subscriber(command));
                 }
                 else
                 {
-                    subscribers[0](command);
+                    subscriber(command);
                 }
 
-                OnAfterSendCommand(command, subscribers[0]);
+                OnAfterSendCommand(command, subscriber);
             }
             else
             {
@@ -176,7 +178,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         public MessageBus()
         {
-            //set null-logger as default unless overridden later
+            //set no-op logger as default
             Logger = (message) => { };
         }
     }
