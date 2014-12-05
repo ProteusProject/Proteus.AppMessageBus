@@ -10,7 +10,7 @@ using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
 namespace Proteus.Infrastructure.Messaging.Tests
 {
-    public class DurableBusTests
+    public class DurableMessageBusTests
     {
         public static async Task ClearAllDataFiles()
         {

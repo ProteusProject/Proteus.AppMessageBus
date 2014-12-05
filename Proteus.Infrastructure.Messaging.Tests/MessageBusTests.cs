@@ -7,7 +7,7 @@ using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 namespace Proteus.Infrastructure.Messaging.Tests
 {
     [TestFixture]
-    public class BusTests
+    public class MessageBusTests
     {
         private MessageBus _bus;
 
