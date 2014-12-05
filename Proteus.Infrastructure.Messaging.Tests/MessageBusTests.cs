@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Proteus.Infrastructure.Messaging.Portable;
@@ -14,7 +16,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
         [SetUp]
         public void SetUp()
         {
-            _bus = new MessageBus();
+            _bus = new MessageBus() { Logger = text => Debug.WriteLine(text) };
         }
 
         [Test]
@@ -73,6 +75,25 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
             Assert.That(_bus.HasSubscriptionFor<TestCommand>(), Is.False, "Expected that all subscriptions for TestCommand would be cleared.");
         }
+
+
+        [Test]
+        public void CanUnregisterSubscriberByKey()
+        {
+            Assume.That(_bus.HasSubscriptionFor<TestEvent>(), Is.False, "Expected the bus to not have any subscriptions for TestEvent");
+
+            var events = new EventSubscribers();
+            _bus.RegisterSubscriptionFor<TestEvent>("Key1", events.Handle);
+            _bus.RegisterSubscriptionFor<TestEvent>("Key2", events.Handle);
+
+            Assume.That(_bus.HasSubscription("Key1"), Is.True, "Expected a subscriber registered with key: Key1");
+            Assume.That(_bus.HasSubscription("Key2"), Is.True, "Expected a subscriber registered with key: Key2");
+
+            _bus.UnRegisterSubscription("Key1");
+
+            Assert.That(_bus.HasSubscription("Key1"), Is.False);
+        }
+
 
         [Test]
         public void MultipleSubscribersCanProcessMessageOnEventPublish()

@@ -67,6 +67,7 @@
     <Compile Include="FileSystemProvider.cs" />
     <Compile Include="JsonNetSerializer.cs" />
     <Compile Include="MessageBus.cs" />
+    <Compile Include="MessageSubscriber.cs" />
     <Compile Include="MesssagePersistence.cs" />
     <Compile Include="NoSubscriberRegisteredException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
