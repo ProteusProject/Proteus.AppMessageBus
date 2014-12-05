@@ -166,7 +166,13 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
         private async Task ProcessPendingCommands()
         {
-            foreach (var envelope in _queuedCommands.Where(envelope => envelope.ShouldRetry).ToList())
+            Logger("Processing Pending Commands...");
+
+            var envelopes = _queuedCommands.Where(envelope => envelope.ShouldRetry).ToList();
+
+            Logger(string.Format("{0} Pending Commands found.", envelopes.Count));
+
+            foreach (var envelope in envelopes)
             {
                 var subscribersResult = GetSubscribersFor(envelope.Message);
 
@@ -174,11 +180,16 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 //  so won't be around for further processing
                 if (!subscribersResult.HasSubscribers)
                 {
+                    Logger(string.Format("No Subscribers found for Envelope Id = {0}.  Removing from Pending Commands.", envelope.Id));
+
                     //TODO: write failing test for this!
                     //_queuedEvents.Remove(envelope);
                     _queuedCommands.Remove(envelope);
                     continue;
                 }
+
+                Logger(string.Format("Republishing Pending Command Id = {0} from Envelope Id = {1} to Subscriber Key = {2}", envelope.Message.Id, envelope.Id, envelope.SubscriberKey));
+
 
                 //there should be only one, so we can take the first...
                 var subscriber = subscribersResult.Subscribers.First();
@@ -198,6 +209,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
                 if (!envelope.ShouldRetry)
                 {
+                    Logger(string.Format("Command in Envelope Id = {0} has invalid/expired Retry Policy.  Removing from Pending Commands.", envelope.Id));
                     _queuedCommands.Remove(envelope);
                 }
             }
@@ -226,7 +238,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
                     continue;
                 }
 
-                Logger(string.Format("Republishing Pending Event Id = {0} from Envelope Id = {1} to Subscriber Index = {2}", envelope.Message.Id, envelope.Id, envelope.SubscriberKey));
+                Logger(string.Format("Republishing Pending Event Id = {0} from Envelope Id = {1} to Subscriber Key = {2}", envelope.Message.Id, envelope.Id, envelope.SubscriberKey));
 
                 var subscriber = subscribersResult.Subscribers.Single(subscr=>subscr.Key== envelope.SubscriberKey);
                 var envelope1 = envelope;
