@@ -161,7 +161,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
         protected virtual SubscribersResult GetSubscribersFor<TMessage>(TMessage message) where TMessage : IMessage
         {
             List<Action<IMessage>> subscribers;
-            return new SubscribersResult(Routes.TryGetValue(message.GetType(), out subscribers), subscribers);
+            return new SubscribersResult(typeof(TMessage), Routes.TryGetValue(message.GetType(), out subscribers), subscribers);
         }
 
         protected virtual bool ShouldSendCommand(IMessage command, Action<IMessage> subscriber)
