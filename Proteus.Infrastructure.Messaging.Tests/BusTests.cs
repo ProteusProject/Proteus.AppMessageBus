@@ -30,36 +30,13 @@ namespace Proteus.Infrastructure.Messaging.Tests
             _bus.RegisterSubscriptionFor<TestCommand>(commands.Handle);
             _bus.RegisterSubscriptionFor<TestCommand>(commands.Handle);
 
-            try
-            {
-                await _bus.Send(new TestCommand(string.Empty));
-            }
-            catch (DuplicateSubscriberRegisteredException)
-            {
-
-            }
-            catch (Exception)
-            {
-                Assert.Fail("Did not get expected DuplicateSubscriberRegisteredException");
-            }
-
+            await AssertEx.ThrowsAsync<DuplicateSubscriberRegisteredException>(() => _bus.Send(new TestCommand(string.Empty)));
         }
 
         [Test]
         public async void CanPreventNoSubscriberRegisteredForCommand()
         {
-            try
-            {
-                await _bus.Send(new TestCommand(string.Empty));
-            }
-            catch (NoSubscriberRegisteredException)
-            {
-
-            }
-            catch (Exception)
-            {
-                Assert.Fail("Did not get expected NoSubscriberRegisteredException");
-            }
+            await AssertEx.ThrowsAsync<NoSubscriberRegisteredException>(() => _bus.Send(new TestCommand(string.Empty)));
         }
 
         [Test]
@@ -79,7 +56,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
         public async void CanIgnoreNoSubscriberRegisteredForEvent()
         {
             //publish the event without registering any handlers
-            Assert.DoesNotThrow(async() => await _bus.Publish(new TestEvent(string.Empty)));
+            Assert.DoesNotThrow(async () => await _bus.Publish(new TestEvent(string.Empty)));
         }
 
         [Test]
