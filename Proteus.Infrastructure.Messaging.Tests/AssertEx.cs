@@ -12,14 +12,13 @@ namespace Proteus.Infrastructure.Messaging.Tests
             {
                 await func();
             }
-            catch (TException ex)
+            catch (TException)
             {
                 Assert.Pass(string.Format("Got expected exception: {0} ", typeof(TException).Name ));
             }
             catch (Exception)
             {
                 Assert.Fail(string.Format("Did not get expected exception: {0} ", typeof(TException).Name));
-
             }
         }
     }
