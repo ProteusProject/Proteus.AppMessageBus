@@ -4,7 +4,7 @@ namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
 {
     public interface IMesssagePersistenceAsync
     {
-        IFileSystemProviderAsync FileSystemProvider { get; set; }
+        IFileSystemProviderAsync FileSystemProvider { set; }
         Task<string> LoadCommands();
         Task<string> LoadEvents();
         Task SaveCommands(string commands);

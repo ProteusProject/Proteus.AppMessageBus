@@ -10,7 +10,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
         private const string CommandsDatafile = "Commands.data";
         private const string EventsDatafile = "Events.data";
 
-        public IFileSystemProviderAsync FileSystemProvider { get; set; }
+        public IFileSystemProviderAsync FileSystemProvider { private get; set; }
 
         public MesssagePersistence()
         {
