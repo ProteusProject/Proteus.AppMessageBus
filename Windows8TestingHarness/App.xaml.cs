@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -33,6 +34,7 @@ namespace Windows8TestingHarness
     {
         public static DurableMessageBus Bus { get; private set; }
         public static IManageViewModels ViewModels { get; private set; }
+        public static ObservableCollection<string> RunningLog { get; private set; }
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -40,8 +42,14 @@ namespace Windows8TestingHarness
         /// </summary>
         public App()
         {
+            RunningLog = new ObservableCollection<string>();
+
             TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-            Bus = new DurableMessageBus() { Logger = text => Debug.WriteLine(text) };
+            Bus = new DurableMessageBus() { Logger = text =>
+            {
+                Debug.WriteLine(text);
+                RunningLog.Add(text);
+            } };
 
             ViewModels = new ViewModelManager();
 
