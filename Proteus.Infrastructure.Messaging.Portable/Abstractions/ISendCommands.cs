@@ -1,8 +1,10 @@
-﻿namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
+﻿using System.Threading.Tasks;
+
+namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
 {
     public interface ISendCommands
     {
-        void Send<TCommand>(TCommand command) where TCommand : ICommand;
+        Task Send<TCommand>(TCommand command) where TCommand : ICommand;
 
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
 namespace Proteus.Infrastructure.Messaging.Portable
@@ -56,7 +57,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        public virtual void Send<TCommand>(TCommand command) where TCommand : ICommand
+        public virtual async Task Send<TCommand>(TCommand command) where TCommand : ICommand
         {
             Logger(string.Format("Sending Command of type {0}, MessageId = {1}", typeof(TCommand).Name, command.Id));
 
@@ -73,7 +74,14 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
                 if (!ShouldSendCommand(command, subscribers[0])) return;
 
-                subscribers[0](command);
+                if (subscribers[0].CanBeAwaited())
+                {
+                    await Task.Run(() => subscribers[0](command));
+                }
+                else
+                {
+                    subscribers[0](command);
+                }
 
                 OnAfterSendCommand(command, subscribers[0]);
             }
@@ -83,7 +91,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        public virtual void Publish<TEvent>(TEvent @event) where TEvent : IEvent
+        public virtual async Task Publish<TEvent>(TEvent @event) where TEvent : IEvent
         {
             var subscriberResult = GetSubscribersFor(@event);
 
@@ -102,7 +110,15 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 Logger(string.Format("Publishing Event of type {0}, MessageId = {1}, Subscriber Index = {2}", typeof(TEvent).Name, @event.Id, index));
 
                 var subscriber = subscribers[index];
-                subscriber(preparedEvent);
+
+                if (subscriber.CanBeAwaited())
+                {
+                    await Task.Run(() => subscriber(preparedEvent));
+                }
+                else
+                {
+                    subscriber(preparedEvent);
+                }
 
                 OnAfterPublishEvent(preparedEvent, index, subscribers);
             }

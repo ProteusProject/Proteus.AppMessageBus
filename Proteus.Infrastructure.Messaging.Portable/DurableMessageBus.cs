@@ -183,8 +183,15 @@ namespace Proteus.Infrastructure.Messaging.Portable
                 var subscriber = subscribersResult.Subscribers[envelope.SubscriberIndex];
 
                 var envelope1 = envelope;
-                //await Task.Run(()=> subscriber(envelope1.Message));
-                subscriber(envelope1.Message);
+
+                if (subscriber.CanBeAwaited())
+                {
+                    await Task.Run(() => subscriber(envelope1.Message));
+                }
+                else
+                {
+                    subscriber(envelope1.Message);
+                }
 
                 envelope.HasBeenRetried();
 
@@ -222,8 +229,16 @@ namespace Proteus.Infrastructure.Messaging.Portable
 
                 var subscriber = subscribersResult.Subscribers[envelope.SubscriberIndex];
                 var envelope1 = envelope;
-                //await Task.Run(() => subscriber(envelope1.Message));
-                subscriber(envelope1.Message);
+
+                if (subscriber.CanBeAwaited())
+                {
+                    await Task.Run(() => subscriber(envelope1.Message));
+                }
+                else
+                {
+                    subscriber(envelope1.Message);
+                }
+
 
                 envelope.HasBeenRetried();
 
@@ -319,7 +334,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             Logger(string.Format("Sending Durable Command of type {0}, Id = {1}", typeof(TCommand).Name, command.Id));
 
             _activeRetryPolicy = retryPolicy;
-            base.Send(command);
+            await base.Send(command);
 
             if (UseIntermediateMessagePersistence)
             {
@@ -337,7 +352,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             Logger(string.Format("Publishing Durable Event of type {0}, Id = {1}", typeof(TEvent).Name, @event.Id));
 
             _activeRetryPolicy = retryPolicy;
-            base.Publish(@event);
+            await base.Publish(@event);
 
             if (UseIntermediateMessagePersistence)
             {

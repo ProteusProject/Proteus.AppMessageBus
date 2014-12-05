@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System;
+using System.Threading.Tasks;
+using NUnit.Framework;
 using Proteus.Infrastructure.Messaging.Portable;
 using Proteus.Infrastructure.Messaging.Portable.Abstractions;
 
@@ -22,19 +24,42 @@ namespace Proteus.Infrastructure.Messaging.Tests
         }
 
         [Test]
-        public void CanPreventMoreThanOneSubscriberRegisteredPerCommand()
+        public async void CanPreventMoreThanOneSubscriberRegisteredPerCommand()
         {
             var commands = new CommandSubscribers();
             _bus.RegisterSubscriptionFor<TestCommand>(commands.Handle);
             _bus.RegisterSubscriptionFor<TestCommand>(commands.Handle);
 
-            Assert.Throws<DuplicateSubscriberRegisteredException>(() => _bus.Send(new TestCommand(string.Empty)));
+            try
+            {
+                await _bus.Send(new TestCommand(string.Empty));
+            }
+            catch (DuplicateSubscriberRegisteredException)
+            {
+
+            }
+            catch (Exception)
+            {
+                Assert.Fail("Did not get expected DuplicateSubscriberRegisteredException");
+            }
+
         }
 
         [Test]
-        public void CanPreventNoSubscriberRegisteredForCommand()
+        public async void CanPreventNoSubscriberRegisteredForCommand()
         {
-            Assert.Throws<NoSubscriberRegisteredException>(() => _bus.Send(new TestCommand(string.Empty)));
+            try
+            {
+                await _bus.Send(new TestCommand(string.Empty));
+            }
+            catch (NoSubscriberRegisteredException)
+            {
+
+            }
+            catch (Exception)
+            {
+                Assert.Fail("Did not get expected NoSubscriberRegisteredException");
+            }
         }
 
         [Test]
@@ -51,19 +76,19 @@ namespace Proteus.Infrastructure.Messaging.Tests
         }
 
         [Test]
-        public void CanIgnoreNoSubscriberRegisteredForEvent()
+        public async void CanIgnoreNoSubscriberRegisteredForEvent()
         {
             //publish the event without registering any handlers
-            Assert.DoesNotThrow(() => _bus.Publish(new TestEvent(string.Empty)));
+            Assert.DoesNotThrow(async() => await _bus.Publish(new TestEvent(string.Empty)));
         }
 
         [Test]
         public void CanClearSubscribers()
         {
             Assume.That(_bus.HasSubscriptionFor<TestCommand>(), Is.False, "Expected the bus to not have any subscribers for TestCommand");
-            
+
             _bus.RegisterSubscriptionFor<TestCommand>(new CommandSubscribers().Handle);
-            
+
             Assume.That(_bus.HasSubscriptionFor<TestCommand>(), Is.True, "Expected the bus to have a subscriber for TestCommand");
 
             _bus.RegisterSubscriptionFor<TestCommand>(new CommandSubscribers().Handle);
