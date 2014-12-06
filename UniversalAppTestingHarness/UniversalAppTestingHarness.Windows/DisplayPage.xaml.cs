@@ -1,5 +1,4 @@
-﻿using TestingHarness.Portable.Messages;
-using UniversalAppTestingHarness.Data;
+﻿using UniversalAppTestingHarness.Data;
 using UniversalAppTestingHarness.Common;
 
 using System;
@@ -25,12 +24,12 @@ namespace UniversalAppTestingHarness
     /// <summary>
     /// A page that displays details for a single item within a group.
     /// </summary>
-    public sealed partial class EditPage : Page
+    public sealed partial class DisplayPage : Page
     {
         private NavigationHelper navigationHelper;
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
 
-        public EditPage()
+        public DisplayPage()
         {
             this.InitializeComponent();
             this.navigationHelper = new NavigationHelper(this);
@@ -67,35 +66,8 @@ namespace UniversalAppTestingHarness
         private async void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
             // TODO: Create an appropriate data model for your problem domain to replace the sample data
-            //var item = await SampleDataSource.GetItemAsync((string)e.NavigationParameter);
-            //this.DefaultViewModel["Item"] = item;
-            this.pageTitle.Text = "Test Harness";
-        }
-
-        private void SaveNames_OnClick(object sender, RoutedEventArgs e)
-        {
-            App.Bus.Send(new ChangeNameCommand(Firstname.Text, Lastname.Text));
-            this.Frame.Navigate(typeof(DisplayPage));
-        }
-
-        private void IncrementCounterWithAck_OnClick(object sender, RoutedEventArgs e)
-        {
-            //send the command using default retries
-            App.Bus.SendDurable(new IncrementCounterWithAckCommand());
-            this.Frame.Navigate(typeof(CounterDisplayPage));
-        }
-
-        private void IncrementCounterWithoutAck_OnClick(object sender, RoutedEventArgs e)
-        {
-            //send the command using default retries
-            App.Bus.SendDurable(new IncrementCounterWithoutAckCommand());
-            this.Frame.Navigate(typeof(CounterDisplayPage));
-
-        }
-
-        private void NavigateToCounterDisplay_OnClick(object sender, RoutedEventArgs e)
-        {
-            this.Frame.Navigate(typeof(CounterDisplayPage));
+            var item = await SampleDataSource.GetItemAsync((string)e.NavigationParameter);
+            this.DefaultViewModel["Item"] = item;
         }
 
         #region NavigationHelper registration
