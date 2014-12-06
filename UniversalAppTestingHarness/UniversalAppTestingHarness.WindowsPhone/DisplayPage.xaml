@@ -41,8 +41,8 @@
                   to show details for the current item -->
         <Grid Grid.Row="1" x:Name="ContentRoot" Margin="19,9.5,19,0">
             <StackPanel Margin="12,0,12,0">
-                <TextBlock Text="{Binding Path=Firstname}" HorizontalAlignment="Center" Margin="10"/>
-                <TextBlock Text="{Binding Path=Lastname}" HorizontalAlignment="Center" Margin="10" />
+                <TextBlock Text="{Binding Path=Firstname}" Style="{StaticResource GroupHeaderTextBlockStyle}" HorizontalAlignment="Center" Margin="10"/>
+                <TextBlock Text="{Binding Path=Lastname}" Style="{StaticResource GroupHeaderTextBlockStyle}" HorizontalAlignment="Center" Margin="10" />
             </StackPanel>
 
         </Grid>
