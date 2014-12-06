@@ -1,4 +1,5 @@
-﻿using UniversalAppTestingHarness.Data;
+﻿using TestingHarness.Portable.ViewModels;
+using UniversalAppTestingHarness.Data;
 using UniversalAppTestingHarness.Common;
 
 using System;
@@ -65,9 +66,10 @@ namespace UniversalAppTestingHarness
         /// session.  The state will be null the first time a page is visited.</param>
         private async void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
-            // TODO: Create an appropriate data model for your problem domain to replace the sample data
-            var item = await SampleDataSource.GetItemAsync((string)e.NavigationParameter);
-            this.DefaultViewModel["Item"] = item;
+            var viewModel = App.ViewModels.Get<CounterDisplayPageViewModel>();
+
+            this.DefaultViewModel["AcknowledgedCounter"] = null != viewModel ? viewModel.AcknowledgedCounter : 0;
+            this.DefaultViewModel["UnacknowledgedCounter"] = null != viewModel ? viewModel.UnacknowledgedCounter : 0;
         }
 
         #region NavigationHelper registration
