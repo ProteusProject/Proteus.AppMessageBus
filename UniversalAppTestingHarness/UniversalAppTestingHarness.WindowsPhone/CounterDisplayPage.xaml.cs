@@ -1,5 +1,4 @@
-﻿using TestingHarness.Portable.Messages;
-using UniversalAppTestingHarness.Common;
+﻿using UniversalAppTestingHarness.Common;
 using UniversalAppTestingHarness.Data;
 
 using System;
@@ -26,12 +25,12 @@ namespace UniversalAppTestingHarness
     /// <summary>
     /// A page that displays details for a single item within a group.
     /// </summary>
-    public sealed partial class EditPage : Page
+    public sealed partial class CounterDisplayPage : Page
     {
         private readonly NavigationHelper navigationHelper;
         private readonly ObservableDictionary defaultViewModel = new ObservableDictionary();
 
-        public EditPage()
+        public CounterDisplayPage()
         {
             this.InitializeComponent();
 
@@ -69,7 +68,9 @@ namespace UniversalAppTestingHarness
         /// session.  The state will be null the first time a page is visited.</param>
         private async void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
-            this.DefaultViewModel["Title"] = "Test Harness";
+            // TODO: Create an appropriate data model for your problem domain to replace the sample data
+            var item = await SampleDataSource.GetItemAsync((string)e.NavigationParameter);
+            this.DefaultViewModel["Item"] = item;
         }
 
         /// <summary>
@@ -83,31 +84,6 @@ namespace UniversalAppTestingHarness
         private void NavigationHelper_SaveState(object sender, SaveStateEventArgs e)
         {
             // TODO: Save the unique state of the page here.
-        }
-
-        private void SaveNames_OnClick(object sender, RoutedEventArgs e)
-        {
-            App.Bus.Send(new ChangeNameCommand(Firstname.Text, Lastname.Text));
-            Frame.Navigate(typeof(DisplayPage));
-        }
-
-        private void IncrementCounterWithAck_OnClick(object sender, RoutedEventArgs e)
-        {
-            //send the command using default retries
-            App.Bus.SendDurable(new IncrementCounterWithAckCommand());
-            Frame.Navigate(typeof(CounterDisplayPage));
-        }
-
-        private void IncrementCounterWithoutAck_OnClick(object sender, RoutedEventArgs e)
-        {
-            //send the command using default retries
-            App.Bus.SendDurable(new IncrementCounterWithoutAckCommand());
-            Frame.Navigate(typeof(CounterDisplayPage));
-        }
-
-        private void NavigateToCounterDisplay_OnClick(object sender, RoutedEventArgs e)
-        {
-            Frame.Navigate(typeof(CounterDisplayPage));
         }
 
         #region NavigationHelper registration

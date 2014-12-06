@@ -1,5 +1,5 @@
 ﻿<Page
-    x:Class="UniversalAppTestingHarness.EditPage"
+    x:Class="UniversalAppTestingHarness.CounterDisplayPage"
     DataContext="{Binding DefaultViewModel.Item, RelativeSource={RelativeSource Self}}"
     d:DataContext="{Binding Groups[0].Items[0], Source={d:DesignData Source=../UniversalAppTestingHarness.Shared/DataModel/SampleData.json, Type=data:SampleDataSource}}"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -41,36 +41,7 @@
         <!--TODO: Content should be placed within the following grid 
                   to show details for the current item -->
         <Grid Grid.Row="1" x:Name="ContentRoot" Margin="19,9.5,19,0">
-            <StackPanel Grid.Row="1" Margin="12,0,12,0" Orientation="Vertical">
 
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="First Name" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 30 0"/>
-                    <TextBox Grid.Column="1" x:Name="Firstname" Width="300" Height="70" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                </Grid>
-
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Last Name" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 30 0"/>
-                    <TextBox Grid.Column="1" x:Name="Lastname" Width="300" Height="70" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                </Grid>
-
-                <Button x:Name="SaveNames" Content="Save Names" HorizontalAlignment="Center" VerticalAlignment="Top"
-                    Click="SaveNames_OnClick" />
-                <Button x:Name="IncrementWithAck" Content="Increment w/ ACK" HorizontalAlignment="Center"
-                    VerticalAlignment="Top" Click="IncrementCounterWithAck_OnClick" />
-                <Button x:Name="IncrementWithoutAck" Content="Increment w/out ACK" HorizontalAlignment="Center"
-                    VerticalAlignment="Top" Click="IncrementCounterWithoutAck_OnClick" />
-                <Button x:Name="NavigateToCounterDisplay" Content="Show Counter Display" HorizontalAlignment="Center"
-                    VerticalAlignment="Top" Click="NavigateToCounterDisplay_OnClick" />
-
-            </StackPanel>
         </Grid>
     </Grid>
 </Page>
