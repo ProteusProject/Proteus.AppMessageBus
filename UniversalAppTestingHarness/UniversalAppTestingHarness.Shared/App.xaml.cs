@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -15,6 +19,10 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
+using Proteus.Infrastructure.Messaging.Portable;
+using TestingHarness.Portable;
+using TestingHarness.Portable.Abstractions;
+using TestingHarness.Portable.Subscribers;
 using UniversalAppTestingHarness.Common;
 
 // The Universal Hub Application project template is documented at http://go.microsoft.com/fwlink/?LinkID=391955
@@ -30,15 +38,57 @@ namespace UniversalAppTestingHarness
         private TransitionCollection transitions;
 #endif
 
+        public static DurableMessageBus Bus { get; private set; }
+        public static IManageViewModels ViewModels { get; private set; }
+        public static ObservableCollection<string> RunningLog { get; private set; }
+
+
         /// <summary>
         /// Initializes the singleton instance of the <see cref="App"/> class. This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
         /// </summary>
         public App()
         {
+            RunningLog = new ObservableCollection<string>();
+
+            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+            Bus = new DurableMessageBus()
+            {
+                Logger = text =>
+                {
+                    Debug.WriteLine(text);
+                    RunningLog.Add(text);
+                }
+            };
+
+            ViewModels = new ViewModelManager();
+
+            var registrar = new SubscriberRegistrar(Bus, ViewModels);
+            registrar.RegisterMessageBusSubscribers();
+
             this.InitializeComponent();
             this.Suspending += this.OnSuspending;
         }
+
+
+        void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+        {
+            Debug.WriteLine("***Unobserved Task Exception: {0} ***", e.Exception);
+        }
+
+        private void CurrentOnVisibilityChanged(object sender, VisibilityChangedEventArgs visibilityChangedEventArgs)
+        {
+            if (visibilityChangedEventArgs.Visible)
+            {
+                //no point in awaiting this, its in an event handler :)
+                Bus.Start();
+            }
+            else
+            {
+                Bus.Stop();
+            }
+        }
+
 
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
@@ -114,6 +164,8 @@ namespace UniversalAppTestingHarness
                 }
             }
 
+            Window.Current.VisibilityChanged += CurrentOnVisibilityChanged;
+
             // Ensure the current window is active
             Window.Current.Activate();
         }
@@ -141,6 +193,9 @@ namespace UniversalAppTestingHarness
         {
             var deferral = e.SuspendingOperation.GetDeferral();
             await SuspensionManager.SaveAsync();
+
+            await Bus.Stop();
+
             deferral.Complete();
         }
     }

@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{f628d7c5-8726-495f-b08a-ff062c89796e}</ProjectGuid>
+    <ProjectGuid>{F628D7C5-8726-495F-B08A-FF062C89796E}</ProjectGuid>
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>UniversalAppTestingHarness</RootNamespace>
@@ -81,8 +81,16 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
+    <ProjectReference Include="..\..\Proteus.Infrastructure.Messaging.Portable\Proteus.Infrastructure.Messaging.Portable.csproj">
+      <Project>{9ce08989-240c-4f66-b523-5bef6e2f6bf6}</Project>
+      <Name>Proteus.Infrastructure.Messaging.Portable</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\TestingHarness.Portable\TestingHarness.Portable.csproj">
+      <Project>{1521d831-215e-4c5e-b69c-a488ab80c038}</Project>
+      <Name>TestingHarness.Portable</Name>
+    </ProjectReference>
   </ItemGroup>
-  <ItemGroup>    
+  <ItemGroup>
     <Compile Include="HubPage.xaml.cs">
       <DependentUpon>HubPage.xaml</DependentUpon>
     </Compile>
@@ -127,7 +135,7 @@
     <VisualStudioVersion>12.0</VisualStudioVersion>
   </PropertyGroup>
   <Import Project="..\UniversalAppTestingHarness.Shared\UniversalAppTestingHarness.Shared.projitems" Label="Shared" />
-    <PropertyGroup Condition=" '$(TargetPlatformIdentifier)' == '' ">
+  <PropertyGroup Condition=" '$(TargetPlatformIdentifier)' == '' ">
     <TargetPlatformIdentifier>WindowsPhoneApp</TargetPlatformIdentifier>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
