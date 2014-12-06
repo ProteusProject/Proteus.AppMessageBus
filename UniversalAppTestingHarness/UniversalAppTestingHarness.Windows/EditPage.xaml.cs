@@ -67,6 +67,8 @@ namespace UniversalAppTestingHarness
         private async void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
             this.pageTitle.Text = "Test Harness";
+            this.Log.ItemsSource = App.RunningLog;
+
         }
 
         private void SaveNames_OnClick(object sender, RoutedEventArgs e)
