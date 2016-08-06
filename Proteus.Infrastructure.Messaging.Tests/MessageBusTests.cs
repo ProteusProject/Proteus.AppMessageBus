@@ -26,7 +26,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
         }
 
         [Test]
-        public async void CanPreventMoreThanOneSubscriberRegisteredPerCommand()
+        public async Task CanPreventMoreThanOneSubscriberRegisteredPerCommand()
         {
             var commands = new CommandSubscribers();
             _bus.RegisterSubscriptionFor<TestCommand>(commands.Handle);
@@ -36,7 +36,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
         }
 
         [Test]
-        public async void CanPreventNoSubscriberRegisteredForCommand()
+        public async Task CanPreventNoSubscriberRegisteredForCommand()
         {
             await AssertEx.ThrowsAsync<NoSubscriberRegisteredException>(() => _bus.Send(new TestCommand(string.Empty)));
         }
@@ -55,10 +55,10 @@ namespace Proteus.Infrastructure.Messaging.Tests
         }
 
         [Test]
-        public async void CanIgnoreNoSubscriberRegisteredForEvent()
+        public async Task CanIgnoreNoSubscriberRegisteredForEvent()
         {
             //publish the event without registering any handlers
-            Assert.DoesNotThrow(async () => await _bus.Publish(new TestEvent(string.Empty)));
+            Assert.DoesNotThrowAsync(async () => await _bus.Publish(new TestEvent(string.Empty)));
         }
 
         [Test]

@@ -29,7 +29,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             private const string SingleValue = "0";
 
             [SetUp]
-            public async void SetUp()
+            public async Task SetUp()
             {
                 await ClearAllDataFiles();
 
@@ -44,7 +44,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
 
             [Test]
-            public async void CommandAndEventAreRetriedOnNextStart()
+            public async Task CommandAndEventAreRetriedOnNextStart()
             {
                 await _bus.SendDurable(new TestDurableCommand(SingleValue));
                 await _bus.PublishDurable(new TestDurableEvent(SingleValue));
@@ -59,7 +59,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
 
             [Test]
-            public async void CommandAndEventRetriesRespectRetryPolicyAcrossAdditionalStarts()
+            public async Task CommandAndEventRetriesRespectRetryPolicyAcrossAdditionalStarts()
             {
                 await _bus.SendDurable(new TestDurableCommand(SingleValue));
                 await _bus.PublishDurable(new TestDurableEvent(SingleValue));
@@ -89,7 +89,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             private const string SingleValue = "0";
 
             [SetUp]
-            public async void SetUp()
+            public async Task SetUp()
             {
                 await ClearAllDataFiles();
 
@@ -105,7 +105,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
 
             [Test]
-            public async void CommandAndEventAreNotRetriedAcrossAdditionalStarts()
+            public async Task CommandAndEventAreNotRetriedAcrossAdditionalStarts()
             {
                 await _bus.SendDurable(new TestDurableCommand(SingleValue));
                 await _bus.PublishDurable(new TestDurableEvent(SingleValue));
@@ -133,7 +133,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             private const string SingleValue = "0";
 
             [SetUp]
-            public async void SetUp()
+            public async Task SetUp()
             {
                 await ClearAllDataFiles();
 
@@ -147,7 +147,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
 
             [Test]
-            public async void CommandAndEventAreNotRetriedOnNextStart()
+            public async Task CommandAndEventAreNotRetriedOnNextStart()
             {
                 await _bus.SendDurable(new TestDurableCommand(SingleValue));
                 await _bus.PublishDurable(new TestDurableEvent(SingleValue));
@@ -173,7 +173,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             private const string SingleValue = "0";
 
             [SetUp]
-            public async void SetUp()
+            public async Task SetUp()
             {
                 await ClearAllDataFiles();
 
@@ -187,7 +187,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
 
             [Test]
-            public async void UnacknowledgedCommandWithNonExpiredRetryPolicyIsRetriedAcrossAdditionalStarts()
+            public async Task UnacknowledgedCommandWithNonExpiredRetryPolicyIsRetriedAcrossAdditionalStarts()
             {
                 var command = new TestDurableCommand(SingleValue);
                 await _bus.SendDurable(command);
@@ -199,7 +199,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
 
             [Test]
-            public async void AcknowledgedCommandWithNonExpiredRetryPolicyIsNotRetriedAcrossAdditionalStarts()
+            public async Task AcknowledgedCommandWithNonExpiredRetryPolicyIsNotRetriedAcrossAdditionalStarts()
             {
                 var command = new TestDurableCommand(SingleValue);
                 await _bus.SendDurable(command);
@@ -222,7 +222,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             private const string SingleValue = "0";
 
             [SetUp]
-            public async void SetUp()
+            public async Task SetUp()
             {
                 await ClearAllDataFiles();
 
@@ -238,7 +238,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
 
             [Test]
-            public async void UnacknowledgedEventWithNonExpiredRetryPolicyIsRetriedAcrossAdditionalStarts()
+            public async Task UnacknowledgedEventWithNonExpiredRetryPolicyIsRetriedAcrossAdditionalStarts()
             {
                 var @event = new TestDurableEvent(SingleValue);
                 await _bus.PublishDurable(@event);
@@ -250,7 +250,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
 
             [Test]
-            public async void AcknowledgedEventWithNonExpiredRetryPolicyIsNotRetriedAcrossAdditionalStarts()
+            public async Task AcknowledgedEventWithNonExpiredRetryPolicyIsNotRetriedAcrossAdditionalStarts()
             {
                 var @event = new TestDurableEvent(SingleValue);
                 await _bus.PublishDurable(@event);
@@ -263,7 +263,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
 
             [Test]
-            public async void UnacknowledgedEventIsUnaffectedByAcknowledgingOtherSubscriberAcrossAdditionalStarts()
+            public async Task UnacknowledgedEventIsUnaffectedByAcknowledgingOtherSubscriberAcrossAdditionalStarts()
             {
                 var @event = new TestDurableEvent(SingleValue);
                 await _bus.PublishDurable(@event);
@@ -288,13 +288,13 @@ namespace Proteus.Infrastructure.Messaging.Tests
         {
 
             [SetUp]
-            public async void SetUp()
+            public async Task SetUp()
             {
                 await ClearAllDataFiles();
             }
 
             [Test]
-            public async void MessageIsNotSendToSubscriberOnStart()
+            public async Task MessageIsNotSendToSubscriberOnStart()
             {
                 const string singleValue = "0";
 
@@ -323,13 +323,13 @@ namespace Proteus.Infrastructure.Messaging.Tests
         public class WhenSubscriberForPendingCommandIsNoLongerRegistered
         {
             [SetUp]
-            public async void SetUp()
+            public async Task SetUp()
             {
                 await ClearAllDataFiles();
             }
 
             [Test]
-            public async void MessageIsNotSendToSubscriberOnStart()
+            public async Task MessageIsNotSendToSubscriberOnStart()
             {
                 const string singleValue = "0";
 
@@ -367,7 +367,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             private const string SingleValue = "0";
 
             [SetUp]
-            public async void SetUp()
+            public async Task SetUp()
             {
                 await ClearAllDataFiles();
 
@@ -411,7 +411,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
 
             [Test]
-            public async void CanRepublishDurableEventsOnNextStart()
+            public async Task CanRepublishDurableEventsOnNextStart()
             {
                 await SendUnacknowlegedCommandAndEventTwiceThenDisposeDurableBus();
 
@@ -430,7 +430,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
 
             [Test]
-            public async void CanRepublishDurableCommandsOnNextStart()
+            public async Task CanRepublishDurableCommandsOnNextStart()
             {
                 await SendUnacknowlegedCommandAndEventTwiceThenDisposeDurableBus();
 
@@ -449,7 +449,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
 
             [Test]
-            public async void DurableCommandsWithoutMatchingVersionAreDiscaredOnBusStart()
+            public async Task DurableCommandsWithoutMatchingVersionAreDiscaredOnBusStart()
             {
                 await SendUnacknowlegedCommandAndEventTwiceThenDisposeDurableBus();
 
@@ -468,7 +468,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
             }
 
             [Test]
-            public async void DurableEventsWithoutMatchingVersionAreDiscaredOnBusStart()
+            public async Task DurableEventsWithoutMatchingVersionAreDiscaredOnBusStart()
             {
                 await SendUnacknowlegedCommandAndEventTwiceThenDisposeDurableBus();
 
