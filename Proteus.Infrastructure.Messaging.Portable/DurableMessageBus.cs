@@ -41,7 +41,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
             MessagePersister = new MesssagePersistence();
         }
 
-        async public Task Start()
+        public async Task Start()
         {
             await LoadPendingMessages();
 
@@ -57,12 +57,12 @@ namespace Proteus.Infrastructure.Messaging.Portable
             }
         }
 
-        async public Task Stop()
+        public async Task Stop()
         {
             await SavePendingMessages();
         }
 
-        async private Task SavePendingMessages()
+        private async Task SavePendingMessages()
         {
             var queuedCommandStates = _queuedCommands.Select(cmdEnvelope => cmdEnvelope.EnvelopeState).ToList();
             var queuedEventStates = _queuedEvents.Select(evtEnvelope => evtEnvelope.EnvelopeState).ToList();
@@ -110,7 +110,7 @@ namespace Proteus.Infrastructure.Messaging.Portable
         }
 
 
-        async private Task LoadPendingMessages()
+        private async Task LoadPendingMessages()
         {
             var hasNoQueuedCommands = _queuedCommands.Count == 0;
             var hasNoQueuedEvents = _queuedEvents.Count == 0;
