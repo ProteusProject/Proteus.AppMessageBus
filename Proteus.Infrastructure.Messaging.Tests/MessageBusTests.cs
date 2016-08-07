@@ -92,11 +92,12 @@ namespace Proteus.Infrastructure.Messaging.Tests
             _bus.UnRegisterSubscription("Key1");
 
             Assert.That(_bus.HasSubscription("Key1"), Is.False);
+            Assert.That(_bus.HasSubscription("Key2"), Is.True);
         }
 
 
         [Test]
-        public void MultipleSubscribersCanProcessMessageOnEventPublish()
+        public async Task MultipleSubscribersCanProcessMessageOnEventPublish()
         {
             const string input = "test";
 
@@ -108,20 +109,20 @@ namespace Proteus.Infrastructure.Messaging.Tests
             _bus.RegisterSubscriptionFor<TestEvent>(events.Handle);
             _bus.RegisterSubscriptionFor<TestEvent>(events.Handle);
 
-            _bus.Publish(new TestEvent(input));
+            await _bus.Publish(new TestEvent(input));
 
             Assert.That(events.ProcessedMessagePayload, Is.EqualTo(expected));
         }
 
         [Test]
-        public void SubscriberCanProcessMessageOnCommandSend()
+        public async Task SubscriberCanProcessMessageOnCommandSend()
         {
             const string expectedPayload = "payload";
 
             var commands = new CommandSubscribers();
             _bus.RegisterSubscriptionFor<TestCommand>(commands.Handle);
 
-            _bus.Send(new TestCommand(expectedPayload));
+            await _bus.Send(new TestCommand(expectedPayload));
 
             Assert.That(commands.ProcessedMessagePayload, Is.EqualTo(expectedPayload));
         }
