@@ -1,5 +1,6 @@
 ﻿<Page
     x:Class="Windows10TestingHarness.DisplayPage"
+    DataContext="{Binding DefaultViewModel, RelativeSource={RelativeSource Self}}"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Windows10TestingHarness"
@@ -8,6 +9,9 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
+        <StackPanel>
+            <TextBlock Text="{Binding Path=Firstname}" HorizontalAlignment="Center" Style="{StaticResource HeaderTextBlockStyle}" Margin="10"/>
+            <TextBlock Text="{Binding Path=Lastname}" HorizontalAlignment="Center" Style="{StaticResource HeaderTextBlockStyle}" Margin="10"/>
+        </StackPanel>
     </Grid>
 </Page>
