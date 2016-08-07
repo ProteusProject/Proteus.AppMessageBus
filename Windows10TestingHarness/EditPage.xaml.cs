@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -99,6 +100,10 @@ namespace Windows10TestingHarness
         private void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
             this.Log.ItemsSource = App.RunningLog;
+
+            UpdateLayout();
+            this.Log.SelectedIndex = App.RunningLog.Count - 1;
+            this.Log.ScrollIntoView(this.Log.SelectedItem);
         }
 
         #endregion
