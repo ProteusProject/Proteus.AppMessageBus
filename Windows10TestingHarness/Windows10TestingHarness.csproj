@@ -101,6 +101,7 @@
     <Compile Include="CounterDisplayPage.xaml.cs">
       <DependentUpon>CounterDisplayPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CustomBasePage.cs" />
     <Compile Include="DisplayPage.xaml.cs">
       <DependentUpon>DisplayPage.xaml</DependentUpon>
     </Compile>
