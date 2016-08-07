@@ -18,6 +18,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using AppUIBasics.Common;
 using Proteus.Infrastructure.Messaging.Portable;
 using TestingHarness.Portable;
 using TestingHarness.Portable.Abstractions;
@@ -78,7 +79,7 @@ namespace Windows10TestingHarness
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="e">Details about the launch request and process.</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e)
+        protected override async void OnLaunched(LaunchActivatedEventArgs e)
         {
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
@@ -99,7 +100,16 @@ namespace Windows10TestingHarness
 
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
-                    //TODO: Load state from previously suspended application
+                    // Restore the saved session state only when appropriate
+                    try
+                    {
+                        await SuspensionManager.RestoreAsync();
+                    }
+                    catch (SuspensionManagerException)
+                    {
+                        // Something went wrong restoring state.
+                        // Assume there is no state and continue
+                    }
                 }
 
                 Window.Current.VisibilityChanged += CurrentWindowOnVisibilityChanged;
@@ -142,9 +152,8 @@ namespace Windows10TestingHarness
         private async void OnSuspending(object sender, SuspendingEventArgs e)
         {
             var deferral = e.SuspendingOperation.GetDeferral();
-            
-            //TODO: save any additional app state
 
+            await SuspensionManager.SaveAsync();
             await Bus.Stop();
 
             deferral.Complete();

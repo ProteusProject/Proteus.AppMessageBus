@@ -8,6 +8,32 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <StackPanel Orientation="Vertical">
+            <Grid HorizontalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="First Name" Style="{StaticResource SubtitleTextBlockStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 30 0"/>
+                <TextBox Grid.Column="1" x:Name="Firstname" Width="300" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            </Grid>
 
+            <Grid HorizontalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Last Name" Style="{StaticResource SubtitleTextBlockStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 30 0"/>
+                <TextBox Grid.Column="1" x:Name="Lastname" Width="300" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            </Grid>
+
+            <Button x:Name="SaveNames" Content="Save Names" HorizontalAlignment="Center" Margin="10" Click="SaveNames_OnClick" />
+            <Button x:Name="IncrementWithAck" Content="Increment w/ ACK" HorizontalAlignment="Center" Margin="10" Click="IncrementCounterWithAck_OnClick" />
+            <Button x:Name="IncrementWithoutAck" Content="Increment w/out ACK" HorizontalAlignment="Center" Margin="10" Click="IncrementCounterWithoutAck_OnClick" />
+            <Button x:Name="NavigateToCounterDisplay" Content="Show Counter Display" HorizontalAlignment="Center" Margin="10" Click="NavigateToCounterDisplay_OnClick" />
+
+            <ListBox x:Name="Log" MaxHeight="300"/>
+
+        </StackPanel>
     </Grid>
 </Page>
