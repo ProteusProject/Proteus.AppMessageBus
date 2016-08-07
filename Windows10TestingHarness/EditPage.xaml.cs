@@ -102,8 +102,7 @@ namespace Windows10TestingHarness
             this.Log.ItemsSource = App.RunningLog;
 
             UpdateLayout();
-            this.Log.SelectedIndex = App.RunningLog.Count - 1;
-            this.Log.ScrollIntoView(this.Log.SelectedItem);
+            this.Log.ScrollIntoView(this.Log.Items?[this.Log.Items.Count -1]);
         }
 
         #endregion
