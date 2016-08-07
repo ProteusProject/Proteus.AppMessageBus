@@ -18,8 +18,7 @@ namespace Windows10TestingHarness
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
 
             SystemNavigationManager.GetForCurrentView().BackRequested += SystemNavigationManager_BackRequested;
-            SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
-
+            
         }
 
         protected virtual void SystemNavigationManager_BackRequested(object sender, BackRequestedEventArgs e)
@@ -83,6 +82,7 @@ namespace Windows10TestingHarness
         /// </summary>
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
+            SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = this.Frame.CanGoBack ? AppViewBackButtonVisibility.Visible : AppViewBackButtonVisibility.Collapsed;
             this.navigationHelper.OnNavigatedTo(e);
         }
 
