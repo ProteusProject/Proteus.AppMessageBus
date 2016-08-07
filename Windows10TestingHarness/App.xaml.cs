@@ -67,7 +67,9 @@ namespace Windows10TestingHarness
 
         void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
-            Debug.WriteLine("***Unobserved Task Exception: {0} ***", e.Exception);
+            var formattedMessage = string.Format("***Unobserved Task Exception: {0} ***", e.Exception);
+            Debug.WriteLine(formattedMessage);
+            RunningLog.Add(formattedMessage);
         }
 
 
@@ -113,7 +115,7 @@ namespace Windows10TestingHarness
                     // When the navigation stack isn't restored navigate to the first page,
                     // configuring the new page by passing required information as a navigation
                     // parameter
-                    rootFrame.Navigate(typeof(MainPage), e.Arguments);
+                    rootFrame.Navigate(typeof(EditPage), e.Arguments);
                 }
                 // Ensure the current window is active
                 Window.Current.Activate();
