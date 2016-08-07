@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -14,6 +18,10 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Proteus.Infrastructure.Messaging.Portable;
+using TestingHarness.Portable;
+using TestingHarness.Portable.Abstractions;
+using TestingHarness.Portable.Subscribers;
 
 namespace Windows10TestingHarness
 {
@@ -22,15 +30,46 @@ namespace Windows10TestingHarness
     /// </summary>
     sealed partial class App : Application
     {
+
+        public static DurableMessageBus Bus { get; private set; }
+        public static IManageViewModels ViewModels { get; private set; }
+        public static ObservableCollection<string> RunningLog { get; private set; }
+
+
+
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
         /// </summary>
         public App()
         {
+            RunningLog = new ObservableCollection<string>();
+
+            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+            Bus = new DurableMessageBus()
+            {
+                Logger = text =>
+                {
+                    Debug.WriteLine(text);
+                    RunningLog.Add(text);
+                }
+            };
+
+            ViewModels = new ViewModelManager();
+
+            var registrar = new SubscriberRegistrar(Bus, ViewModels);
+            registrar.RegisterMessageBusSubscribers();
+
+
             this.InitializeComponent();
             this.Suspending += OnSuspending;
         }
+
+        void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+        {
+            Debug.WriteLine("***Unobserved Task Exception: {0} ***", e.Exception);
+        }
+
 
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
@@ -61,6 +100,8 @@ namespace Windows10TestingHarness
                     //TODO: Load state from previously suspended application
                 }
 
+                Window.Current.VisibilityChanged += CurrentWindowOnVisibilityChanged;
+                
                 // Place the frame in the current Window
                 Window.Current.Content = rootFrame;
             }
@@ -96,11 +137,30 @@ namespace Windows10TestingHarness
         /// </summary>
         /// <param name="sender">The source of the suspend request.</param>
         /// <param name="e">Details about the suspend request.</param>
-        private void OnSuspending(object sender, SuspendingEventArgs e)
+        private async void OnSuspending(object sender, SuspendingEventArgs e)
         {
             var deferral = e.SuspendingOperation.GetDeferral();
-            //TODO: Save application state and stop any background activity
+            
+            //TODO: save any additional app state
+
+            await Bus.Stop();
+
             deferral.Complete();
+        }
+
+        //TODO: determine whether its still necessary (or even advisable) to do this
+        //(maybe we should just respond to the SUSPEND and RESUME events)
+        private void CurrentWindowOnVisibilityChanged(object sender, VisibilityChangedEventArgs visibilityChangedEventArgs)
+        {
+            if (visibilityChangedEventArgs.Visible)
+            {
+                //no point in awaiting this, its in an event handler :)
+                Bus.Start();
+            }
+            else
+            {
+                Bus.Stop();
+            }
         }
     }
 }
