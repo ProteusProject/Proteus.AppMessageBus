@@ -1,4 +1,5 @@
 ﻿using System;
+using Windows.UI.Core;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 using AppUIBasics.Common;
@@ -15,6 +16,26 @@ namespace Windows10TestingHarness
         {
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
+
+            SystemNavigationManager.GetForCurrentView().BackRequested += SystemNavigationManager_BackRequested;
+            SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
+
+        }
+
+        protected virtual void SystemNavigationManager_BackRequested(object sender, BackRequestedEventArgs e)
+        {
+            // Get a hold of the current frame so that we can inspect the app back stack.
+
+            if (this.Frame == null)
+                return;
+
+            // Check to see if this is the top-most page on the app back stack.
+            if (this.Frame.CanGoBack)
+            {
+                // If not, set the event to handled and go back to the previous page in the app.
+                e.Handled = true;
+                this.Frame.GoBack();
+            }
         }
 
         /// <summary>
