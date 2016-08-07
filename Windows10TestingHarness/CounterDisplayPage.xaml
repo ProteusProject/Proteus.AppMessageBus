@@ -8,6 +8,18 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <StackPanel Margin="12,0,12,0" Orientation="Vertical">
 
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Acknowledged Count:" Style="{StaticResource HeaderTextBlockStyle}" Margin="10" />
+                <TextBlock Text="{Binding Path=AcknowledgedCounter}" Style="{StaticResource HeaderTextBlockStyle}" Margin="10" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="UnAcknowledged Count:" Style="{StaticResource HeaderTextBlockStyle}" Margin="10" />
+                <TextBlock Text="{Binding Path=UnacknowledgedCounter}" Style="{StaticResource HeaderTextBlockStyle}" Margin="10" />
+            </StackPanel>
+
+        </StackPanel>
     </Grid>
 </Page>
