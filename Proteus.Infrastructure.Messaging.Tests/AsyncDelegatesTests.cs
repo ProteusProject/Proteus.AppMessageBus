@@ -67,7 +67,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
     {
         public string FuncThatReturnsString(string input)
         {
-            return input += input;
+            return input + input;
         }
 
         public async Task<string> FuncThatReturnsTaskOfString(string input)
@@ -77,7 +77,7 @@ namespace Proteus.Infrastructure.Messaging.Tests
 
         public async Task FuncThatReturnsTask(string input)
         {
-            await Task.Run(() => Thread.Sleep(2000));
+            await Task.FromResult(FuncThatReturnsString(input));
         }
     }
 

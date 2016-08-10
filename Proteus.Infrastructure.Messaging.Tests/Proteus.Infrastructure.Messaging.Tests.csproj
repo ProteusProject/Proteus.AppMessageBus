@@ -68,7 +68,6 @@
   <ItemGroup>
     <Compile Include="AsyncDelegatesTests.cs" />
     <Compile Include="MessageBusTests.cs" />
-    <Compile Include="AssertEx.cs" />
     <Compile Include="DateTimeUtility.cs" />
     <Compile Include="EnvelopeTests.cs" />
     <Compile Include="JsonNetSerializerTests.cs" />
