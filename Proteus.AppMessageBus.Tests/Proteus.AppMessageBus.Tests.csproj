@@ -7,8 +7,8 @@
     <ProjectGuid>{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Proteus.Infrastructure.Messaging.Tests</RootNamespace>
-    <AssemblyName>Proteus.Infrastructure.Messaging.Tests</AssemblyName>
+    <RootNamespace>Proteus.AppMessageBus.Tests</RootNamespace>
+    <AssemblyName>Proteus.AppMessageBus.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -81,9 +81,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Proteus.Infrastructure.Messaging.Portable\Proteus.Infrastructure.Messaging.Portable.csproj">
+    <ProjectReference Include="..\Proteus.AppMessageBus.Portable\Proteus.AppMessageBus.Portable.csproj">
       <Project>{9ce08989-240c-4f66-b523-5bef6e2f6bf6}</Project>
-      <Name>Proteus.Infrastructure.Messaging.Portable</Name>
+      <Name>Proteus.AppMessageBus.Portable</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

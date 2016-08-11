@@ -8,8 +8,8 @@
     <ProjectGuid>{9CE08989-240C-4F66-B523-5BEF6E2F6BF6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Proteus.Infrastructure.Messaging.Portable</RootNamespace>
-    <AssemblyName>Proteus.Infrastructure.Messaging.Portable</AssemblyName>
+    <RootNamespace>Proteus.AppMesageBus.Portable</RootNamespace>
+    <AssemblyName>Proteus.AppMessageBus.Portable</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Profile259</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>

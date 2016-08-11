@@ -58,9 +58,9 @@
     <Compile Include="ViewModels\DisplayPageViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Proteus.Infrastructure.Messaging.Portable\Proteus.Infrastructure.Messaging.Portable.csproj">
+    <ProjectReference Include="..\Proteus.AppMessageBus.Portable\Proteus.AppMessageBus.Portable.csproj">
       <Project>{9ce08989-240c-4f66-b523-5bef6e2f6bf6}</Project>
-      <Name>Proteus.Infrastructure.Messaging.Portable</Name>
+      <Name>Proteus.AppMessageBus.Portable</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
