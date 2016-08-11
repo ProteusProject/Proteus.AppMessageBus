@@ -14,7 +14,7 @@ namespace Proteus.AppMessageBus.Tests
     {
         public static async Task ClearAllDataFiles()
         {
-            var messagePersistence = new MesssagePersistence();
+            var messagePersistence = new MessagePersistence();
             await messagePersistence.RemoveAllCommandsFromPersistence();
             await messagePersistence.RemoveAllEventsFromPersistence();
         }
@@ -299,7 +299,7 @@ namespace Proteus.AppMessageBus.Tests
                 const string singleValue = "0";
 
                 //we need a retry policy with at least one retry
-                //  so that we'd expect the call to Start() to attemp a retry
+                //  so that we'd expect the call to Start() to attempt a retry
                 var retryPolicy = new RetryPolicy(1, DateTimeUtility.PositiveOneHourTimeSpan);
 
                 var bus = new DurableMessageBus(retryPolicy);
@@ -334,7 +334,7 @@ namespace Proteus.AppMessageBus.Tests
                 const string singleValue = "0";
 
                 //we need a retry policy with at least one retry
-                //  so that we'd expect the call to Start() to attemp a retry
+                //  so that we'd expect the call to Start() to attempt a retry
                 var retryPolicy = new RetryPolicy(1, DateTimeUtility.PositiveOneHourTimeSpan);
 
                 var bus = new DurableMessageBus(retryPolicy);
@@ -374,7 +374,7 @@ namespace Proteus.AppMessageBus.Tests
 
             }
 
-            private async Task SendUnacknowlegedCommandAndEventTwiceThenDisposeDurableBus()
+            private async Task SendUnacknowledgedCommandAndEventTwiceThenDisposeDurableBus()
             {
                 _doubleValue = string.Format("{0}{0}", SingleValue);
                 _tripleValue = string.Format("{0}{0}{0}", SingleValue);
@@ -413,7 +413,7 @@ namespace Proteus.AppMessageBus.Tests
             [Test]
             public async Task CanRepublishDurableEventsOnNextStart()
             {
-                await SendUnacknowlegedCommandAndEventTwiceThenDisposeDurableBus();
+                await SendUnacknowledgedCommandAndEventTwiceThenDisposeDurableBus();
 
                 //recreate the bus from scratch
                 _bus = new DurableMessageBus(_retryPolicy);
@@ -432,7 +432,7 @@ namespace Proteus.AppMessageBus.Tests
             [Test]
             public async Task CanRepublishDurableCommandsOnNextStart()
             {
-                await SendUnacknowlegedCommandAndEventTwiceThenDisposeDurableBus();
+                await SendUnacknowledgedCommandAndEventTwiceThenDisposeDurableBus();
 
                 //recreate the bus from scratch
                 _bus = new DurableMessageBus(_retryPolicy);
@@ -449,9 +449,9 @@ namespace Proteus.AppMessageBus.Tests
             }
 
             [Test]
-            public async Task DurableCommandsWithoutMatchingVersionAreDiscaredOnBusStart()
+            public async Task DurableCommandsWithoutMatchingVersionAreDiscardedOnBusStart()
             {
-                await SendUnacknowlegedCommandAndEventTwiceThenDisposeDurableBus();
+                await SendUnacknowledgedCommandAndEventTwiceThenDisposeDurableBus();
 
                 //recreate the bus from scratch, set the version to be something *other* than the default empty string
                 _bus = new DurableMessageBus(_retryPolicy) { MessageVersionProvider = () => "not-the-default" };
@@ -463,14 +463,14 @@ namespace Proteus.AppMessageBus.Tests
                 // and then process them using the re-registered subscriber
                 await _bus.Start();
 
-                //becasue the version of the command doesn't match, we should still only have original two payload elements received
+                //because the version of the command doesn't match, we should still only have original two payload elements received
                 Assert.That(_commands.ProcessedMessagePayload, Is.EqualTo(_doubleValue), "Command with wrong version not properly ignored.");
             }
 
             [Test]
-            public async Task DurableEventsWithoutMatchingVersionAreDiscaredOnBusStart()
+            public async Task DurableEventsWithoutMatchingVersionAreDiscardedOnBusStart()
             {
-                await SendUnacknowlegedCommandAndEventTwiceThenDisposeDurableBus();
+                await SendUnacknowledgedCommandAndEventTwiceThenDisposeDurableBus();
 
                 //recreate the bus from scratch, set the version to be something *other* than the default empty string
                 _bus = new DurableMessageBus(_retryPolicy) { MessageVersionProvider = () => "not-the-default" };
@@ -482,7 +482,7 @@ namespace Proteus.AppMessageBus.Tests
                 // and then process them using the re-registered subscriber
                 await _bus.Start();
 
-                //becasue the version of the command doesn't match, we should still only have original two payload elements received
+                //because the version of the command doesn't match, we should still only have original two payload elements received
                 Assert.That(_events.ProcessedMessagePayload, Is.EqualTo(_doubleValue), "Event with wrong version not properly ignored.");
             }
         }
@@ -519,7 +519,7 @@ namespace Proteus.AppMessageBus.Tests
 
                 Assume.That(bus.MessageVersion, Is.EqualTo(expected), "MessageVersionProvider delegate not wired up properly.");
 
-                //this changes the value thta would be returned by the delegate, should it improperly be invoked a second time
+                //this changes the value that would be returned by the delegate, should it improperly be invoked a second time
                 versionProvider.Version = notExpected;
 
                 //since the delegate should NOT be invoked a second time, we expect the original value to be retained
@@ -539,7 +539,7 @@ namespace Proteus.AppMessageBus.Tests
             public void Handle(TestDurableEvent message)
             {
                 ProcessedMessagePayload += message.Payload;
-                ProcessedMessageIds.Add(new Tuple<Guid, Guid>(message.Id, message.AcknowledgementId));
+                ProcessedMessageIds.Add(new Tuple<Guid, Guid>(message.Id, message.AcknowledgmentId));
                 Messages.Add(message);
             }
 
@@ -572,7 +572,7 @@ namespace Proteus.AppMessageBus.Tests
             public void Handle(TestDurableCommand message)
             {
                 ProcessedMessagePayload += message.Payload;
-                ProcessedMessageIds.Add(new Tuple<Guid, Guid>(message.Id, message.AcknowledgementId));
+                ProcessedMessageIds.Add(new Tuple<Guid, Guid>(message.Id, message.AcknowledgmentId));
                 Messages.Add(message);
             }
 
@@ -589,7 +589,7 @@ namespace Proteus.AppMessageBus.Tests
             {
             }
 
-            public Guid AcknowledgementId { get; set; }
+            public Guid AcknowledgmentId { get; set; }
         }
 
 
@@ -600,7 +600,7 @@ namespace Proteus.AppMessageBus.Tests
             {
             }
 
-            public Guid AcknowledgementId { get; set; }
+            public Guid AcknowledgmentId { get; set; }
         }
 
     }

@@ -20,7 +20,7 @@ namespace Proteus.AppMessageBus.Portable
         protected RetryPolicy DefaultEventRetryPolicy { get; private set; }
         protected RetryPolicy DefaultCommandRetryPolicy { get; private set; }
         public IMessageSerializer Serializer { get; set; }
-        public MesssagePersistence MessagePersister { get; set; }
+        public MessagePersistence MessagePersister { get; set; }
 
         public DurableMessageBus()
             : this(new RetryPolicy(), new RetryPolicy())
@@ -38,7 +38,7 @@ namespace Proteus.AppMessageBus.Portable
             DefaultEventRetryPolicy = defaultEventRetryPolicy;
 
             Serializer = new JsonNetSerializer();
-            MessagePersister = new MesssagePersistence();
+            MessagePersister = new MessagePersistence();
         }
 
         public async Task Start()
@@ -121,7 +121,7 @@ namespace Proteus.AppMessageBus.Portable
                 {
                     var commands = await MessagePersister.LoadCommands();
 
-                    var deserialized = Serializer.TryDeserialize<List<EvenvelopeState<IDurableMessage>>>(commands);
+                    var deserialized = Serializer.TryDeserialize<List<EnvelopeState<IDurableMessage>>>(commands);
 
                     if (deserialized.HasValue)
                     {
@@ -140,7 +140,7 @@ namespace Proteus.AppMessageBus.Portable
                 {
                     var events = await MessagePersister.LoadEvents();
 
-                    var deserialized = Serializer.TryDeserialize<List<EvenvelopeState<IDurableMessage>>>(events);
+                    var deserialized = Serializer.TryDeserialize<List<EnvelopeState<IDurableMessage>>>(events);
 
                     if (deserialized.HasValue)
                     {
@@ -265,24 +265,24 @@ namespace Proteus.AppMessageBus.Portable
 
         public async Task Acknowledge<TMessage>(TMessage message) where TMessage : IDurableMessage
         {
-            Logger(string.Format("Acknowledgement received for Message of type {0} Id = {1} having Acknowledgement Id = {2}", typeof(TMessage).Name, message.Id,
-                                 message.AcknowledgementId));
+            Logger(string.Format("Acknowledgment received for Message of type {0} Id = {1} having Acknowledgment Id = {2}", typeof(TMessage).Name, message.Id,
+                                 message.AcknowledgmentId));
 
             if (message is ICommand)
             {
-                Logger(string.Format("Acknowledging Command of type {0} Id = {1} having Acknowledgement Id = {2}",
-                                     typeof(TMessage).Name, message.Id, message.AcknowledgementId));
+                Logger(string.Format("Acknowledging Command of type {0} Id = {1} having Acknowledgment Id = {2}",
+                                     typeof(TMessage).Name, message.Id, message.AcknowledgmentId));
 
-                _queuedCommands.RemoveAll(env => env.Message.AcknowledgementId == message.AcknowledgementId);
+                _queuedCommands.RemoveAll(env => env.Message.AcknowledgmentId == message.AcknowledgmentId);
             }
 
             if (message is IEvent)
             {
-                Logger(string.Format("Acknowledging Event of type {0} Id = {1} having Acknowledgement Id = {2}",
-                                     typeof(TMessage).Name, message.Id, message.AcknowledgementId));
+                Logger(string.Format("Acknowledging Event of type {0} Id = {1} having Acknowledgment Id = {2}",
+                                     typeof(TMessage).Name, message.Id, message.AcknowledgmentId));
 
-                var acknowledgementId = message.AcknowledgementId;
-                _queuedEvents.RemoveAll(env => env.Message.AcknowledgementId == acknowledgementId);
+                var acknowledgmentId = message.AcknowledgmentId;
+                _queuedEvents.RemoveAll(env => env.Message.AcknowledgmentId == acknowledgmentId);
             }
 
             if (UseIntermediateMessagePersistence)
@@ -303,7 +303,7 @@ namespace Proteus.AppMessageBus.Portable
             if (null == durableCommand)
                 return command;
 
-            durableCommand.AcknowledgementId = Guid.NewGuid();
+            durableCommand.AcknowledgmentId = Guid.NewGuid();
 
             StoreCommand(durableCommand);
 
@@ -321,7 +321,7 @@ namespace Proteus.AppMessageBus.Portable
             if (null == durableEvent)
                 return @event;
 
-            durableEvent.AcknowledgementId = Guid.NewGuid();
+            durableEvent.AcknowledgmentId = Guid.NewGuid();
 
             var clonedEvent = Clone((TEvent)durableEvent);
 
@@ -375,7 +375,7 @@ namespace Proteus.AppMessageBus.Portable
 
         private void StoreEvent(IDurableMessage @event, string subscriberKey)
         {
-            var envelope = new Envelope<IDurableMessage>(@event, _activeRetryPolicy, @event.AcknowledgementId, subscriberKey);
+            var envelope = new Envelope<IDurableMessage>(@event, _activeRetryPolicy, @event.AcknowledgmentId, subscriberKey);
 
             if (envelope.ShouldRetry)
             {
@@ -385,7 +385,7 @@ namespace Proteus.AppMessageBus.Portable
 
         private void StoreCommand(IDurableMessage command)
         {
-            var envelope = new Envelope<IDurableMessage>(command, _activeRetryPolicy, command.AcknowledgementId);
+            var envelope = new Envelope<IDurableMessage>(command, _activeRetryPolicy, command.AcknowledgmentId);
 
             if (envelope.ShouldRetry)
             {

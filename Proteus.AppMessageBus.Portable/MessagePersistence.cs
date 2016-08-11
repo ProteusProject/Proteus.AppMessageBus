@@ -4,7 +4,7 @@ using Proteus.AppMessageBus.Portable.Abstractions;
 
 namespace Proteus.AppMessageBus.Portable
 {
-    public class MesssagePersistence : IMesssagePersistenceAsync
+    public class MessagePersistence : IMessagePersistenceAsync
     {
         private const string MessagesFolder = "Proteus.Messaging.Messages";
         private const string CommandsDatafile = "Commands.data";
@@ -12,7 +12,7 @@ namespace Proteus.AppMessageBus.Portable
 
         public IFileSystemProviderAsync FileSystemProvider { private get; set; }
 
-        public MesssagePersistence()
+        public MessagePersistence()
         {
             FileSystemProvider = new FileSystemProvider();
         }

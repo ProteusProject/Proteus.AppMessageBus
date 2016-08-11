@@ -55,7 +55,7 @@ namespace Proteus.AppMessageBus.Tests
             }
 
             [Test]
-            public void ResultHasExpception()
+            public void ResultHasException()
             {
                 Assert.That(_result.Exception, Is.Not.Null);
             }

@@ -53,7 +53,7 @@ namespace Proteus.AppMessageBus.Portable
         {
             get
             {
-                _message.AcknowledgementId = AcknowledgementId;
+                _message.AcknowledgmentId = AcknowledgmentId;
                 return _message;
             }
             private set { _message = value; }
@@ -86,26 +86,26 @@ namespace Proteus.AppMessageBus.Portable
         {
         }
 
-        public Envelope(TMessage message, RetryPolicy retryPolicy, Guid acknowledgementId, string subscriberKey = "")
+        public Envelope(TMessage message, RetryPolicy retryPolicy, Guid acknowledgmentId, string subscriberKey = "")
         {
-            AcknowledgementId = acknowledgementId;
+            AcknowledgmentId = acknowledgmentId;
             SubscriberKey = subscriberKey;
             Message = message;
             RetryPolicy = retryPolicy;
             _retriesRemaining = retryPolicy.Retries;
         }
 
-        public Envelope(EvenvelopeState<TMessage> state)
+        public Envelope(EnvelopeState<TMessage> state)
         {
             SubscriberKey = state.SubscriberKey;
             _id = state.Id;
             _retriesRemaining = state.RetriesRemaining;
             _message = state.Message;
             RetryPolicy = state.RetryPolicyState.GetRetryPolicy();
-            AcknowledgementId = state.AcknowledgementId;
+            AcknowledgmentId = state.AcknowledgmentId;
         }
 
-        public Guid AcknowledgementId { get; private set; }
+        public Guid AcknowledgmentId { get; private set; }
 
         public void HasBeenRetried()
         {
@@ -118,13 +118,13 @@ namespace Proteus.AppMessageBus.Portable
             return value < 0 ? 0 : value;
         }
 
-        public EvenvelopeState<TMessage> EnvelopeState
+        public EnvelopeState<TMessage> EnvelopeState
         {
             get
             {
-                return new EvenvelopeState<TMessage>()
+                return new EnvelopeState<TMessage>()
                     {
-                        AcknowledgementId = AcknowledgementId,
+                        AcknowledgmentId = AcknowledgmentId,
                         Id = Id,
                         Message = Message,
                         RetriesRemaining = _retriesRemaining,

@@ -6,7 +6,7 @@ using Windows.Foundation.Collections;
 namespace AppUIBasics.Common
 {
     /// <summary>
-    /// Implementation of IObservableMap that supports reentrancy for use as a default view
+    /// Implementation of IObservableMap that supports re-entrancy for use as a default view
     /// model.
     /// </summary>
     public class ObservableDictionary : IObservableMap<string, object>

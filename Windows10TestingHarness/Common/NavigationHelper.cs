@@ -14,7 +14,7 @@ namespace AppUIBasics.Common
 {
     /// <summary>
     /// NavigationHelper aids in navigation between pages. It manages
-    /// the backstack and integrates SuspensionManager to handle process
+    /// the back stack and integrates SuspensionManager to handle process
     /// lifetime management and state management when navigating between pages.
     /// </summary>
     /// <example>
@@ -295,7 +295,7 @@ namespace AppUIBasics.Common
                 properties.IsMiddleButtonPressed)
                 return;
 
-            // If back or foward are pressed (but not both) navigate appropriately
+            // If back or forward are pressed (but not both) navigate appropriately
             bool backPressed = properties.IsXButton1Pressed;
             bool forwardPressed = properties.IsXButton2Pressed;
             if (backPressed ^ forwardPressed)

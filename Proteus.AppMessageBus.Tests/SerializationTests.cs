@@ -17,13 +17,13 @@ namespace Proteus.AppMessageBus.Tests
         {
             var retryPolicy = new RetryPolicy(10, DateTimeUtility.PositiveOneHourTimeSpan);
             var msg = new DurableMessageBusTests.TestDurableEvent("0");
-            var acknowledgementId = Guid.NewGuid();
+            var acknowledgmentId = Guid.NewGuid();
 
-            var env = new Envelope<DurableMessageBusTests.TestDurableEvent>(msg, retryPolicy, acknowledgementId);
+            var env = new Envelope<DurableMessageBusTests.TestDurableEvent>(msg, retryPolicy, acknowledgmentId);
 
             var serializer = new JsonNetSerializer();
             var serialized = serializer.SerializeToStream(env.EnvelopeState);
-            var deserialized = serializer.Deserialize<EvenvelopeState<DurableMessageBusTests.TestDurableEvent>>(serialized);
+            var deserialized = serializer.Deserialize<EnvelopeState<DurableMessageBusTests.TestDurableEvent>>(serialized);
 
             var envelope = deserialized.GetEnvelope();
             Assert.That(envelope, Is.Not.Null);
@@ -33,7 +33,7 @@ namespace Proteus.AppMessageBus.Tests
             Assert.That(message, Is.Not.Null);
             Assert.That(message.Id, Is.EqualTo(msg.Id));
             Assert.That(message.Payload, Is.EqualTo(msg.Payload));
-            Assert.That(message.AcknowledgementId, Is.EqualTo(msg.AcknowledgementId));
+            Assert.That(message.AcknowledgmentId, Is.EqualTo(msg.AcknowledgmentId));
 
 
         }

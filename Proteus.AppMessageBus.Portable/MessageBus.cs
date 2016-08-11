@@ -122,7 +122,7 @@ namespace Proteus.AppMessageBus.Portable
         {
             Logger(string.Format("Sending Command of type {0}, MessageId = {1}", typeof(TCommand).Name, command.Id));
 
-            const string reminderMessage = "Each Command must have exacty one subscriber registered.";
+            const string reminderMessage = "Each Command must have exactly one subscriber registered.";
 
             IList<MessageSubscriber> subscribers;
             if (Routes.TryGetValue(command.GetType(), out subscribers))

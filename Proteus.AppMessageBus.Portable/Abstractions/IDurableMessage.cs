@@ -4,6 +4,6 @@ namespace Proteus.AppMessageBus.Portable.Abstractions
 {
     public interface IDurableMessage : IMessage
     {
-        Guid AcknowledgementId { get; set; }
+        Guid AcknowledgmentId { get; set; }
     }
 }

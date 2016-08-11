@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 namespace Proteus.AppMessageBus.Portable.Abstractions
 {
-    public interface IMesssagePersistenceAsync
+    public interface IMessagePersistenceAsync
     {
         IFileSystemProviderAsync FileSystemProvider { set; }
         Task<string> LoadCommands();

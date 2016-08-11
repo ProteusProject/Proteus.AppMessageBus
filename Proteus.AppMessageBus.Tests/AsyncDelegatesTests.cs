@@ -22,7 +22,7 @@ namespace Proteus.AppMessageBus.Tests
         }
 
         [Test]
-        public async Task InvovcationTest()
+        public async Task InvocationTest()
         {
             Assert.That(_holder.InvokeFuncThatReturnsString("steve"), Is.EqualTo("stevesteve"));
             Assert.That(await _holder.InvokeFuncThatReturnsTaskOfString("steve"), Is.EqualTo("stevesteve"));
