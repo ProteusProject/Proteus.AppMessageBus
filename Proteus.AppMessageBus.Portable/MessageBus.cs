@@ -106,7 +106,6 @@ namespace Proteus.AppMessageBus.Portable
 
             if (HasSubscription(subscriberKey))
             {
-                Type foundType = null;
                 foreach (var route in Routes)
                 {
                     if (route.Value.Any(v => v.Key == subscriberKey))
