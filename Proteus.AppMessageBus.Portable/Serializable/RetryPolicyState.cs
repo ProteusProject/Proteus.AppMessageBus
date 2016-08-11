@@ -1,6 +1,6 @@
 using System;
 
-namespace Proteus.Infrastructure.Messaging.Portable.Serializable
+namespace Proteus.AppMessageBus.Portable.Serializable
 {
     public class RetryPolicyState
     {

@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Linq.Expressions;
 
-namespace Proteus.Infrastructure.Messaging.Portable
+namespace Proteus.AppMessageBus.Portable
 {
     /*
      * borrowed from http://codebetter.com/gregyoung/2009/10/03/delegate-mapper/

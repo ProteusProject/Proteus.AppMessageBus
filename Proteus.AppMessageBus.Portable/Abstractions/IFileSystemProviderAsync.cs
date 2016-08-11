@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using PCLStorage;
 
-namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
+namespace Proteus.AppMessageBus.Portable.Abstractions
 {
     public interface IFileSystemProviderAsync
     {

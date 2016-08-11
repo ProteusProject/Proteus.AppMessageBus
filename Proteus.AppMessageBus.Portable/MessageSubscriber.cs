@@ -1,7 +1,7 @@
 using System;
-using Proteus.Infrastructure.Messaging.Portable.Abstractions;
+using Proteus.AppMessageBus.Portable.Abstractions;
 
-namespace Proteus.Infrastructure.Messaging.Portable
+namespace Proteus.AppMessageBus.Portable
 {
     public class MessageSubscriber
     {

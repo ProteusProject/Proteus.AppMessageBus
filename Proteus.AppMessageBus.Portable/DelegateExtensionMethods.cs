@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Proteus.Infrastructure.Messaging.Portable
+namespace Proteus.AppMessageBus.Portable
 {
     public static class DelegateExtensionMethods
     {

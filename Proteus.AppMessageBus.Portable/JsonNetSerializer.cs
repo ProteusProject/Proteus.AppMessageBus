@@ -3,9 +3,9 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
 using Newtonsoft.Json;
-using Proteus.Infrastructure.Messaging.Portable.Abstractions;
+using Proteus.AppMessageBus.Portable.Abstractions;
 
-namespace Proteus.Infrastructure.Messaging.Portable
+namespace Proteus.AppMessageBus.Portable
 {
     public class JsonNetSerializer : IMessageSerializer
     {

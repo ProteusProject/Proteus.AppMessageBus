@@ -3,11 +3,11 @@ using System.Diagnostics;
 using System.Globalization;
 using NUnit.Framework;
 using PCLStorage;
-using Proteus.Infrastructure.Messaging.Portable;
-using Proteus.Infrastructure.Messaging.Portable.Abstractions;
-using Proteus.Infrastructure.Messaging.Portable.Serializable;
+using Proteus.AppMessageBus.Portable;
+using Proteus.AppMessageBus.Portable.Abstractions;
+using Proteus.AppMessageBus.Portable.Serializable;
 
-namespace Proteus.Infrastructure.Messaging.Tests
+namespace Proteus.AppMessageBus.Tests
 {
     [TestFixture]
     public class SerializationTests

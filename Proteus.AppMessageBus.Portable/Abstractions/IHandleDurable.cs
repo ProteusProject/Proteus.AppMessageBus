@@ -1,4 +1,4 @@
-﻿namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
+﻿namespace Proteus.AppMessageBus.Portable.Abstractions
 {
     public interface IHandleDurable<in TMessage> where TMessage : IDurableMessage
     {

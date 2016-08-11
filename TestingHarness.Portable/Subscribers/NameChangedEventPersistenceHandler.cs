@@ -1,4 +1,4 @@
-using Proteus.Infrastructure.Messaging.Portable.Abstractions;
+using Proteus.AppMessageBus.Portable.Abstractions;
 using TestingHarness.Portable.Messages;
 
 namespace TestingHarness.Portable.Subscribers

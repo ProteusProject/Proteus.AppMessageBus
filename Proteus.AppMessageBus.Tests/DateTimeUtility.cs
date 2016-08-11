@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Proteus.Infrastructure.Messaging.Tests
+namespace Proteus.AppMessageBus.Tests
 {
     public static class DateTimeUtility
     {

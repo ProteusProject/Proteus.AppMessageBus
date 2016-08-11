@@ -1,8 +1,8 @@
 ﻿using System;
 using NUnit.Framework;
-using Proteus.Infrastructure.Messaging.Portable.Abstractions;
+using Proteus.AppMessageBus.Portable.Abstractions;
 
-namespace Proteus.Infrastructure.Messaging.Tests
+namespace Proteus.AppMessageBus.Tests
 {
 
     public class SerializerResultTests

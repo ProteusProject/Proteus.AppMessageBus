@@ -3,10 +3,10 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Proteus.Infrastructure.Messaging.Portable;
-using Proteus.Infrastructure.Messaging.Portable.Abstractions;
+using Proteus.AppMessageBus.Portable;
+using Proteus.AppMessageBus.Portable.Abstractions;
 
-namespace Proteus.Infrastructure.Messaging.Tests
+namespace Proteus.AppMessageBus.Tests
 {
     [TestFixture]
     public class MessageBusTests

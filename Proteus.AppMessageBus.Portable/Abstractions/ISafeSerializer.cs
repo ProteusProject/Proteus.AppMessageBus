@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace Proteus.Infrastructure.Messaging.Portable.Abstractions
+namespace Proteus.AppMessageBus.Portable.Abstractions
 {
     public interface ISafeSerializer
     {

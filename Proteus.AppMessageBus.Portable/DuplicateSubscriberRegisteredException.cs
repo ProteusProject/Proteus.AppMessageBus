@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Proteus.Infrastructure.Messaging.Portable
+namespace Proteus.AppMessageBus.Portable
 {
     public class DuplicateSubscriberRegisteredException : InvalidOperationException
     {

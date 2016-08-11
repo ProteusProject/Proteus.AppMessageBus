@@ -1,8 +1,8 @@
 ﻿using System;
-using Proteus.Infrastructure.Messaging.Portable.Abstractions;
-using Proteus.Infrastructure.Messaging.Portable.Serializable;
+using Proteus.AppMessageBus.Portable.Abstractions;
+using Proteus.AppMessageBus.Portable.Serializable;
 
-namespace Proteus.Infrastructure.Messaging.Portable
+namespace Proteus.AppMessageBus.Portable
 {
     public class Envelope<TMessage> : IEquatable<Envelope<TMessage>> where TMessage : IDurableMessage
     {

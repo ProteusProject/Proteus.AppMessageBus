@@ -4,9 +4,9 @@ using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Proteus.Infrastructure.Messaging.Portable;
+using Proteus.AppMessageBus.Portable;
 
-namespace Proteus.Infrastructure.Messaging.Tests
+namespace Proteus.AppMessageBus.Tests
 {
     [TestFixture]
     public class AsyncDelegatesTests

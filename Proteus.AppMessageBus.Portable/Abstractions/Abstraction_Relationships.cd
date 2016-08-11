@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="Proteus.Infrastructure.Messaging.Portable.Abstractions.Message" Collapsed="true">
+  <Class Name="Proteus.AppMessageBus.Portable.Abstractions.Message" Collapsed="true">
     <Position X="1.5" Y="0.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>IAADAAAAAAAAAAAABABAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
@@ -8,7 +8,7 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="Proteus.Infrastructure.Messaging.Portable.Abstractions.Command" Collapsed="true">
+  <Class Name="Proteus.AppMessageBus.Portable.Abstractions.Command" Collapsed="true">
     <Position X="0.5" Y="2" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
@@ -16,7 +16,7 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="Proteus.Infrastructure.Messaging.Portable.Abstractions.Event" Collapsed="true">
+  <Class Name="Proteus.AppMessageBus.Portable.Abstractions.Event" Collapsed="true">
     <Position X="2.75" Y="2" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
@@ -24,7 +24,7 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="Proteus.Infrastructure.Messaging.Portable.Abstractions.DurableEvent" Collapsed="true">
+  <Class Name="Proteus.AppMessageBus.Portable.Abstractions.DurableEvent" Collapsed="true">
     <Position X="2.75" Y="3.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
@@ -32,7 +32,7 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="Proteus.Infrastructure.Messaging.Portable.Abstractions.DurableCommand" Collapsed="true">
+  <Class Name="Proteus.AppMessageBus.Portable.Abstractions.DurableCommand" Collapsed="true">
     <Position X="0.5" Y="3.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
@@ -40,42 +40,42 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Interface Name="Proteus.Infrastructure.Messaging.Portable.Abstractions.IMessage" Collapsed="true">
+  <Interface Name="Proteus.AppMessageBus.Portable.Abstractions.IMessage" Collapsed="true">
     <Position X="6.25" Y="0.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>IAACAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Abstractions\IMessage.cs</FileName>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="Proteus.Infrastructure.Messaging.Portable.Abstractions.ICommand" Collapsed="true">
+  <Interface Name="Proteus.AppMessageBus.Portable.Abstractions.ICommand" Collapsed="true">
     <Position X="4.75" Y="2" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Abstractions\ICommand.cs</FileName>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="Proteus.Infrastructure.Messaging.Portable.Abstractions.IDurableMessage" Collapsed="true">
+  <Interface Name="Proteus.AppMessageBus.Portable.Abstractions.IDurableMessage" Collapsed="true">
     <Position X="7" Y="2" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
       <FileName>Abstractions\IDurableMessage.cs</FileName>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="Proteus.Infrastructure.Messaging.Portable.Abstractions.IEvent" Collapsed="true">
+  <Interface Name="Proteus.AppMessageBus.Portable.Abstractions.IEvent" Collapsed="true">
     <Position X="9.25" Y="2" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Abstractions\IEvent.cs</FileName>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="Proteus.Infrastructure.Messaging.Portable.Abstractions.IDurableCommand" Collapsed="true">
+  <Interface Name="Proteus.AppMessageBus.Portable.Abstractions.IDurableCommand" Collapsed="true">
     <Position X="5.75" Y="3.5" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Abstractions\IDurableCommand.cs</FileName>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="Proteus.Infrastructure.Messaging.Portable.Abstractions.IDurableEvent" Collapsed="true">
+  <Interface Name="Proteus.AppMessageBus.Portable.Abstractions.IDurableEvent" Collapsed="true">
     <Position X="8" Y="3.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>

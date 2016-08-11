@@ -5,10 +5,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using PCLStorage;
-using Proteus.Infrastructure.Messaging.Portable;
-using Proteus.Infrastructure.Messaging.Portable.Abstractions;
+using Proteus.AppMessageBus.Portable;
+using Proteus.AppMessageBus.Portable.Abstractions;
 
-namespace Proteus.Infrastructure.Messaging.Tests
+namespace Proteus.AppMessageBus.Tests
 {
     public class DurableMessageBusTests
     {

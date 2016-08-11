@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading;
 using NUnit.Framework;
-using Proteus.Infrastructure.Messaging.Portable;
+using Proteus.AppMessageBus.Portable;
 
-namespace Proteus.Infrastructure.Messaging.Tests
+namespace Proteus.AppMessageBus.Tests
 {
     [TestFixture]
     public class RetryPolicyTests

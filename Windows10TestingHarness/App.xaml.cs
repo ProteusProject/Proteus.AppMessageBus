@@ -19,7 +19,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using AppUIBasics.Common;
-using Proteus.Infrastructure.Messaging.Portable;
+using Proteus.AppMessageBus.Portable;
 using TestingHarness.Portable;
 using TestingHarness.Portable.Abstractions;
 using TestingHarness.Portable.Subscribers;
