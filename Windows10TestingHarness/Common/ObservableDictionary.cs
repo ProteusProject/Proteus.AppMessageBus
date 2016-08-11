@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Windows.Foundation.Collections;
 
-namespace AppUIBasics.Common
+namespace Windows10TestingHarness.Common
 {
     /// <summary>
     /// Implementation of IObservableMap that supports re-entrancy for use as a default view

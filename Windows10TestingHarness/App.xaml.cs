@@ -18,7 +18,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-using AppUIBasics.Common;
+using Windows10TestingHarness.Common;
 using Proteus.AppMessageBus.Portable;
 using TestingHarness.Portable;
 using TestingHarness.Portable.Abstractions;

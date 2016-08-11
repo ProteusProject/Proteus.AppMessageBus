@@ -1,4 +1,4 @@
-﻿<local:CustomBasePage
+﻿<local:CommonBasePage
     x:Class="Windows10TestingHarness.CounterDisplayPage"
     DataContext="{Binding DefaultViewModel, RelativeSource={RelativeSource Self}}"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -23,5 +23,5 @@
 
         </StackPanel>
     </Grid>
-</local:CustomBasePage>
+</local:CommonBasePage>
 

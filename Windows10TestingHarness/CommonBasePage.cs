@@ -2,17 +2,17 @@
 using Windows.UI.Core;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
-using AppUIBasics.Common;
+using Windows10TestingHarness.Common;
 
 namespace Windows10TestingHarness
 {
-    public abstract class CustomBasePage : Page
+    public abstract class CommonBasePage : Page
     {
         protected NavigationHelper navigationHelper;
         protected ObservableDictionary defaultViewModel = new ObservableDictionary();
 
 
-        public CustomBasePage()
+        protected CommonBasePage()
         {
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
@@ -59,7 +59,7 @@ namespace Windows10TestingHarness
         /// provided when recreating a page from a prior session.
         /// </summary>
         /// <param name="sender">
-        /// The source of the event; typically <see cref="AppUIBasics.Common.NavigationHelper"/>
+        /// The source of the event; typically <see cref="Common.NavigationHelper"/>
         /// </param>
         /// <param name="e">Event data that provides both the navigation parameter passed to
         /// <see cref="Frame.Navigate(Type, object)"/> when this page was initially requested and
@@ -75,8 +75,8 @@ namespace Windows10TestingHarness
         /// The methods provided in this section are simply used to allow
         /// NavigationHelper to respond to the page's navigation methods.
         /// Page specific logic should be placed in event handlers for the  
-        /// <see cref="AppUIBasics.Common.NavigationHelper.LoadState"/>
-        /// and <see cref="AppUIBasics.Common.NavigationHelper.SaveState"/>.
+        /// <see cref="Common.NavigationHelper.LoadState"/>
+        /// and <see cref="Common.NavigationHelper.SaveState"/>.
         /// The navigation parameter is available in the LoadState method 
         /// in addition to page state preserved during an earlier session.
         /// </summary>

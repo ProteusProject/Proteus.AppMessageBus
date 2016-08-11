@@ -14,7 +14,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-using AppUIBasics.Common;
+using Windows10TestingHarness.Common;
 using TestingHarness.Portable.Messages;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
@@ -24,7 +24,7 @@ namespace Windows10TestingHarness
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class EditPage : CustomBasePage
+    public sealed partial class EditPage : CommonBasePage
     {
         public EditPage()
         {
