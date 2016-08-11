@@ -31,10 +31,8 @@ namespace Proteus.AppMessageBus.Tests
 
             var message = deserialized.Message;
             Assert.That(message, Is.Not.Null);
-            Assert.That(message.Id, Is.EqualTo(msg.Id));
             Assert.That(message.Payload, Is.EqualTo(msg.Payload));
             Assert.That(message.AcknowledgmentId, Is.EqualTo(msg.AcknowledgmentId));
-
 
         }
 
@@ -49,6 +47,9 @@ namespace Proteus.AppMessageBus.Tests
             var deserialized = serializer.Deserialize<DurableMessageBusTests.TestDurableEvent>(serialized);
 
             Assert.That(deserialized, Is.Not.Null);
+            Assert.That(deserialized.Payload, Is.EqualTo(msg.Payload));
+            Assert.That(deserialized.AcknowledgmentId, Is.EqualTo(msg.AcknowledgmentId));
+            Assert.That(deserialized.Version, Is.EqualTo(msg.Version));
         }
 
     }
