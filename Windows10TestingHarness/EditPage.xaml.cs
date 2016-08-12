@@ -43,23 +43,23 @@ namespace Windows10TestingHarness
 
         #region Control Event Handlers
 
-        private void SaveNames_OnClick(object sender, RoutedEventArgs e)
+        private async void SaveNames_OnClick(object sender, RoutedEventArgs e)
         {
-            App.Bus.Send(new ChangeNameCommand(Firstname.Text, Lastname.Text));
+            await App.Bus.Send(new ChangeNameCommand(Firstname.Text, Lastname.Text));
             this.Frame.Navigate(typeof(DisplayPage));
         }
 
-        private void IncrementCounterWithAck_OnClick(object sender, RoutedEventArgs e)
+        private async void IncrementCounterWithAck_OnClick(object sender, RoutedEventArgs e)
         {
             //send the command using default retries
-            App.Bus.SendDurable(new IncrementCounterWithAckCommand());
+            await App.Bus.SendDurable(new IncrementCounterWithAckCommand());
             this.Frame.Navigate(typeof(CounterDisplayPage));
         }
 
-        private void IncrementCounterWithoutAck_OnClick(object sender, RoutedEventArgs e)
+        private async void IncrementCounterWithoutAck_OnClick(object sender, RoutedEventArgs e)
         {
             //send the command using default retries
-            App.Bus.SendDurable(new IncrementCounterWithoutAckCommand());
+            await App.Bus.SendDurable(new IncrementCounterWithoutAckCommand());
             this.Frame.Navigate(typeof(CounterDisplayPage));
 
         }

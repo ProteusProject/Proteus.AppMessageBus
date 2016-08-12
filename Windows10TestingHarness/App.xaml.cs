@@ -161,16 +161,15 @@ namespace Windows10TestingHarness
 
         //TODO: determine whether its still necessary (or even advisable) to do this
         //(maybe we should just respond to the SUSPEND and RESUME events)
-        private void CurrentWindowOnVisibilityChanged(object sender, VisibilityChangedEventArgs visibilityChangedEventArgs)
+        private async void CurrentWindowOnVisibilityChanged(object sender, VisibilityChangedEventArgs visibilityChangedEventArgs)
         {
             if (visibilityChangedEventArgs.Visible)
             {
-                //no point in awaiting this, its in an event handler :)
-                Bus.Start();
+                await Bus.Start();
             }
             else
             {
-                Bus.Stop();
+                await Bus.Stop();
             }
         }
     }
