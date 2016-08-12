@@ -3,18 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proteus.AppMessageBus.Tests", "Proteus.AppMessageBus.Tests\Proteus.AppMessageBus.Tests.csproj", "{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proteus.AppMessageBus.Tests", "test\Proteus.AppMessageBus.Tests\Proteus.AppMessageBus.Tests.csproj", "{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proteus.AppMessageBus.Portable", "Proteus.AppMessageBus.Portable\Proteus.AppMessageBus.Portable.csproj", "{9CE08989-240C-4F66-B523-5BEF6E2F6BF6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proteus.AppMessageBus.Portable", "src\Proteus.AppMessageBus.Portable\Proteus.AppMessageBus.Portable.csproj", "{9CE08989-240C-4F66-B523-5BEF6E2F6BF6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{870BCF9F-E065-4B08-A4D5-A21BCB3E8669}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestingHarness.Portable", "TestingHarness.Portable\TestingHarness.Portable.csproj", "{1521D831-215E-4C5E-B69C-A488AB80C038}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestingHarness.Portable", "test\TestingHarness.Portable\TestingHarness.Portable.csproj", "{1521D831-215E-4C5E-B69C-A488AB80C038}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Windows10TestingHarness", "Windows10TestingHarness\Windows10TestingHarness.csproj", "{61F03A77-138D-4C89-B93B-64DFFB5DD9C1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Windows10TestingHarness", "test\Windows10TestingHarness\Windows10TestingHarness.csproj", "{61F03A77-138D-4C89-B93B-64DFFB5DD9C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
