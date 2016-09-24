@@ -77,7 +77,7 @@ namespace Proteus.AppMessageBus.Portable
                 subscribers = new List<MessageSubscriber>();
                 Routes.Add(typeof(TMessage), subscribers);
             }
-            subscribers.Add(new MessageSubscriber(subscriberKey, DelegateConverter.CastArgument<IMessage, TMessage>(x => handler(x))));
+            subscribers.Add(new MessageSubscriber(subscriberKey, x => handler((TMessage)x)));
         }
 
         public virtual bool HasSubscriptionFor<TMessage>() where TMessage : IMessage
