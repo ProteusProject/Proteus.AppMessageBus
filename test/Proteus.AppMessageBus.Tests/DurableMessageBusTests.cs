@@ -133,7 +133,7 @@ namespace Proteus.AppMessageBus.Tests
                 Assume.That(_commands.ProcessedMessagePayload, Is.EqualTo(SingleValue));
                 Assume.That(_events.ProcessedMessagePayload, Is.EqualTo(SingleValue));
 
-                //despite multiple calls to Start(), messages are only retried ONCE as per the retry policy setting
+                //despite multiple calls to Start(), messages are NOT retried at all as per the retry policy setting
                 for (int i = 0; i < 10; i++)
                 {
                     await _bus.Start();
