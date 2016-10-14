@@ -1,0 +1,4 @@
+version: 1.0.{build}
+build:
+  project: Proteus.AppMessageBus.build.xml
+  verbosity: minimal
