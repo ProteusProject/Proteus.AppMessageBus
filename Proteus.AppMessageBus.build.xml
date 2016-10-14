@@ -19,7 +19,7 @@
     <MSBuild Projects="@(AllProjects)" Targets="Build" Properties="WarningLevel=1" />
   </Target>
      
-  <Target Name="Test" DependsOnTargets="Clean;Compile">
+  <Target Name="Test" DependsOnTargets="Clean;NuGetRestore;Compile">
         <Exec ContinueOnError="true" Command="&quot;$(NUnit-ToolPath)\nunit3-console.exe&quot; &quot;$(Test-Assemblies-List)&quot; /work=build\Debug" />
   </Target>
   
@@ -28,8 +28,14 @@
         <Exec ContinueOnError="true" Command="tools\doxygen\doxygen.exe src\proteus.appmessagebus.doxygen " />
   </Target>
   
+  <Target Name="NuGetRestore">
+        <Exec ContinueOnError="false" Command="tools\NuGet\nuget.exe restore" />
+  </Target>
+  
+  
+  
   <!-- default 'Build' target doesn't need to invoke Test target b/c CI server will auto-discover test assemblies on run -->  
-  <Target Name="Build" DependsOnTargets="BuildSolution;ApiReferenceDocs" />
+  <Target Name="Build" DependsOnTargets="NuGetRestore;BuildSolution;ApiReferenceDocs" />
  
   <Target Name="BuildSolution">
     <MSBuild Projects="$(SolutionFileName)" />
