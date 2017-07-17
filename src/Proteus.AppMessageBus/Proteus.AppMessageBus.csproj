@@ -5,11 +5,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>..\..\build\Debug\netstandard1.6\</OutputPath>
+    <OutputPath>..\..\build\Debug</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>..\..\build\Release\netstandard1.6\</OutputPath>
+    <OutputPath>..\..\build\Release</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
