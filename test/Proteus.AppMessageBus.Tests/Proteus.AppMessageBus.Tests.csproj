@@ -99,12 +99,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Proteus.AppMessageBus.Portable\Proteus.AppMessageBus.Portable.csproj">
-      <Project>{9ce08989-240c-4f66-b523-5bef6e2f6bf6}</Project>
-      <Name>Proteus.AppMessageBus.Portable</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

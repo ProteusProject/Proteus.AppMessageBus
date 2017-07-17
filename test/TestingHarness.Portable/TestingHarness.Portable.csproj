@@ -57,12 +57,6 @@
     <Compile Include="ViewModels\CounterDisplayPageViewModel.cs" />
     <Compile Include="ViewModels\DisplayPageViewModel.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Proteus.AppMessageBus.Portable\Proteus.AppMessageBus.Portable.csproj">
-      <Project>{9ce08989-240c-4f66-b523-5bef6e2f6bf6}</Project>
-      <Name>Proteus.AppMessageBus.Portable</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
