@@ -20,7 +20,7 @@
 
 using System;
 using NUnit.Framework;
-using Proteus.AppMessageBus.Portable.Abstractions;
+using Proteus.AppMessageBus.Abstractions;
 
 namespace Proteus.AppMessageBus.Tests
 {

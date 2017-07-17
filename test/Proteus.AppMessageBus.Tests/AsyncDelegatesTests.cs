@@ -19,12 +19,8 @@
 #endregion
 
 using System;
-using System.CodeDom;
-using System.Runtime.Remoting.Messaging;
-using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Proteus.AppMessageBus.Portable;
 
 namespace Proteus.AppMessageBus.Tests
 {

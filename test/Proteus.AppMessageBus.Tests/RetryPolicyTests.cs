@@ -19,9 +19,7 @@
 #endregion
 
 using System;
-using System.Threading;
 using NUnit.Framework;
-using Proteus.AppMessageBus.Portable;
 
 namespace Proteus.AppMessageBus.Tests
 {

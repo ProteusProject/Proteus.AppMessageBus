@@ -18,16 +18,13 @@
 
 #endregion
 
-using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Common.Logging;
 using NUnit.Framework;
-using Proteus.AppMessageBus.Portable;
-using Proteus.AppMessageBus.Portable.Abstractions;
+using Proteus.AppMessageBus.Abstractions;
 
 namespace Proteus.AppMessageBus.Tests
 {

@@ -19,13 +19,8 @@
 #endregion
 
 using System;
-using System.Diagnostics;
-using System.Globalization;
 using NUnit.Framework;
-using PCLStorage;
-using Proteus.AppMessageBus.Portable;
-using Proteus.AppMessageBus.Portable.Abstractions;
-using Proteus.AppMessageBus.Portable.Serializable;
+using Proteus.AppMessageBus.Serializable;
 
 namespace Proteus.AppMessageBus.Tests
 {

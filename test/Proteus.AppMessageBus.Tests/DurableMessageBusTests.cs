@@ -20,13 +20,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using PCLStorage;
-using Proteus.AppMessageBus.Portable;
-using Proteus.AppMessageBus.Portable.Abstractions;
+using Proteus.AppMessageBus.Abstractions;
 
 namespace Proteus.AppMessageBus.Tests
 {
