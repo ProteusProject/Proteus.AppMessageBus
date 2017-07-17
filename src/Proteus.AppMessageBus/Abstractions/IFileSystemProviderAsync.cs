@@ -19,7 +19,8 @@
 #endregion
 
 using System.Threading.Tasks;
-using PCLStorage;
+using Plugin.NetStandardStorage.Abstractions.Interfaces;
+using Plugin.NetStandardStorage.Abstractions.Types;
 
 namespace Proteus.AppMessageBus.Portable.Abstractions
 {

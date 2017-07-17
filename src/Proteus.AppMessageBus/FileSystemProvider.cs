@@ -18,17 +18,20 @@
 
 #endregion
 
+using System;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using PCLStorage;
+using Plugin.NetStandardStorage.Abstractions.Interfaces;
+using Plugin.NetStandardStorage.Abstractions.Types;
 using Proteus.AppMessageBus.Portable.Abstractions;
 
 namespace Proteus.AppMessageBus.Portable
 {
     public class FileSystemProvider : IFileSystemProviderAsync
     {
-        private static readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1,1);
+        private static readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
 
         public async Task<IFolder> GetFolderAsync(IFolder parentFolder, string folderName)
         {
@@ -36,7 +39,7 @@ namespace Proteus.AppMessageBus.Portable
             try
             {
                 IFolder folder = null;
-                var folders = await parentFolder.GetFoldersAsync();
+                var folders = parentFolder.GetFolders();
 
                 foreach (var candidate in folders.Where(candidate => candidate.Name == folderName))
                 {
@@ -58,7 +61,7 @@ namespace Proteus.AppMessageBus.Portable
             {
                 IFile file = null;
 
-                var files = await parentFolder.GetFilesAsync();
+                var files = parentFolder.GetFiles();
 
                 foreach (var candidate in files.Where(candidate => candidate.Name == fileName))
                 {
@@ -78,7 +81,7 @@ namespace Proteus.AppMessageBus.Portable
             await Semaphore.WaitAsync();
             try
             {
-                return await parentFolder.CreateFolderAsync(folderName, creationCollisionOption);
+                return parentFolder.CreateFolder(folderName, creationCollisionOption);
             }
             finally
             {
@@ -91,11 +94,11 @@ namespace Proteus.AppMessageBus.Portable
             await Semaphore.WaitAsync();
             try
             {
-                var folders = await parentFolder.GetFoldersAsync();
+                var folders = parentFolder.GetFolders();
 
                 foreach (var candidate in folders.Where(candidate => candidate.Name == folderName))
                 {
-                    await candidate.DeleteAsync();
+                    candidate.Delete();
                 }
             }
             finally
@@ -109,7 +112,7 @@ namespace Proteus.AppMessageBus.Portable
             await Semaphore.WaitAsync();
             try
             {
-                return await parentFolder.CreateFileAsync(filename, creationCollisionOption);
+                return parentFolder.CreateFile(filename, creationCollisionOption);
             }
             finally
             {
@@ -122,10 +125,10 @@ namespace Proteus.AppMessageBus.Portable
             await Semaphore.WaitAsync();
             try
             {
-                var files = await parentFolder.GetFilesAsync();
+                var files = parentFolder.GetFiles();
                 foreach (var file in files.Where(file => file.Name == filename))
                 {
-                    await file.DeleteAsync();
+                    file.Delete();
                 }
             }
             finally
@@ -139,7 +142,10 @@ namespace Proteus.AppMessageBus.Portable
             await Semaphore.WaitAsync();
             try
             {
-                return await file.ReadAllTextAsync();
+                using (var stream = file.Open(FileAccess.Read))
+                {
+                    return await new StreamReader(stream).ReadToEndAsync();
+                }
             }
             finally
             {
@@ -152,7 +158,7 @@ namespace Proteus.AppMessageBus.Portable
             await Semaphore.WaitAsync();
             try
             {
-                await file.WriteAllTextAsync(text);
+                file.WriteAllText(text);
             }
             finally
             {

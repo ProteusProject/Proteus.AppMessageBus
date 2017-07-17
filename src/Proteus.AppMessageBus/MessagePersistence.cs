@@ -19,7 +19,9 @@
 #endregion
 
 using System.Threading.Tasks;
-using PCLStorage;
+using Plugin.NetStandardStorage.Abstractions.Interfaces;
+using Plugin.NetStandardStorage.Abstractions.Types;
+using Plugin.NetStandardStorage.Implementations;
 using Proteus.AppMessageBus.Portable.Abstractions;
 
 namespace Proteus.AppMessageBus.Portable
@@ -103,7 +105,8 @@ namespace Proteus.AppMessageBus.Portable
 
         private async Task<IFolder> GetFolder()
         {
-            return await FileSystemProvider.CreateFolderAsync(FileSystem.Current.LocalStorage, MessagesFolder, CreationCollisionOption.OpenIfExists);
+            //TODO: check for FileSystem.LocalStorage returns an exception and fallback to attempt some local filesystem access as needed
+            return await FileSystemProvider.CreateFolderAsync(new FileSystem().LocalStorage, MessagesFolder, CreationCollisionOption.OpenIfExists);
         }
     }
 }
