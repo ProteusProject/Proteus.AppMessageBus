@@ -19,10 +19,10 @@
 #endregion
 
 using System;
-using Proteus.AppMessageBus.Portable.Abstractions;
-using Proteus.AppMessageBus.Portable.Serializable;
+using Proteus.AppMessageBus.Abstractions;
+using Proteus.AppMessageBus.Serializable;
 
-namespace Proteus.AppMessageBus.Portable
+namespace Proteus.AppMessageBus
 {
     public class Envelope<TMessage> : IEquatable<Envelope<TMessage>> where TMessage : IDurableMessage
     {

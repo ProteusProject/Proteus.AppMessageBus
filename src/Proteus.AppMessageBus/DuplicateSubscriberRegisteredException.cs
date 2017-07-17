@@ -20,7 +20,7 @@
 
 using System;
 
-namespace Proteus.AppMessageBus.Portable
+namespace Proteus.AppMessageBus
 {
     public class DuplicateSubscriberRegisteredException : InvalidOperationException
     {

@@ -19,9 +19,9 @@
 #endregion
 
 using System;
-using Proteus.AppMessageBus.Portable.Abstractions;
+using Proteus.AppMessageBus.Abstractions;
 
-namespace Proteus.AppMessageBus.Portable.Serializable
+namespace Proteus.AppMessageBus.Serializable
 {
     public class EnvelopeState<TMessage> where TMessage : IDurableMessage
     {

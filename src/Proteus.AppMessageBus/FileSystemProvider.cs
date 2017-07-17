@@ -18,16 +18,15 @@
 
 #endregion
 
-using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Plugin.NetStandardStorage.Abstractions.Interfaces;
 using Plugin.NetStandardStorage.Abstractions.Types;
-using Proteus.AppMessageBus.Portable.Abstractions;
+using Proteus.AppMessageBus.Abstractions;
 
-namespace Proteus.AppMessageBus.Portable
+namespace Proteus.AppMessageBus
 {
     public class FileSystemProvider : IFileSystemProviderAsync
     {

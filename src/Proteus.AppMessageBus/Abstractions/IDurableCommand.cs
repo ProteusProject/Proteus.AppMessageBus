@@ -18,7 +18,7 @@
 
 #endregion
 
-namespace Proteus.AppMessageBus.Portable.Abstractions
+namespace Proteus.AppMessageBus.Abstractions
 {
     public interface IDurableCommand : ICommand, IDurableMessage
     {

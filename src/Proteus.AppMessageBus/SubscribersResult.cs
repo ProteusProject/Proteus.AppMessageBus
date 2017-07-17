@@ -20,9 +20,8 @@
 
 using System;
 using System.Collections.Generic;
-using Proteus.AppMessageBus.Portable.Abstractions;
 
-namespace Proteus.AppMessageBus.Portable
+namespace Proteus.AppMessageBus
 {
     public class SubscribersResult
     {

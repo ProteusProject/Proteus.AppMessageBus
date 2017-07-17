@@ -20,7 +20,7 @@
 
 using System;
 
-namespace Proteus.AppMessageBus.Portable.Serializable
+namespace Proteus.AppMessageBus.Serializable
 {
     public class RetryPolicyState
     {

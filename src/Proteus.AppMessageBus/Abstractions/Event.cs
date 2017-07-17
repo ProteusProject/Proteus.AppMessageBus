@@ -18,9 +18,7 @@
 
 #endregion
 
-using System;
-
-namespace Proteus.AppMessageBus.Portable.Abstractions
+namespace Proteus.AppMessageBus.Abstractions
 {
     public class Event : Message, IEvent
     {

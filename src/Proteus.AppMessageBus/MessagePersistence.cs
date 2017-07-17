@@ -22,9 +22,9 @@ using System.Threading.Tasks;
 using Plugin.NetStandardStorage.Abstractions.Interfaces;
 using Plugin.NetStandardStorage.Abstractions.Types;
 using Plugin.NetStandardStorage.Implementations;
-using Proteus.AppMessageBus.Portable.Abstractions;
+using Proteus.AppMessageBus.Abstractions;
 
-namespace Proteus.AppMessageBus.Portable
+namespace Proteus.AppMessageBus
 {
     public class MessagePersistence : IMessagePersistenceAsync
     {

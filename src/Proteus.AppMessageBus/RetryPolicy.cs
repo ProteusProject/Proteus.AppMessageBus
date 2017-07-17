@@ -19,9 +19,9 @@
 #endregion
 
 using System;
-using Proteus.AppMessageBus.Portable.Serializable;
+using Proteus.AppMessageBus.Serializable;
 
-namespace Proteus.AppMessageBus.Portable
+namespace Proteus.AppMessageBus
 {
     public class RetryPolicy
     {

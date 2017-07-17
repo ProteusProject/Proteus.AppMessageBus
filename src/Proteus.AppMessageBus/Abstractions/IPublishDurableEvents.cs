@@ -20,7 +20,7 @@
 
 using System.Threading.Tasks;
 
-namespace Proteus.AppMessageBus.Portable.Abstractions
+namespace Proteus.AppMessageBus.Abstractions
 {
     public interface IPublishDurableEvents
     {

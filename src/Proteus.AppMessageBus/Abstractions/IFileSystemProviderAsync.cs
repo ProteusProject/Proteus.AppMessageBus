@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 using Plugin.NetStandardStorage.Abstractions.Interfaces;
 using Plugin.NetStandardStorage.Abstractions.Types;
 
-namespace Proteus.AppMessageBus.Portable.Abstractions
+namespace Proteus.AppMessageBus.Abstractions
 {
     public interface IFileSystemProviderAsync
     {

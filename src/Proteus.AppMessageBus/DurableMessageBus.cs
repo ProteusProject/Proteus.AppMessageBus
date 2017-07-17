@@ -20,15 +20,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Proteus.AppMessageBus.Portable.Abstractions;
-using Proteus.AppMessageBus.Portable.Serializable;
+using Proteus.AppMessageBus.Abstractions;
+using Proteus.AppMessageBus.Serializable;
 
-namespace Proteus.AppMessageBus.Portable
+namespace Proteus.AppMessageBus
 {
     public class DurableMessageBus : MessageBus, IStartableAsync, IStoppableAsync, ISendDurableCommands, IPublishDurableEvents, IAcknowledgeMessages
     {
