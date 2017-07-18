@@ -2,6 +2,21 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
+
+    <!--BEGIN nuget packaging specification-->
+    <Authors>Stephen A. Bohlen</Authors>
+    <Description>In-process Durable Message Bus supporting a CQRS paradigm to manage program flow within your own application.</Description>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Copyright>Copyright © 2017 Stephen A. Bohlen. All rights reserved.</Copyright>
+    <PackageTags>message bus</PackageTags>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <RepositoryUrl>https://github.com/ProteusProject/Proteus.AppMessageBus</RepositoryUrl>
+    <RepositoryType>Public</RepositoryType>
+    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+    <VersionSuffix>RC1</VersionSuffix>
+    <!--END nuget packaging specification-->
+
+
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
