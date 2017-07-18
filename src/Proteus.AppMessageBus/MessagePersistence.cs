@@ -106,7 +106,7 @@ namespace Proteus.AppMessageBus
         private async Task<IFolder> GetFolder()
         {
             //TODO: check for FileSystem.LocalStorage returns an exception and fallback to attempt some local filesystem access as needed
-            return await FileSystemProvider.CreateFolderAsync(new FileSystem().LocalStorage, MessagesFolder, CreationCollisionOption.OpenIfExists);
+            return await FileSystemProvider.CreateFolderAsync(FileSystemProvider.LocalStorage, MessagesFolder, CreationCollisionOption.OpenIfExists);
         }
     }
 }

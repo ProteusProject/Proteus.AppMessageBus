@@ -34,5 +34,6 @@ namespace Proteus.AppMessageBus.Abstractions
         Task DeleteFileAsync(IFolder parentFolder, string filename);
         Task<string> ReadAllTextAsync(IFile file);
         Task WriteAllTextAsync(IFile file, string text);
+        IFolder LocalStorage { get; }
     }
 }

@@ -18,12 +18,14 @@
 
 #endregion
 
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Plugin.NetStandardStorage.Abstractions.Interfaces;
 using Plugin.NetStandardStorage.Abstractions.Types;
+using Plugin.NetStandardStorage.Implementations;
 using Proteus.AppMessageBus.Abstractions;
 
 namespace Proteus.AppMessageBus
@@ -31,6 +33,13 @@ namespace Proteus.AppMessageBus
     public class FileSystemProvider : IFileSystemProviderAsync
     {
         private static readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
+        private FileSystem _fileSystem;
+        private IFolder _localStorageFolder;
+
+        public FileSystemProvider()
+        {
+            _fileSystem = new FileSystem();
+        }
 
         public async Task<IFolder> GetFolderAsync(IFolder parentFolder, string folderName)
         {
@@ -163,6 +172,28 @@ namespace Proteus.AppMessageBus
             {
                 Semaphore.Release();
             }
+        }
+
+        public IFolder LocalStorage
+        {
+            get { return GetLocalStorageFolder(); }
+        }
+
+        private IFolder GetLocalStorageFolder()
+        {
+            try
+            {
+                if (null == _localStorageFolder)
+                {
+                    _localStorageFolder = _fileSystem.LocalStorage;
+                }
+            }
+            catch (PlatformNotSupportedException)
+            {
+                _localStorageFolder = _fileSystem.GetFolderFromPath(Directory.GetCurrentDirectory());
+            }
+
+            return _localStorageFolder;
         }
     }
 }
