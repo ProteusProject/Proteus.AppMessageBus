@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proteus.AppMessageBus.Tests", "test\Proteus.AppMessageBus.Tests\Proteus.AppMessageBus.Tests.csproj", "{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestingHarness.Portable", "test\TestingHarness.Portable\TestingHarness.Portable.csproj", "{1521D831-215E-4C5E-B69C-A488AB80C038}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Windows10TestingHarness", "test\Windows10TestingHarness\Windows10TestingHarness.csproj", "{61F03A77-138D-4C89-B93B-64DFFB5DD9C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proteus.AppMessageBus", "src\Proteus.AppMessageBus\Proteus.AppMessageBus.csproj", "{3AE693F4-FB46-4386-8282-60A499BD8D2B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proteus.AppMessageBus", "src\Proteus.AppMessageBus\Proteus.AppMessageBus.csproj", "{3AE693F4-FB46-4386-8282-60A499BD8D2B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proteus.AppMessageBus.Tests", "test\Proteus.AppMessageBus.Tests\Proteus.AppMessageBus.Tests.csproj", "{7F7CD691-6F00-40A3-BAAF-E99B125028F7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,16 +23,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}.Release|ARM.ActiveCfg = Release|Any CPU
-		{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}.Release|x64.ActiveCfg = Release|Any CPU
-		{966F39AD-2C1A-4369-B96F-7D9122D8CA5F}.Release|x86.ActiveCfg = Release|Any CPU
 		{1521D831-215E-4C5E-B69C-A488AB80C038}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1521D831-215E-4C5E-B69C-A488AB80C038}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1521D831-215E-4C5E-B69C-A488AB80C038}.Debug|ARM.ActiveCfg = Debug|Any CPU
@@ -81,6 +71,22 @@ Global
 		{3AE693F4-FB46-4386-8282-60A499BD8D2B}.Release|x64.Build.0 = Release|Any CPU
 		{3AE693F4-FB46-4386-8282-60A499BD8D2B}.Release|x86.ActiveCfg = Release|Any CPU
 		{3AE693F4-FB46-4386-8282-60A499BD8D2B}.Release|x86.Build.0 = Release|Any CPU
+		{7F7CD691-6F00-40A3-BAAF-E99B125028F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F7CD691-6F00-40A3-BAAF-E99B125028F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F7CD691-6F00-40A3-BAAF-E99B125028F7}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{7F7CD691-6F00-40A3-BAAF-E99B125028F7}.Debug|ARM.Build.0 = Debug|Any CPU
+		{7F7CD691-6F00-40A3-BAAF-E99B125028F7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7F7CD691-6F00-40A3-BAAF-E99B125028F7}.Debug|x64.Build.0 = Debug|Any CPU
+		{7F7CD691-6F00-40A3-BAAF-E99B125028F7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7F7CD691-6F00-40A3-BAAF-E99B125028F7}.Debug|x86.Build.0 = Debug|Any CPU
+		{7F7CD691-6F00-40A3-BAAF-E99B125028F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F7CD691-6F00-40A3-BAAF-E99B125028F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F7CD691-6F00-40A3-BAAF-E99B125028F7}.Release|ARM.ActiveCfg = Release|Any CPU
+		{7F7CD691-6F00-40A3-BAAF-E99B125028F7}.Release|ARM.Build.0 = Release|Any CPU
+		{7F7CD691-6F00-40A3-BAAF-E99B125028F7}.Release|x64.ActiveCfg = Release|Any CPU
+		{7F7CD691-6F00-40A3-BAAF-E99B125028F7}.Release|x64.Build.0 = Release|Any CPU
+		{7F7CD691-6F00-40A3-BAAF-E99B125028F7}.Release|x86.ActiveCfg = Release|Any CPU
+		{7F7CD691-6F00-40A3-BAAF-E99B125028F7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
