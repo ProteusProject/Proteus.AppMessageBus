@@ -8,7 +8,7 @@
     <Description>In-process Durable Message Bus supporting a CQRS paradigm to manage program flow within your own application.</Description>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Copyright>Copyright © 2017 Stephen A. Bohlen. All rights reserved.</Copyright>
-    <PackageTags>message bus</PackageTags>
+    <PackageTags>message bus cqrs</PackageTags>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <RepositoryUrl>https://github.com/ProteusProject/Proteus.AppMessageBus</RepositoryUrl>
     <RepositoryType>Public</RepositoryType>
