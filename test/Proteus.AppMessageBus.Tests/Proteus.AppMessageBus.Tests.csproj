@@ -176,6 +176,7 @@
     <Compile Include="SerializerResultTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Abstraction_Relationships.cd" />
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
