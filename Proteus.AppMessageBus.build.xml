@@ -20,7 +20,7 @@
   </Target>
      
   <Target Name="Test" DependsOnTargets="Clean;NuGetRestore;Compile">
-        <Exec ContinueOnError="true" Command="&quot;$(NUnit-ToolPath)\nunit3-console.exe&quot; &quot;$(Test-Assemblies-List)&quot; /work=build\Debug" />
+        <Exec ContinueOnError="false" Command="dotnet test .\test\Proteus.AppMessageBus.Tests\Proteus.AppMessageBus.Tests.csproj" />
   </Target>
   
   <!-- Have to set ContinueOnError="true" b/c Doxygen will return an error is the LaTex infrastructure isn't present -->
