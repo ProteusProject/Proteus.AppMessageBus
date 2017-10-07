@@ -18,11 +18,14 @@
 
 #endregion
 
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Common.Logging;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
 using NUnit.Framework;
 using Proteus.AppMessageBus.Abstractions;
 
@@ -160,8 +163,21 @@ namespace Proteus.AppMessageBus.Tests
         [Test]
         public async Task CanLWireDelegateToLogToArbitraryLoggingFramework()
         {
-            var busLogger = LogManager.GetLogger(this.GetType());
-            var bus = new MessageBus() { Logger = text => busLogger.Debug(text) };
+            var configuration = new LoggingConfiguration();
+            var fileTarget = new FileTarget
+            {
+                FileName = LogFileName,
+                Layout = @"${date:format=HH\:mm\:ss} ${logger} ${message}"
+            };
+            configuration.AddTarget("logFile", fileTarget);
+            configuration.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, fileTarget));
+
+
+            LogManager.Configuration = configuration;
+
+            var busLogger = LogManager.GetCurrentClassLogger();
+
+            var bus = new MessageBus { Logger = text => busLogger.Debug(text) };
 
             bus.RegisterSubscriptionFor<TestCommand>(new CommandSubscribers().Handle);
 
@@ -171,8 +187,8 @@ namespace Proteus.AppMessageBus.Tests
 
             var logFileEntries = File.ReadAllLines(LogFileName);
 
-            Assert.That(logFileEntries.Any(entry => entry.Contains("Proteus.AppMessageBus.Tests.MessageBusTests Registering Subscriber for Messages of type TestCommand using Key ")));
-            Assert.That(logFileEntries.Any(entry => entry.Contains("Proteus.AppMessageBus.Tests.MessageBusTests Sending Command of type TestCommand, MessageId = ")));
+            Assert.That(logFileEntries.Any(entry => entry.Contains("Registering Subscriber for Messages of type TestCommand using Key ")));
+            Assert.That(logFileEntries.Any(entry => entry.Contains("Sending Command of type TestCommand, MessageId = ")));
 
         }
     }
