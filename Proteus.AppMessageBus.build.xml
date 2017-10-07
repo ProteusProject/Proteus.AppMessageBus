@@ -29,7 +29,7 @@
   </Target>
   
   <Target Name="NuGetRestore">
-        <Exec ContinueOnError="false" Command="tools\NuGet\nuget.exe restore" />
+        <Exec ContinueOnError="false" Command="dotnet restore" />
   </Target>
   
   
