@@ -34,8 +34,9 @@
   
   
   
-  <!-- default 'Build' target doesn't need to invoke Test target b/c CI server will auto-discover test assemblies on run -->  
-  <Target Name="Build" DependsOnTargets="NuGetRestore;BuildSolution;ApiReferenceDocs" />
+  <!-- default 'Build' target doesn't need to invoke Test target b/c CI server will auto-discover test assemblies on run -->
+  <!-- UPDATE: auto-discover in the CI enviroment results in a (failed) run via the nunit console so have to re-wire Test task up from Build task again --> 
+  <Target Name="Build" DependsOnTargets="NuGetRestore;BuildSolution;Test;ApiReferenceDocs" />
  
   <Target Name="BuildSolution">
     <MSBuild Projects="$(SolutionFileName)" />
